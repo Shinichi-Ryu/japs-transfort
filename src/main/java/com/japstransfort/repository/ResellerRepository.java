@@ -1,8 +1,12 @@
 package com.japstransfort.repository;
 
 import com.japstransfort.entity.Reseller;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,4 +26,15 @@ public interface ResellerRepository extends JpaRepository<Reseller, Integer> {
     List<Reseller> findAllWithDetails();
 
     long countByTier_TierId(Integer tierId);
+
+    @EntityGraph(attributePaths = {"user", "tier", "parentReseller"})
+    @Query("SELECT r FROM Reseller r " +
+           "WHERE (:search IS NULL OR :search = '' OR " +
+           "      LOWER(r.businessName) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "  AND (:tierId IS NULL OR r.tier.tierId = :tierId) " +
+           "  AND (:status IS NULL OR :status = 'all' OR LOWER(r.status) = LOWER(:status))")
+    Page<Reseller> findWithFilters(@Param("search") String search,
+                                  @Param("tierId") Integer tierId,
+                                  @Param("status") String status,
+                                  Pageable pageable);
 }

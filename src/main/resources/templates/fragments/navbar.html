@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<body>
+<nav th:fragment="headerNav(activeTab)" class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center" th:href="@{/dashboard}">
+            <i class="bi bi-box-seam me-2 text-warning"></i>
+            <span>Japs Transfort</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${activeTab == 'dashboard' ? 'active fw-semibold' : ''}" th:href="@{/dashboard}">
+                        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'STAFF')">
+                    <a class="nav-link" th:classappend="${activeTab == 'products' ? 'active fw-semibold' : ''}" th:href="@{/admin/products}">
+                        <i class="bi bi-boxes me-1"></i> Products
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'STAFF')">
+                    <a class="nav-link" th:classappend="${activeTab == 'categories' ? 'active fw-semibold' : ''}" th:href="@{/admin/categories}">
+                        <i class="bi bi-tag me-1"></i> Categories
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'STAFF')">
+                    <a class="nav-link" th:classappend="${activeTab == 'resellers' ? 'active fw-semibold' : ''}" th:href="@{/admin/resellers}">
+                        <i class="bi bi-people me-1"></i> Resellers
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" th:classappend="${activeTab == 'tiers' ? 'active fw-semibold' : ''}" th:href="@{/admin/tiers}">
+                        <i class="bi bi-award me-1"></i> Tiers
+                    </a>
+                </li>
+            </ul>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-light small text-end">
+                    <div class="fw-semibold" sec:authentication="name">User Email</div>
+                    <span class="badge bg-primary text-uppercase" th:text="${userRole != null ? userRole : 'Admin'}">ROLE</span>
+                </div>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-box-arrow-right me-1"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

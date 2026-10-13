@@ -20,4 +20,6 @@ public interface ResellerRepository extends JpaRepository<Reseller, Integer> {
 
     @Query("SELECT r FROM Reseller r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.tier LEFT JOIN FETCH r.parentReseller")
     List<Reseller> findAllWithDetails();
+
+    long countByTier_TierId(Integer tierId);
 }

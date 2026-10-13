@@ -41,7 +41,8 @@
                         </div>
                     </div>
                     <div class="mt-3 pt-2 border-top small text-muted">
-                        <span th:text="${reseller != null && reseller.territory != null ? reseller.territory : 'General Territory'}">Territory</span>
+                        <span class="fw-medium">City/Location:</span>
+                        <span th:text="${reseller != null && reseller.territory != null ? reseller.territory : 'N/A'}">City/Location</span>
                     </div>
                 </div>
             </div>
@@ -128,15 +129,25 @@
                             <div class="col-md-6">
                                 <label class="small text-muted fw-medium d-block">Assigned Tier</label>
                                 <span class="badge bg-light text-dark border"
-                                      th:text="${reseller != null && reseller.tier != null ? reseller.tier.tierName : 'Unassigned'}">Tier</span>
+                                      th:text="${reseller != null && reseller.tier != null ? reseller.tier.tierName + ' (' + #numbers.formatDecimal(reseller.tier.discountPct, 1, 2) + '%)' : 'Unassigned'}">Tier</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted fw-medium d-block">City/Location</label>
+                                <span class="text-dark" th:text="${reseller != null && reseller.territory != null ? reseller.territory : '-'}">-</span>
                             </div>
                             <div class="col-md-6">
                                 <label class="small text-muted fw-medium d-block">Contact Number</label>
                                 <span class="text-dark" th:text="${reseller != null && reseller.contactNo != null ? reseller.contactNo : '-'}">-</span>
                             </div>
                             <div class="col-md-6">
-                                <label class="small text-muted fw-medium d-block">Territory</label>
-                                <span class="text-dark" th:text="${reseller != null && reseller.territory != null ? reseller.territory : '-'}">-</span>
+                                <label class="small text-muted fw-medium d-block">Credit Limit</label>
+                                <span class="text-dark font-monospace"
+                                      th:text="${reseller != null && reseller.creditLimit != null ? '₱' + #numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted fw-medium d-block">Current Balance</label>
+                                <span class="text-dark font-monospace"
+                                      th:text="${reseller != null && reseller.balance != null ? '₱' + #numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</span>
                             </div>
                             <div class="col-12">
                                 <label class="small text-muted fw-medium d-block">Business Address</label>

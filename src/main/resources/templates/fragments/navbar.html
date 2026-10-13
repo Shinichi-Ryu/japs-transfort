@@ -36,6 +36,11 @@
                     </a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" th:classappend="${activeTab == 'inventory' ? 'active fw-semibold' : ''}" th:href="@{/admin/inventory}">
+                        <i class="bi bi-box-seam me-1"></i> Inventory
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" th:classappend="${activeTab == 'tiers' ? 'active fw-semibold' : ''}" th:href="@{/admin/tiers}">
                         <i class="bi bi-award me-1"></i> Tiers
                     </a>

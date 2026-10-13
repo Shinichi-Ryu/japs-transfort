@@ -15,27 +15,182 @@
     <div th:replace="~{fragments/navbar :: resellerNav('catalog')}"></div>
 
     <div class="container-fluid px-4 py-4">
-        <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Page Header with Tier Info at the Top -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
             <div>
-                <h3 class="fw-bold mb-1 text-dark">Product Catalog</h3>
-                <p class="text-muted mb-0 small">Browse products and wholesale catalog pricing.</p>
+                <h3 class="fw-bold mb-0 text-dark">Product Catalog</h3>
+                <p class="text-muted small mb-0">Browse wholesale products with your exclusive reseller pricing</p>
             </div>
-            <a th:href="@{/portal}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i> Back to Portal
-            </a>
+            <div class="badge bg-light text-dark border p-2 px-3 small">
+                <i class="bi bi-award text-warning me-1"></i>
+                <span>Tier: <strong class="text-primary" th:text="${tierName}">Tier</strong></span>
+                <span class="mx-1">&bull;</span>
+                <span>Discount: <strong class="text-success" th:text="${discountPct != null ? #numbers.formatDecimal(discountPct, 1, 2) : '0.00'} + '%'">0.00%</strong></span>
+            </div>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-3 p-5 text-center">
-            <div class="my-4">
-                <div class="stat-icon bg-primary-subtle text-primary mx-auto mb-3" style="width: 64px; height: 64px; font-size: 2rem;">
-                    <i class="bi bi-grid"></i>
+        <!-- Tier Pricing Info Banner at the Top -->
+        <div class="alert alert-info py-2 px-3 small mb-4 d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <span>Current Tier: <strong th:text="${tierName}">Tier</strong> &bull; Exclusive Discount: <strong th:text="${discountPct != null ? #numbers.formatDecimal(discountPct, 1, 2) : '0.00'} + '%'">0.00%</strong> off SRP.</span>
+            </div>
+            <span class="badge bg-primary" th:text="${tierName} + ' (' + ${discountPct != null ? #numbers.formatDecimal(discountPct, 1, 2) : '0.00'} + '%)'">Tier (0%)</span>
+        </div>
+
+        <!-- Filter & Search Card (matching templates/products/list.html style) -->
+        <div class="card table-card mb-4">
+            <div class="card-body p-3">
+                <form th:action="@{/portal/catalog}" method="get" class="row g-2 align-items-center">
+                    <!-- Search Input -->
+                    <div class="col-12 col-md-5">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text"
+                                   class="form-control"
+                                   name="search"
+                                   th:value="${search}"
+                                   placeholder="Search by name or SKU...">
+                        </div>
+                    </div>
+
+                    <!-- Category Filter Dropdown -->
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <select name="categoryId" class="form-select form-select-sm">
+                            <option value="">All Categories</option>
+                            <option th:each="cat : ${categories}"
+                                    th:value="${cat.categoryId}"
+                                    th:text="${cat.name}"
+                                    th:selected="${categoryId != null && categoryId == cat.categoryId}">Category</option>
+                        </select>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="col-12 col-sm-6 col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-secondary btn-sm flex-grow-1">
+                            <i class="bi bi-funnel me-1"></i> Filter
+                        </button>
+                        <a th:href="@{/portal/catalog}" class="btn btn-outline-secondary btn-sm" title="Clear Filters">
+                            Reset
+                        </a>
+                    </div>
+
+                    <!-- Preserve current sort parameters -->
+                    <input type="hidden" name="sort" th:value="${sort}">
+                    <input type="hidden" name="dir" th:value="${dir}">
+                </form>
+            </div>
+        </div>
+
+        <!-- Catalog Products Table Card (matching templates/products/list.html style) -->
+        <div class="card table-card">
+            <div class="card-header table-header d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0"><i class="bi bi-grid me-1"></i> Available Products</h6>
+                <span class="badge bg-secondary" th:text="${productsPage.totalElements} + ' total'">0 total</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="ps-3">
+                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
+                                       th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort='sku', dir=${sort == 'sku' ? reverseDir : 'asc'})}">
+                                        SKU
+                                        <i class="bi ms-1" th:classappend="${sort == 'sku' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
+                                       th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort='name', dir=${sort == 'name' ? reverseDir : 'asc'})}">
+                                        Product Name
+                                        <i class="bi ms-1" th:classappend="${sort == 'name' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
+                                    </a>
+                                </th>
+                                <th scope="col">Category</th>
+                                <th scope="col">Unit</th>
+                                <th scope="col" class="text-end">
+                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
+                                       th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort='price', dir=${(sort == 'price' or sort == 'srp') ? reverseDir : 'asc'})}">
+                                        SRP
+                                        <i class="bi ms-1" th:classappend="${(sort == 'price' or sort == 'srp') ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
+                                    </a>
+                                </th>
+                                <th scope="col" class="text-end pe-3">
+                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
+                                       th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort='price', dir=${(sort == 'price' or sort == 'srp') ? reverseDir : 'asc'})}">
+                                        Your Price
+                                        <i class="bi ms-1" th:classappend="${(sort == 'price' or sort == 'srp') ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
+                                    </a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${productsPage.empty}">
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    No products found matching the criteria.
+                                </td>
+                            </tr>
+                            <tr th:each="product : ${productsPage.content}">
+                                <td class="ps-3 fw-mono small fw-semibold text-secondary" th:text="${product.sku}">SKU-001</td>
+                                <td class="fw-medium text-dark" th:text="${product.name}">Product Name</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border"
+                                          th:text="${product.category != null ? product.category.name : 'Uncategorized'}">
+                                        Category
+                                    </span>
+                                </td>
+                                <td class="small text-muted" th:text="${product.unit}">pc</td>
+                                <td class="text-end font-monospace">
+                                    <del class="text-muted" th:text="'₱' + ${#numbers.formatDecimal(product.srp, 1, 'COMMA', 2, 'POINT')}">₱0.00</del>
+                                </td>
+                                <td class="text-end pe-3 font-monospace">
+                                    <span class="fw-bold text-success fs-6" th:text="'₱' + ${#numbers.formatDecimal(product.yourPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <h4 class="fw-bold text-dark">Product Catalog</h4>
-                <p class="text-muted mb-4">Catalog and wholesale inventory ordering will be available here.</p>
-                <a th:href="@{/portal}" class="btn btn-primary">
-                    <i class="bi bi-house-door me-1"></i> Return to Home
-                </a>
+            </div>
+
+            <!-- Pagination Footer (matching templates/products/list.html style) -->
+            <div class="card-footer bg-white border-top d-flex flex-wrap justify-content-between align-items-center py-2"
+                 th:if="${productsPage.totalPages > 0}">
+                <div class="small text-muted mb-2 mb-sm-0">
+                    Showing <span class="fw-semibold" th:text="${productsPage.empty ? 0 : productsPage.number * productsPage.size + 1}">1</span>
+                    to <span class="fw-semibold" th:text="${productsPage.number * productsPage.size + productsPage.numberOfElements}">10</span>
+                    of <span class="fw-semibold" th:text="${productsPage.totalElements}">25</span> products
+                </div>
+
+                <!-- Page navigation -->
+                <nav th:if="${productsPage.totalPages > 1}" aria-label="Catalog pagination">
+                    <ul class="pagination pagination-sm mb-0">
+                        <!-- Previous button -->
+                        <li class="page-item" th:classappend="${productsPage.first ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort=${sort}, dir=${dir}, page=${productsPage.number - 1})}">
+                                &laquo;
+                            </a>
+                        </li>
+
+                        <!-- Page number items -->
+                        <li class="page-item"
+                            th:each="i : ${#numbers.sequence(0, productsPage.totalPages - 1)}"
+                            th:classappend="${i == productsPage.number ? 'active' : ''}">
+                            <a class="page-link"
+                               th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort=${sort}, dir=${dir}, page=${i})}"
+                               th:text="${i + 1}">1</a>
+                        </li>
+
+                        <!-- Next button -->
+                        <li class="page-item" th:classappend="${productsPage.last ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort=${sort}, dir=${dir}, page=${productsPage.number + 1})}">
+                                &raquo;
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>

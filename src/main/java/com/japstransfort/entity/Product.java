@@ -41,6 +41,9 @@ public class Product {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
+    @Transient
+    private BigDecimal yourPrice;
+
     public Product() {
     }
 
@@ -125,5 +128,25 @@ public class Product {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public BigDecimal getYourPrice() {
+        return yourPrice;
+    }
+
+    public void setYourPrice(BigDecimal yourPrice) {
+        this.yourPrice = yourPrice;
+    }
+
+    public BigDecimal calculateYourPrice(BigDecimal discountPct) {
+        if (this.srp == null) {
+            return BigDecimal.ZERO.setScale(2, java.math.RoundingMode.HALF_UP);
+        }
+        if (discountPct == null || discountPct.compareTo(BigDecimal.ZERO) <= 0) {
+            return this.srp.setScale(2, java.math.RoundingMode.HALF_UP);
+        }
+        BigDecimal discountAmount = this.srp.multiply(discountPct)
+                .divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+        return this.srp.subtract(discountAmount).setScale(2, java.math.RoundingMode.HALF_UP);
     }
 }

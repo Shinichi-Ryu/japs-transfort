@@ -2,12 +2,17 @@ package com.japstransfort.controller;
 
 import com.japstransfort.config.CustomUserDetails;
 import com.japstransfort.entity.Reseller;
+import com.japstransfort.entity.Product;
+import com.japstransfort.entity.ResellerTier;
 import com.japstransfort.repository.CategoryRepository;
 import com.japstransfort.repository.ProductRepository;
 import com.japstransfort.repository.ResellerRepository;
 import com.japstransfort.repository.ResellerTierRepository;
+import com.japstransfort.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.data.domain.Page;
+import java.math.BigDecimal;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.DisabledException;
@@ -31,15 +36,18 @@ public class AuthController {
     private final ResellerRepository resellerRepository;
     private final ResellerTierRepository tierRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductService productService;
 
     public AuthController(ProductRepository productRepository,
                           ResellerRepository resellerRepository,
                           ResellerTierRepository tierRepository,
-                          CategoryRepository categoryRepository) {
+                          CategoryRepository categoryRepository,
+                          ProductService productService) {
         this.productRepository = productRepository;
         this.resellerRepository = resellerRepository;
         this.tierRepository = tierRepository;
         this.categoryRepository = categoryRepository;
+        this.productService = productService;
     }
 
     @GetMapping("/")
@@ -115,10 +123,51 @@ public class AuthController {
 
     @GetMapping("/portal/catalog")
     @PreAuthorize("hasRole('RESELLER')")
-    public String portalCatalog(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    @Transactional(readOnly = true)
+    public String portalCatalog(
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "categoryId", required = false) Integer categoryId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "sort", defaultValue = "name") String sort,
+            @RequestParam(name = "dir", defaultValue = "asc") String dir,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
+
+        Reseller reseller = null;
+        ResellerTier tier = null;
+        BigDecimal discountPct = BigDecimal.ZERO;
+        String tierName = "Unassigned";
+
         if (userDetails != null) {
             model.addAttribute("currentUser", userDetails.getUser());
+            reseller = resellerRepository.findByUser_UserId(userDetails.getUserId()).orElse(null);
+            if (reseller != null) {
+                tier = reseller.getTier();
+                if (tier != null) {
+                    tierName = tier.getTierName();
+                    if (tier.getDiscountPct() != null) {
+                        discountPct = tier.getDiscountPct();
+                    }
+                }
+            }
         }
+
+        Page<Product> productsPage = productService.getProducts(search, categoryId, "active", page, 10, sort, dir);
+        for (Product product : productsPage) {
+            product.setYourPrice(product.calculateYourPrice(discountPct));
+        }
+
+        model.addAttribute("productsPage", productsPage);
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("reseller", reseller);
+        model.addAttribute("tierName", tierName);
+        model.addAttribute("discountPct", discountPct);
+        model.addAttribute("search", search != null ? search : "");
+        model.addAttribute("categoryId", categoryId);
+        model.addAttribute("sort", sort);
+        model.addAttribute("dir", dir);
+        model.addAttribute("reverseDir", "asc".equalsIgnoreCase(dir) ? "desc" : "asc");
+
         return "portal/catalog";
     }
 

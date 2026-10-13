@@ -43,6 +43,10 @@ public class ProductService {
             isActive = false;
         }
 
+        if ("price".equalsIgnoreCase(sortField)) {
+            sortField = "srp";
+        }
+
         // Validate sort field to prevent invalid property injection
         String validSortField = ALLOWED_SORT_FIELDS.contains(sortField) ? sortField : "name";
         Sort.Direction direction = "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;

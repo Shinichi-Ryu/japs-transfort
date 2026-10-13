@@ -2,8 +2,6 @@ package com.japstransfort.controller;
 
 import com.japstransfort.config.CustomUserDetails;
 import com.japstransfort.entity.Reseller;
-import com.japstransfort.entity.Product;
-import com.japstransfort.entity.ResellerTier;
 import com.japstransfort.repository.CategoryRepository;
 import com.japstransfort.repository.ProductRepository;
 import com.japstransfort.repository.ResellerRepository;
@@ -11,8 +9,6 @@ import com.japstransfort.repository.ResellerTierRepository;
 import com.japstransfort.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.data.domain.Page;
-import java.math.BigDecimal;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.DisabledException;
@@ -27,7 +23,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * Controller handling authentication views, dashboard, and reseller portal shell.
+ * Controller handling authentication views, dashboard, and reseller portal home.
+ * Catalog, cart, and orders are handled by PortalController.
  */
 @Controller
 public class AuthController {
@@ -99,7 +96,6 @@ public class AuthController {
             model.addAttribute("userRole", userDetails.getRole().name());
         }
 
-        // Placeholder summary stats for Phase 1
         model.addAttribute("totalProducts", productRepository.count());
         model.addAttribute("totalResellers", resellerRepository.count());
         model.addAttribute("totalTiers", tierRepository.count());
@@ -120,6 +116,7 @@ public class AuthController {
         }
         return "portal/home";
     }
+}
 
     @GetMapping("/portal/catalog")
     @PreAuthorize("hasRole('RESELLER')")

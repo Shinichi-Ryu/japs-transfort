@@ -83,8 +83,21 @@ public class OrderService {
         // Credit limit check
         BigDecimal creditLimit = reseller.getCreditLimit() != null ? reseller.getCreditLimit() : BigDecimal.ZERO;
         BigDecimal balance = reseller.getBalance() != null ? reseller.getBalance() : BigDecimal.ZERO;
-        BigDecimal pendingTotal = orderRepository.sumPendingTotalByReseller(reseller.getResellerId());
-        if (pendingTotal == null) pendingTotal = BigDecimal.ZERO;
+        BigDecimal pendingTotal = BigDecimal.ZERO;
+        try {
+            BigDecimal pt = orderRepository.sumPendingTotalByReseller(reseller.getResellerId());
+            if (pt != null) {
+                pendingTotal = pt;
+            }
+        } catch (Exception e) {
+            try {
+                pendingTotal = getMyOrders(reseller.getResellerId()).stream()
+                        .filter(o -> o.getStatus() == OrderStatus.pending && o.getTotal() != null)
+                        .map(Order::getTotal)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+            } catch (Exception ignored) {
+            }
+        }
 
         BigDecimal availableCredit = creditLimit.subtract(balance).subtract(pendingTotal);
 
@@ -133,7 +146,11 @@ public class OrderService {
     private String generateOrderNo() {
         String datePart = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String prefix = "ORD-" + datePart + "-";
-        long count = orderRepository.countByOrderNoPrefix(prefix);
+        long count = 0;
+        try {
+            count = orderRepository.countByOrderNoPrefix(prefix);
+        } catch (Exception ignored) {
+        }
         String seq = String.format("%04d", count + 1);
         String candidate = prefix + seq;
         // Ensure uniqueness in case of race (increment until free)

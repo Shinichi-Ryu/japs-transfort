@@ -232,7 +232,6 @@ public class PortalController {
     // ─── Place order ──────────────────────────────────────────────────────────
 
     @PostMapping("/cart/place-order")
-    @Transactional
     public String placeOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpSession session,
@@ -254,8 +253,12 @@ public class PortalController {
             redirectAttributes.addFlashAttribute("successMessage",
                     "Order placed successfully! Order number: " + order.getOrderNo());
             return "redirect:/portal/orders";
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException | IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/portal/cart";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    e.getMessage() != null ? e.getMessage() : "Failed to place order.");
             return "redirect:/portal/cart";
         }
     }

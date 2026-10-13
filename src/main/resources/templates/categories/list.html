@@ -54,7 +54,7 @@
                                        id="categoryName"
                                        th:field="*{name}"
                                        placeholder="e.g. Beverages, Electronics"
-                                       th:classappend="${#fields.hasErrors('name') ? 'is-invalid' : ''}"
+                                       th:errorclass="is-invalid"
                                        required>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
                                     Category name is required.

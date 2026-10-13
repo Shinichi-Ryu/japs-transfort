@@ -42,7 +42,7 @@
                                        id="editCategoryName"
                                        th:field="*{name}"
                                        placeholder="Enter category name"
-                                       th:classappend="${#fields.hasErrors('name') ? 'is-invalid' : ''}"
+                                       th:errorclass="is-invalid"
                                        required>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
                                     Category name is required.

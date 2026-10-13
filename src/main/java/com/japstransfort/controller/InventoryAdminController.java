@@ -58,6 +58,16 @@ public class InventoryAdminController {
     }
 
     /**
+     * Search active products by name or SKU for modal autocomplete (case-insensitive, limit 20).
+     */
+    @GetMapping("/products/search")
+    @ResponseBody
+    public java.util.List<java.util.Map<String, Object>> searchProducts(
+            @RequestParam(name = "q", required = false) String query) {
+        return inventoryService.searchActiveProducts(query, 20);
+    }
+
+    /**
      * Handles receiving stock into a warehouse for a product.
      */
     @PostMapping("/receive")

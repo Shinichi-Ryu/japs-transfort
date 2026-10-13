@@ -84,6 +84,9 @@ public class InventoryService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found (ID " + productId + ")."));
+        if (!Boolean.TRUE.equals(product.getIsActive())) {
+            throw new IllegalArgumentException("Product '" + product.getName() + "' is inactive and cannot receive stock.");
+        }
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new IllegalArgumentException("Warehouse not found (ID " + warehouseId + ")."));
 
@@ -125,6 +128,9 @@ public class InventoryService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found (ID " + productId + ")."));
+        if (!Boolean.TRUE.equals(product.getIsActive())) {
+            throw new IllegalArgumentException("Product '" + product.getName() + "' is inactive and cannot adjust stock.");
+        }
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new IllegalArgumentException("Warehouse not found (ID " + warehouseId + ")."));
 
@@ -146,8 +152,8 @@ public class InventoryService {
 
         if (targetQty < 0) {
             throw new IllegalArgumentException(String.format(
-                    "Stock quantity cannot be less than 0. Current stock is %d, and requested adjustment (%s%d) results in %d.",
-                    currentQty, signedChange > 0 ? "+" : "", signedChange, targetQty));
+                "Stock quantity cannot be less than 0. Current stock is %d, and requested adjustment (%s%d) results in %d.",
+                currentQty, signedChange > 0 ? "+" : "", signedChange, targetQty));
         }
 
         inventory.setQuantity(targetQty);
@@ -162,6 +168,27 @@ public class InventoryService {
         movement.setCreatedBy(admin);
 
         return stockMovementRepository.save(movement);
+    }
+
+    /**
+     * Searches active products by name or SKU (case-insensitive, limited results).
+     */
+    @Transactional(readOnly = true)
+    public List<java.util.Map<String, Object>> searchActiveProducts(String query, int maxResults) {
+        String trimmed = (query != null && !query.trim().isEmpty()) ? query.trim() : null;
+        Pageable pageable = PageRequest.of(0, maxResults > 0 ? maxResults : 20, Sort.by(Sort.Direction.ASC, "name"));
+        Page<Product> page = productRepository.findWithFilters(trimmed, null, true, pageable);
+
+        return page.getContent().stream()
+                .map(p -> {
+                    java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                    map.put("id", p.getProductId());
+                    map.put("name", p.getName());
+                    map.put("sku", p.getSku());
+                    map.put("text", p.getName() + " (" + p.getSku() + ")");
+                    return map;
+                })
+                .toList();
     }
 
     /**

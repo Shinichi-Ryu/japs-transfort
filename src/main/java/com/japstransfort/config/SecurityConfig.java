@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 /**
  * Spring Security configuration for role-based access control and BCrypt authentication.
@@ -23,11 +24,26 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationSuccessHandler roleBasedAuthenticationSuccessHandler() {
+        return (request, response, authentication) -> {
+            boolean isReseller = authentication.getAuthorities().stream()
+                    .anyMatch(a -> "ROLE_RESELLER".equals(a.getAuthority()));
+            if (isReseller) {
+                response.sendRedirect(request.getContextPath() + "/portal");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/dashboard");
+            }
+        };
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/portal", "/portal/**").hasRole("RESELLER")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/dashboard", "/dashboard/**").hasAnyRole("ADMIN", "STAFF")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -35,7 +51,7 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
-                .defaultSuccessUrl("/dashboard", true)
+                .successHandler(roleBasedAuthenticationSuccessHandler())
                 .failureUrl("/login?error=true")
                 .permitAll()
             )

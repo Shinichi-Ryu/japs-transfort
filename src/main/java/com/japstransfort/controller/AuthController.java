@@ -1,21 +1,24 @@
 package com.japstransfort.controller;
 
 import com.japstransfort.config.CustomUserDetails;
+import com.japstransfort.entity.Reseller;
 import com.japstransfort.repository.CategoryRepository;
 import com.japstransfort.repository.ProductRepository;
 import com.japstransfort.repository.ResellerRepository;
 import com.japstransfort.repository.ResellerTierRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * Controller handling authentication views and the primary dashboard.
+ * Controller handling authentication views, dashboard, and reseller portal shell.
  */
 @Controller
 public class AuthController {
@@ -36,7 +39,11 @@ public class AuthController {
     }
 
     @GetMapping("/")
-    public String root() {
+    public String root(Authentication authentication) {
+        if (authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_RESELLER".equals(a.getAuthority()))) {
+            return "redirect:/portal";
+        }
         return "redirect:/dashboard";
     }
 
@@ -46,6 +53,9 @@ public class AuthController {
                             Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            if (auth.getAuthorities().stream().anyMatch(a -> "ROLE_RESELLER".equals(a.getAuthority()))) {
+                return "redirect:/portal";
+            }
             return "redirect:/dashboard";
         }
 
@@ -60,6 +70,7 @@ public class AuthController {
     }
 
     @GetMapping("/dashboard")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public String dashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
             model.addAttribute("currentUser", userDetails.getUser());
@@ -74,4 +85,36 @@ public class AuthController {
 
         return "dashboard";
     }
+
+    @GetMapping("/portal")
+    @PreAuthorize("hasRole('RESELLER')")
+    @Transactional(readOnly = true)
+    public String portal(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
+            Reseller reseller = resellerRepository.findByUser_UserId(userDetails.getUserId())
+                    .orElse(null);
+            model.addAttribute("currentUser", userDetails.getUser());
+            model.addAttribute("reseller", reseller);
+        }
+        return "portal/home";
+    }
+
+    @GetMapping("/portal/catalog")
+    @PreAuthorize("hasRole('RESELLER')")
+    public String portalCatalog(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
+            model.addAttribute("currentUser", userDetails.getUser());
+        }
+        return "portal/catalog";
+    }
+
+    @GetMapping("/portal/orders")
+    @PreAuthorize("hasRole('RESELLER')")
+    public String portalOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
+            model.addAttribute("currentUser", userDetails.getUser());
+        }
+        return "portal/orders";
+    }
 }
+

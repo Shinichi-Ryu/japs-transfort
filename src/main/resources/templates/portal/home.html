@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reseller Portal - Japs Transfort</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+</head>
+<body>
+    <!-- Reseller Navigation Bar Fragment -->
+    <div th:replace="~{fragments/navbar :: resellerNav('home')}"></div>
+
+    <div class="container-fluid px-4 py-4">
+        <!-- Page Title & Greeting -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1 text-dark">Reseller Portal</h3>
+                <p class="text-muted mb-0 small">Welcome back, <span class="fw-semibold text-primary" th:text="${currentUser != null ? currentUser.fullName : 'Partner'}">Partner</span>! Here is your reseller account overview.</p>
+            </div>
+            <div class="badge bg-light text-dark border p-2 px-3 small">
+                <i class="bi bi-shield-check me-1 text-success"></i> Reseller Account Active
+            </div>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="row g-3 mb-4">
+            <!-- Business Name Card -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card stat-card shadow-sm p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-medium text-uppercase">Business Name</span>
+                            <h4 class="fw-bold mb-0 text-dark" th:text="${reseller != null ? reseller.businessName : 'N/A'}">Business Name</h4>
+                        </div>
+                        <div class="stat-icon bg-primary-subtle text-primary">
+                            <i class="bi bi-building"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top small text-muted">
+                        <span th:text="${reseller != null && reseller.territory != null ? reseller.territory : 'General Territory'}">Territory</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tier Name with Discount % Card -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card stat-card shadow-sm p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-medium text-uppercase">Tier &amp; Discount</span>
+                            <h4 class="fw-bold mb-0 text-dark"
+                                th:text="${reseller != null && reseller.tier != null ? reseller.tier.tierName + ' (' + #numbers.formatDecimal(reseller.tier.discountPct, 1, 2) + '%)' : 'None (0.00%)'}">
+                                Tier (0.00%)
+                            </h4>
+                        </div>
+                        <div class="stat-icon bg-warning-subtle text-warning">
+                            <i class="bi bi-award"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top small text-muted">
+                        Applied discount rate
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credit Limit Card -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card stat-card shadow-sm p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-medium text-uppercase">Credit Limit</span>
+                            <h4 class="fw-bold mb-0 text-dark font-monospace"
+                                th:text="${reseller != null && reseller.creditLimit != null ? '₱' + #numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">
+                                ₱0.00
+                            </h4>
+                        </div>
+                        <div class="stat-icon bg-info-subtle text-info">
+                            <i class="bi bi-credit-card"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top small text-muted">
+                        Approved purchasing limit
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Balance Card -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card stat-card shadow-sm p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-medium text-uppercase">Current Balance</span>
+                            <h4 class="fw-bold mb-0 text-dark font-monospace"
+                                th:text="${reseller != null && reseller.balance != null ? '₱' + #numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">
+                                ₱0.00
+                            </h4>
+                        </div>
+                        <div class="stat-icon bg-success-subtle text-success">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top small text-muted">
+                        Outstanding account balance
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Profile Details Card -->
+        <div class="row g-3">
+            <div class="col-12 col-lg-8">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h5 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-briefcase me-2 text-primary"></i>Reseller Profile Details
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="small text-muted fw-medium d-block">Business Name</label>
+                                <span class="fw-semibold text-dark" th:text="${reseller != null ? reseller.businessName : '-'}">-</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted fw-medium d-block">Assigned Tier</label>
+                                <span class="badge bg-light text-dark border"
+                                      th:text="${reseller != null && reseller.tier != null ? reseller.tier.tierName : 'Unassigned'}">Tier</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted fw-medium d-block">Contact Number</label>
+                                <span class="text-dark" th:text="${reseller != null && reseller.contactNo != null ? reseller.contactNo : '-'}">-</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted fw-medium d-block">Territory</label>
+                                <span class="text-dark" th:text="${reseller != null && reseller.territory != null ? reseller.territory : '-'}">-</span>
+                            </div>
+                            <div class="col-12">
+                                <label class="small text-muted fw-medium d-block">Business Address</label>
+                                <span class="text-dark" th:text="${reseller != null && reseller.address != null ? reseller.address : '-'}">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Links / Shortcuts -->
+            <div class="col-12 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h5 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-lightning-charge me-2 text-warning"></i>Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column gap-3">
+                        <a th:href="@{/portal/catalog}" class="btn btn-outline-primary d-flex align-items-center justify-content-between p-3 text-start">
+                            <div>
+                                <div class="fw-bold"><i class="bi bi-grid me-2"></i>Product Catalog</div>
+                                <small class="text-muted">Browse available items and wholesale pricing</small>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a th:href="@{/portal/orders}" class="btn btn-outline-secondary d-flex align-items-center justify-content-between p-3 text-start">
+                            <div>
+                                <div class="fw-bold"><i class="bi bi-receipt me-2"></i>My Orders</div>
+                                <small class="text-muted">View purchase history and order status</small>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

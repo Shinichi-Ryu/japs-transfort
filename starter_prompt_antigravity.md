@@ -109,7 +109,7 @@ Real dashboard data, sales/stock/unpaid reports, printable invoice PDF,
 low-stock alerts.
 
 PHASE 5 - Deployment
-Move DB to Supabase/Neon, deploy app to Render/Railway, prod profile, HTTPS,
+Move DB to Supabase/Neon, deploy app to vercel, prod profile, HTTPS,
 backup plan, user guide.
 
 ## CHANGELOG

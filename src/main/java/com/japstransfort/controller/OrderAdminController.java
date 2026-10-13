@@ -102,17 +102,18 @@ public class OrderAdminController {
     }
 
     /**
-     * Cancels an order (pending or approved).
+     * Cancels an order (pending or approved). Requires a reason from the standard list.
      */
     @PostMapping("/{id}/cancel")
     public String cancelOrder(
             @PathVariable("id") Integer id,
+            @RequestParam(value = "cancelReason", required = false) String cancelReason,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
 
         try {
             User admin = userDetails != null ? userDetails.getUser() : null;
-            Order order = orderAdminService.cancelOrder(id, admin);
+            Order order = orderAdminService.cancelOrder(id, cancelReason, "ADMIN", admin);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Order #" + order.getOrderNo() + " cancelled successfully.");
         } catch (IllegalStateException | IllegalArgumentException ex) {

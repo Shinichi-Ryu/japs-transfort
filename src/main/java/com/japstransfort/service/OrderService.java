@@ -3,14 +3,18 @@ package com.japstransfort.service;
 import com.japstransfort.dto.CartItem;
 import com.japstransfort.dto.CartRow;
 import com.japstransfort.entity.*;
+import com.japstransfort.repository.InventoryRepository;
 import com.japstransfort.repository.OrderRepository;
 import com.japstransfort.repository.ProductRepository;
+import com.japstransfort.repository.ResellerRepository;
+import com.japstransfort.repository.StockMovementRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +28,20 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final InventoryRepository inventoryRepository;
+    private final StockMovementRepository stockMovementRepository;
+    private final ResellerRepository resellerRepository;
 
-    public OrderService(OrderRepository orderRepository, ProductRepository productRepository) {
+    public OrderService(OrderRepository orderRepository,
+                        ProductRepository productRepository,
+                        InventoryRepository inventoryRepository,
+                        StockMovementRepository stockMovementRepository,
+                        ResellerRepository resellerRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.inventoryRepository = inventoryRepository;
+        this.stockMovementRepository = stockMovementRepository;
+        this.resellerRepository = resellerRepository;
     }
 
     /**
@@ -141,6 +155,83 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<Order> getMyOrders(Integer resellerId) {
         return orderRepository.findByReseller_ResellerIdOrderByCreatedAtDesc(resellerId);
+    }
+
+    /**
+     * Cancels a reseller's own order.
+     * Validates ownership, status (pending or approved only), and reason server-side.
+     * Reuses the same stock-reversal logic as admin cancel.
+     * Throws IllegalStateException / IllegalArgumentException with user-friendly messages.
+     */
+    @Transactional
+    public Order cancelOrderByReseller(Integer orderId, Integer resellerId, String cancelReason) {
+        if (orderId == null) throw new IllegalArgumentException("Order ID must not be null.");
+
+        String reason = cancelReason != null ? cancelReason.trim() : "";
+        if (reason.isEmpty() || reason.length() > 255) {
+            throw new IllegalArgumentException("A valid cancellation reason (max 255 characters) is required.");
+        }
+
+        Order order = orderRepository.findByIdWithLock(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found."));
+
+        if (order.getReseller() == null || !order.getReseller().getResellerId().equals(resellerId)) {
+            throw new IllegalStateException("You can only cancel your own orders.");
+        }
+
+        if (order.getStatus() != OrderStatus.pending && order.getStatus() != OrderStatus.approved) {
+            throw new IllegalStateException("Only orders that are pending or approved can be cancelled. This order is: " + order.getStatus() + ".");
+        }
+
+        // Already cancelled guard (stale page / double click)
+        if (order.getCancelledAt() != null) {
+            throw new IllegalStateException("This order has already been cancelled.");
+        }
+
+        order.setCancelReason(reason);
+        order.setCancelledBy("RESELLER");
+        order.setCancelledAt(LocalDateTime.now());
+
+        if (order.getStatus() == OrderStatus.pending) {
+            order.setStatus(OrderStatus.cancelled);
+            orderRepository.save(order);
+            orderRepository.touchUpdatedAt(orderId);
+            return order;
+        }
+
+        // Approved: reverse stock and reduce reseller balance
+        Warehouse warehouse = order.getWarehouse();
+        if (warehouse == null) {
+            throw new IllegalStateException("Approved order does not have an assigned warehouse. Please contact admin.");
+        }
+
+        Reseller reseller = resellerRepository.findByIdWithLock(resellerId)
+                .orElseThrow(() -> new IllegalStateException("Reseller profile not found."));
+
+        for (OrderItem item : order.getItems()) {
+            Product product = item.getProduct();
+            if (product == null) continue;
+            int quantity = item.getQuantity() != null ? item.getQuantity() : 0;
+
+            java.util.Optional<Inventory> invOpt = inventoryRepository.findByIdWithLock(warehouse.getWarehouseId(), product.getProductId());
+            Inventory inventory = invOpt.orElseGet(() -> new Inventory(warehouse, product, 0));
+            int currentQty = inventory.getQuantity() != null ? inventory.getQuantity() : 0;
+            inventory.setQuantity(currentQty + quantity);
+            inventoryRepository.save(inventory);
+
+            StockMovement movement = new StockMovement(warehouse, product, MoveType.return_, quantity, order.getOrderNo(), null);
+            stockMovementRepository.save(movement);
+        }
+
+        BigDecimal currentBalance = reseller.getBalance() != null ? reseller.getBalance() : BigDecimal.ZERO;
+        BigDecimal orderTotal = order.getTotal() != null ? order.getTotal() : BigDecimal.ZERO;
+        reseller.setBalance(currentBalance.subtract(orderTotal));
+        resellerRepository.save(reseller);
+
+        order.setStatus(OrderStatus.cancelled);
+        orderRepository.save(order);
+        orderRepository.touchUpdatedAt(orderId);
+        return order;
     }
 
     private String generateOrderNo() {

@@ -85,6 +85,20 @@
                                 <label class="text-muted small">Notes / Instructions</label>
                                 <div class="p-2 bg-light rounded text-secondary small" th:text="${order.notes}">Special handling notes</div>
                             </div>
+                            <!-- Cancellation info -->
+                            <div class="col-12" th:if="${order.status != null and order.status.name() == 'cancelled' and order.cancelReason != null}">
+                                <label class="text-muted small">Cancellation Details</label>
+                                <div class="p-2 bg-danger-subtle rounded border border-danger-subtle small">
+                                    <div class="fw-semibold text-danger mb-1"><i class="bi bi-x-octagon-fill me-1"></i> Cancelled</div>
+                                    <div><span class="text-muted">Reason:</span> <span th:text="${order.cancelReason}"></span></div>
+                                    <div th:if="${order.cancelledBy != null}"><span class="text-muted">Cancelled by:</span>
+                                        <span class="badge bg-secondary ms-1" th:text="${order.cancelledBy}">ADMIN</span>
+                                    </div>
+                                    <div th:if="${order.cancelledAt != null}"><span class="text-muted">At:</span>
+                                        <span th:text="${#temporals.format(order.cancelledAt, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -197,7 +211,7 @@
         <!-- Order Actions Card -->
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white py-3 border-bottom">
-                <h6 class="fw-bold mb-0"><i class="bi bi-gear-fill me-2 text-secondary"></i> Actions & Fulfillment</h6>
+                <h6 class="fw-bold mb-0"><i class="bi bi-gear-fill me-2 text-secondary"></i> Actions &amp; Fulfillment</h6>
             </div>
             <div class="card-body p-4">
                 <!-- Status: PENDING -->
@@ -205,7 +219,7 @@
                     <p class="text-muted small mb-3">
                         This order is currently <strong>Pending</strong> approval. Choose a fulfillment warehouse to verify inventory availability, deduct stock, and approve the order.
                     </p>
-                    <div class="d-flex flex-wrap align-items-center gap-3">
+                    <div class="d-flex flex-wrap align-items-start gap-3">
                         <!-- Approve Form -->
                         <form th:action="@{'/admin/orders/' + ${order.orderId} + '/approve'}" method="post" class="d-flex align-items-center gap-2">
                             <label for="warehouseSelect" class="form-label mb-0 small fw-semibold">Fulfill from Warehouse:</label>
@@ -220,11 +234,21 @@
                             </button>
                         </form>
 
-                        <div class="vr mx-2 d-none d-md-block"></div>
+                        <div class="vr mx-2 d-none d-md-block" style="height: 36px;"></div>
 
-                        <!-- Cancel Form -->
+                        <!-- Cancel Form (pending) -->
                         <form th:action="@{'/admin/orders/' + ${order.orderId} + '/cancel'}" method="post"
-                              onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                              onsubmit="return confirmAdminCancel(this);"
+                              class="d-flex align-items-center gap-2 flex-wrap">
+                            <select name="cancelReason" class="form-select form-select-sm" required style="min-width: 230px;">
+                                <option value="" disabled selected>Select cancel reason…</option>
+                                <option value="Ordered by mistake">Ordered by mistake</option>
+                                <option value="Wrong item or quantity">Wrong item or quantity</option>
+                                <option value="Found a better price elsewhere">Found a better price elsewhere</option>
+                                <option value="No longer needed">No longer needed</option>
+                                <option value="Taking too long to process">Taking too long to process</option>
+                                <option value="Other">Other</option>
+                            </select>
                             <button type="submit" class="btn btn-outline-danger btn-sm">
                                 <i class="bi bi-x-circle me-1"></i> Cancel Order
                             </button>
@@ -249,9 +273,19 @@
                             Cancelling this approved order will return all ordered item quantities back into the warehouse inventory and subtract <strong>₱<span th:text="${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">0.00</span></strong> from the reseller's balance.
                         </p>
                         <form th:action="@{'/admin/orders/' + ${order.orderId} + '/cancel'}" method="post"
-                              onsubmit="return confirm('WARNING: Cancelling this approved order will reverse inventory stock and adjust the reseller balance. Are you sure you want to proceed?');">
+                              onsubmit="return confirmAdminCancel(this);"
+                              class="d-flex align-items-center gap-2 flex-wrap">
+                            <select name="cancelReason" class="form-select form-select-sm" required style="min-width: 230px;">
+                                <option value="" disabled selected>Select cancel reason…</option>
+                                <option value="Ordered by mistake">Ordered by mistake</option>
+                                <option value="Wrong item or quantity">Wrong item or quantity</option>
+                                <option value="Found a better price elsewhere">Found a better price elsewhere</option>
+                                <option value="No longer needed">No longer needed</option>
+                                <option value="Taking too long to process">Taking too long to process</option>
+                                <option value="Other">Other</option>
+                            </select>
                             <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="bi bi-x-octagon me-1"></i> Cancel Order & Reverse Stock
+                                <i class="bi bi-x-octagon me-1"></i> Cancel Order &amp; Reverse Stock
                             </button>
                         </form>
                     </div>
@@ -273,5 +307,19 @@
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function confirmAdminCancel(form) {
+        var select = form.querySelector('select[name="cancelReason"]');
+        if (!select || !select.value) {
+            alert('Please select a cancellation reason before proceeding.');
+            return false;
+        }
+        var isApproved = form.querySelector('button[type="submit"]').textContent.indexOf('Reverse') !== -1;
+        var msg = isApproved
+            ? 'WARNING: Cancelling this approved order will reverse inventory stock and adjust the reseller balance. Are you sure?'
+            : 'Are you sure you want to cancel this order?';
+        return confirm(msg);
+    }
+    </script>
 </body>
 </html>

@@ -54,6 +54,15 @@ public class Order {
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
+    @Column(name = "cancel_reason", length = 255)
+    private String cancelReason;
+
+    @Column(name = "cancelled_by", length = 20)
+    private String cancelledBy;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -95,6 +104,15 @@ public class Order {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public String getCancelReason() { return cancelReason; }
+    public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }
+
+    public String getCancelledBy() { return cancelledBy; }
+    public void setCancelledBy(String cancelledBy) { this.cancelledBy = cancelledBy; }
+
+    public LocalDateTime getCancelledAt() { return cancelledAt; }
+    public void setCancelledAt(LocalDateTime cancelledAt) { this.cancelledAt = cancelledAt; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

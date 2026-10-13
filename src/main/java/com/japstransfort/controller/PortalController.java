@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Controller for the reseller portal: home, catalog, cart, orders.
@@ -234,6 +235,7 @@ public class PortalController {
     @PostMapping("/cart/place-order")
     public String placeOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(value = "selectedIds", required = false) List<Integer> selectedIds,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
@@ -243,13 +245,30 @@ public class PortalController {
             return "redirect:/portal/cart";
         }
 
+        if (selectedIds == null || selectedIds.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please select at least one item to order.");
+            return "redirect:/portal/cart";
+        }
+
         BigDecimal discountPct = getDiscountPct(reseller);
         Map<Integer, Integer> cart = getCart(session);
 
+        // Build sub-cart from session cart for selected IDs only (ignore any id not in cart)
+        Set<Integer> selectedSet = new java.util.HashSet<>(selectedIds);
+        Map<Integer, Integer> subCart = new LinkedHashMap<>();
+        for (Map.Entry<Integer, Integer> entry : cart.entrySet()) {
+            if (selectedSet.contains(entry.getKey())) {
+                subCart.put(entry.getKey(), entry.getValue());
+            }
+        }
+
         try {
-            Order order = orderService.placeOrder(reseller, cart, discountPct);
-            // Clear cart after successful placement
-            session.removeAttribute(CART_SESSION_KEY);
+            Order order = orderService.placeOrder(reseller, subCart, discountPct);
+            // Remove only the ordered items from the session cart; leave unchecked items
+            for (Integer pid : subCart.keySet()) {
+                cart.remove(pid);
+            }
+            saveCart(session, cart);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Order placed successfully! Order number: " + order.getOrderNo());
             return "redirect:/portal/orders";
@@ -281,5 +300,30 @@ public class PortalController {
         model.addAttribute("reseller", reseller);
 
         return "portal/orders";
+    }
+
+    // ─── Cancel Order ─────────────────────────────────────────────────────────
+
+    @PostMapping("/orders/{id}/cancel")
+    public String cancelOrder(
+            @PathVariable("id") Integer orderId,
+            @RequestParam(value = "cancelReason", required = false) String cancelReason,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+
+        Reseller reseller = loadReseller(userDetails);
+        if (reseller == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Reseller profile not found.");
+            return "redirect:/portal/orders";
+        }
+
+        try {
+            Order order = orderService.cancelOrderByReseller(orderId, reseller.getResellerId(), cancelReason);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Order #" + order.getOrderNo() + " has been cancelled.");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/portal/orders";
     }
 }

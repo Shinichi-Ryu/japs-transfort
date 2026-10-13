@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -198,11 +199,18 @@ public class OrderAdminService {
      * Cancels an order (must be pending or approved):
      * - If pending: marks cancelled directly
      * - If approved: reverses stock deduction (MoveType.return_, positive qty) and subtracts order total from reseller balance
+     * Saves cancel_reason, cancelled_by, cancelled_at on both paths.
      */
     @Transactional
-    public Order cancelOrder(Integer orderId, User admin) {
+    public Order cancelOrder(Integer orderId, String cancelReason, String cancelledBy, User admin) {
         if (orderId == null) {
             throw new IllegalArgumentException("Order ID must not be null.");
+        }
+
+        // Server-side reason validation
+        String reason = cancelReason != null ? cancelReason.trim() : "";
+        if (reason.isEmpty() || reason.length() > 255) {
+            throw new IllegalArgumentException("A valid cancellation reason (max 255 characters) is required.");
         }
 
         Order order = orderRepository.findByIdWithLock(orderId)
@@ -211,6 +219,10 @@ public class OrderAdminService {
         if (order.getStatus() != OrderStatus.pending && order.getStatus() != OrderStatus.approved) {
             throw new IllegalStateException("Only pending or approved orders can be cancelled. Current status: " + order.getStatus());
         }
+
+        order.setCancelReason(reason);
+        order.setCancelledBy(cancelledBy != null ? cancelledBy : "ADMIN");
+        order.setCancelledAt(LocalDateTime.now());
 
         if (order.getStatus() == OrderStatus.pending) {
             order.setStatus(OrderStatus.cancelled);

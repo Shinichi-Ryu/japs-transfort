@@ -121,6 +121,9 @@ CREATE TABLE orders (
   discount     NUMERIC(12,2) DEFAULT 0,
   total        NUMERIC(12,2) DEFAULT 0,
   notes        TEXT,
+  cancel_reason  VARCHAR(255),
+  cancelled_by   VARCHAR(20),
+  cancelled_at   TIMESTAMP,
   created_at   TIMESTAMP DEFAULT NOW(),
   updated_at   TIMESTAMP DEFAULT NOW()
 );

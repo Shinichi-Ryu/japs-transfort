@@ -155,7 +155,7 @@ public class ResellerAdminController {
         try {
             resellerService.softDelete(id);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Reseller marked as inactive (soft deleted).");
+                    "Reseller deactivated.");
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }

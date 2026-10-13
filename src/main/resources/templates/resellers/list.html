@@ -117,7 +117,7 @@
                                 <th scope="col">
                                     <a class="text-decoration-none text-muted d-inline-flex align-items-center"
                                        th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='territory', dir=${sort == 'territory' ? reverseDir : 'asc'})}">
-                                        Territory
+                                        City/Location
                                         <i class="bi ms-1" th:classappend="${sort == 'territory' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                     </a>
                                 </th>
@@ -162,7 +162,7 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-dark border"
-                                          th:text="${reseller.tier != null ? reseller.tier.tierName : 'Unassigned'}">
+                                           th:text="${reseller.tier != null ? reseller.tier.tierName : 'Unassigned'}">
                                         Tier
                                     </span>
                                 </td>
@@ -170,7 +170,7 @@
                                 <td class="text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
                                 <td class="text-center">
                                     <span th:if="${reseller.status == 'active'}" class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
-                                    <span th:unless="${reseller.status == 'active'}" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" th:text="${reseller.status}">Inactive</span>
+                                    <span th:unless="${reseller.status == 'active'}" class="badge bg-danger-subtle text-danger border border-danger-subtle">Inactive</span>
                                 </td>
                                 <td class="text-end pe-3">
                                     <div class="action-buttons">
@@ -180,13 +180,13 @@
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
-                                        <!-- Soft Delete action for active resellers -->
+                                        <!-- Deactivate action for active resellers -->
                                         <form th:if="${reseller.status == 'active'}"
                                               th:action="@{'/admin/resellers/delete/' + ${reseller.resellerId}}"
                                               method="post"
                                               class="d-inline"
-                                              onsubmit="return confirm('Soft-delete this reseller? It will be marked inactive.');">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Mark Inactive (Soft Delete)">
+                                              onsubmit="return confirm('Deactivate this reseller? It will be marked inactive.');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Deactivate Reseller">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>

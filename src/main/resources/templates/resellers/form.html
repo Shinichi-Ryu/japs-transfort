@@ -136,9 +136,9 @@
                                     </div>
                                 </div>
 
-                                <!-- Territory -->
+                                <!-- City/Location -->
                                 <div class="col-12 col-md-6">
-                                    <label for="territory" class="form-label small fw-medium">Territory / Area</label>
+                                    <label for="territory" class="form-label small fw-medium">City/Location</label>
                                     <input type="text"
                                            class="form-control"
                                            id="territory"
@@ -146,7 +146,7 @@
                                            placeholder="e.g. Quezon City / NCR"
                                            th:errorclass="is-invalid">
                                     <div class="invalid-feedback" th:if="${#fields.hasErrors('territory')}" th:errors="*{territory}">
-                                        Invalid territory.
+                                        Invalid City/Location.
                                     </div>
                                 </div>
 

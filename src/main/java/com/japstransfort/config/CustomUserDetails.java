@@ -15,9 +15,15 @@ import java.util.Collections;
 public class CustomUserDetails implements UserDetails {
 
     private final User user;
+    private final boolean enabled;
 
     public CustomUserDetails(User user) {
+        this(user, Boolean.TRUE.equals(user.getIsActive()));
+    }
+
+    public CustomUserDetails(User user, boolean enabled) {
         this.user = user;
+        this.enabled = enabled;
     }
 
     public User getUser() {
@@ -69,6 +75,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return Boolean.TRUE.equals(user.getIsActive());
+        return enabled;
     }
 }

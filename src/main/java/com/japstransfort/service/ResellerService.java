@@ -165,7 +165,11 @@ public class ResellerService {
         reseller.setParentReseller(parentReseller);
         reseller.setCreditLimit(dto.getCreditLimit() != null ? dto.getCreditLimit() : BigDecimal.ZERO);
         if (dto.getStatus() != null && !dto.getStatus().isBlank()) {
-            reseller.setStatus(dto.getStatus().trim().toLowerCase());
+            String newStatus = dto.getStatus().trim().toLowerCase();
+            reseller.setStatus(newStatus);
+            if (reseller.getUser() != null) {
+                reseller.getUser().setIsActive("active".equalsIgnoreCase(newStatus));
+            }
         }
 
         return resellerRepository.save(reseller);

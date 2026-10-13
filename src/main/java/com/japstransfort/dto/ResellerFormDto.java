@@ -37,7 +37,7 @@ public class ResellerFormDto {
 
     private String address;
 
-    @Size(max = 80, message = "Territory cannot exceed 80 characters.")
+    @Size(max = 80, message = "City/Location cannot exceed 80 characters.")
     private String territory;
 
     @NotNull(message = "Tier selection is required.")

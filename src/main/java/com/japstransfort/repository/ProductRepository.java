@@ -22,6 +22,10 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     List<Product> findByCategory_CategoryIdAndIsActiveTrue(Integer categoryId);
 
+    boolean existsByCategory_CategoryId(Integer categoryId);
+
+    long countByCategory_CategoryId(Integer categoryId);
+
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category WHERE p.isActive = true")
     List<Product> findAllActiveWithCategory();
 }

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Order ' + ${order.orderNo} + ' - Japs Transfort'">Order Detail - Japs Transfort</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+</head>
+<body>
+    <!-- Navbar Fragment -->
+    <div th:replace="~{fragments/navbar :: headerNav('orders')}"></div>
+
+    <div class="container-fluid px-4 py-4">
+        <!-- Top Navigation & Action Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <a th:href="@{/admin/orders}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Orders
+                </a>
+                <h3 class="fw-bold mb-0">
+                    Order <span class="text-primary font-monospace" th:text="${order.orderNo}">ORD-20261013-0001</span>
+                </h3>
+                <span class="badge text-uppercase fs-6"
+                      th:classappend="${order.status != null and order.status.name() == 'pending' ? 'bg-warning text-dark' :
+                                       (order.status != null and order.status.name() == 'approved' ? 'bg-info text-dark' :
+                                       (order.status != null and (order.status.name() == 'packed' or order.status.name() == 'shipped') ? 'bg-primary' :
+                                       (order.status != null and order.status.name() == 'delivered' ? 'bg-success' :
+                                       (order.status != null and order.status.name() == 'cancelled' ? 'bg-danger' : 'bg-secondary'))))}"
+                      th:text="${order.status}">
+                    pending
+                </span>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${successMessage}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${errorMessage}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Two Columns: Order Info & Reseller Info -->
+        <div class="row g-4 mb-4">
+            <!-- Order Information Card -->
+            <div class="col-12 col-lg-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+                        <i class="bi bi-info-circle text-primary me-2 fs-5"></i>
+                        <h6 class="fw-bold mb-0">Order Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="text-muted small">Order Number</label>
+                                <div class="fw-semibold font-monospace" th:text="${order.orderNo}">ORD-0001</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small">Date Placed</label>
+                                <div class="fw-medium" th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}">2026-10-13</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small">Payment Status</label>
+                                <div>
+                                    <span class="badge bg-secondary text-uppercase" th:text="${order.paymentStatus}">unpaid</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small">Warehouse</label>
+                                <div class="fw-medium">
+                                    <span th:if="${order.warehouse != null}" class="badge bg-info-subtle text-info-emphasis border border-info-subtle" th:text="${order.warehouse.name}">Main Warehouse</span>
+                                    <span th:unless="${order.warehouse != null}" class="text-muted fst-italic">Not yet assigned</span>
+                                </div>
+                            </div>
+                            <div class="col-12" th:if="${order.notes != null and !order.notes.empty}">
+                                <label class="text-muted small">Notes / Instructions</label>
+                                <div class="p-2 bg-light rounded text-secondary small" th:text="${order.notes}">Special handling notes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reseller Information Card -->
+            <div class="col-12 col-lg-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+                        <i class="bi bi-person-badge text-success me-2 fs-5"></i>
+                        <h6 class="fw-bold mb-0">Reseller Profile</h6>
+                    </div>
+                    <div class="card-body" th:if="${order.reseller != null}">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="text-muted small">Business Name</label>
+                                <div class="fw-bold text-dark fs-6" th:text="${order.reseller.businessName}">Business Name</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small">Territory</label>
+                                <div class="fw-medium text-dark" th:text="${order.reseller.territory != null ? order.reseller.territory : 'N/A'}">Metro Manila</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small">Credit Limit</label>
+                                <div class="fw-semibold text-dark font-monospace" th:text="'₱' + ${#numbers.formatDecimal(order.reseller.creditLimit, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small">Outstanding Balance</label>
+                                <div class="fw-semibold text-danger font-monospace" th:text="'₱' + ${#numbers.formatDecimal(order.reseller.balance, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                            </div>
+                            <div class="col-6" th:if="${order.reseller.contactNo != null}">
+                                <label class="text-muted small">Contact Number</label>
+                                <div class="text-dark small" th:text="${order.reseller.contactNo}">+63 912 345 6789</div>
+                            </div>
+                            <div class="col-6" th:if="${order.reseller.user != null}">
+                                <label class="text-muted small">Account Email</label>
+                                <div class="text-dark small" th:text="${order.reseller.user.email}">reseller@example.com</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body" th:unless="${order.reseller != null}">
+                        <p class="text-muted mb-0">No reseller profile linked to this order.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0"><i class="bi bi-boxes me-2 text-primary"></i> Ordered Items</h6>
+                <span class="badge bg-secondary" th:text="${order.items != null ? order.items.size() : 0} + ' items'">0 items</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="ps-3">SKU</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col">Unit</th>
+                                <th scope="col" class="text-center">Quantity</th>
+                                <th scope="col" class="text-end">Unit Price (Snapshot)</th>
+                                <th scope="col" class="text-end pe-3">Line Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${order.items == null or order.items.empty}">
+                                <td colspan="6" class="text-center text-muted py-4">No items in this order.</td>
+                            </tr>
+                            <tr th:each="item : ${order.items}">
+                                <td class="ps-3 fw-mono small fw-semibold text-secondary"
+                                    th:text="${item.product != null ? item.product.sku : 'N/A'}">SKU-001</td>
+                                <td class="fw-medium text-dark"
+                                    th:text="${item.product != null ? item.product.name : 'Unknown Product'}">Product Name</td>
+                                <td class="small text-muted"
+                                    th:text="${item.product != null and item.product.unit != null ? item.product.unit : 'pc'}">pc</td>
+                                <td class="text-center font-monospace fw-semibold" th:text="${item.quantity}">1</td>
+                                <td class="text-end font-monospace"
+                                    th:text="'₱' + ${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                <td class="text-end pe-3 font-monospace fw-semibold text-dark"
+                                    th:text="'₱' + ${#numbers.formatDecimal(item.lineTotal, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="table-light border-top">
+                            <tr>
+                                <td colspan="4" class="border-0"></td>
+                                <td class="text-end text-muted small fw-semibold">Subtotal:</td>
+                                <td class="text-end pe-3 font-monospace"
+                                    th:text="'₱' + ${#numbers.formatDecimal(order.subtotal, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="border-0"></td>
+                                <td class="text-end text-muted small fw-semibold">Discount:</td>
+                                <td class="text-end pe-3 font-monospace text-success"
+                                    th:text="'-₱' + ${#numbers.formatDecimal(order.discount, 1, 'COMMA', 2, 'POINT')}">-₱0.00</td>
+                            </tr>
+                            <tr class="fs-6">
+                                <td colspan="4" class="border-0"></td>
+                                <td class="text-end fw-bold text-dark">Total:</td>
+                                <td class="text-end pe-3 font-monospace fw-bold text-primary fs-5"
+                                    th:text="'₱' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Actions Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="fw-bold mb-0"><i class="bi bi-gear-fill me-2 text-secondary"></i> Actions & Fulfillment</h6>
+            </div>
+            <div class="card-body p-4">
+                <!-- Status: PENDING -->
+                <div th:if="${order.status != null and order.status.name() == 'pending'}">
+                    <p class="text-muted small mb-3">
+                        This order is currently <strong>Pending</strong> approval. Choose a fulfillment warehouse to verify inventory availability, deduct stock, and approve the order.
+                    </p>
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                        <!-- Approve Form -->
+                        <form th:action="@{'/admin/orders/' + ${order.orderId} + '/approve'}" method="post" class="d-flex align-items-center gap-2">
+                            <label for="warehouseSelect" class="form-label mb-0 small fw-semibold">Fulfill from Warehouse:</label>
+                            <select name="warehouseId" id="warehouseSelect" class="form-select form-select-sm" required style="min-width: 200px;">
+                                <option value="" disabled selected>Select Warehouse...</option>
+                                <option th:each="wh : ${warehouses}"
+                                        th:value="${wh.warehouseId}"
+                                        th:text="${wh.name}">Main Warehouse</option>
+                            </select>
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="bi bi-check-circle me-1"></i> Approve Order
+                            </button>
+                        </form>
+
+                        <div class="vr mx-2 d-none d-md-block"></div>
+
+                        <!-- Cancel Form -->
+                        <form th:action="@{'/admin/orders/' + ${order.orderId} + '/cancel'}" method="post"
+                              onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-x-circle me-1"></i> Cancel Order
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Status: APPROVED -->
+                <div th:if="${order.status != null and order.status.name() == 'approved'}">
+                    <div class="alert alert-info border-0 mb-3 small d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+                        <div>
+                            This order was approved and fulfilled from <strong><span th:text="${order.warehouse != null ? order.warehouse.name : 'Warehouse'}">Warehouse</span></strong>.
+                            Stock has been deducted from inventory and the order amount added to the reseller's outstanding balance.
+                        </div>
+                    </div>
+                    <div class="p-3 bg-light rounded border">
+                        <p class="text-danger small mb-2 fw-semibold">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Stock Reversal on Cancellation:
+                        </p>
+                        <p class="text-muted small mb-3">
+                            Cancelling this approved order will return all ordered item quantities back into the warehouse inventory and subtract <strong>₱<span th:text="${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">0.00</span></strong> from the reseller's balance.
+                        </p>
+                        <form th:action="@{'/admin/orders/' + ${order.orderId} + '/cancel'}" method="post"
+                              onsubmit="return confirm('WARNING: Cancelling this approved order will reverse inventory stock and adjust the reseller balance. Are you sure you want to proceed?');">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="bi bi-x-octagon me-1"></i> Cancel Order & Reverse Stock
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Status: Other (packed, shipped, delivered, cancelled, returned) -->
+                <div th:if="${order.status != null and order.status.name() != 'pending' and order.status.name() != 'approved'}">
+                    <div class="alert alert-secondary border-0 mb-0 small d-flex align-items-center">
+                        <i class="bi bi-shield-check fs-5 me-2"></i>
+                        <div>
+                            This order is currently in <strong class="text-uppercase" th:text="${order.status}">STATUS</strong> status.
+                            No administrative approval or cancellation actions are available from this screen.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

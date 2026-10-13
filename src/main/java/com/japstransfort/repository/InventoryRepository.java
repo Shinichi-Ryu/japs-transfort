@@ -3,9 +3,11 @@ package com.japstransfort.repository;
 import com.japstransfort.dto.InventoryRowDto;
 import com.japstransfort.entity.Inventory;
 import com.japstransfort.entity.InventoryId;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -24,6 +26,10 @@ public interface InventoryRepository extends JpaRepository<Inventory, InventoryI
     List<Inventory> findById_ProductId(Integer productId);
 
     Optional<Inventory> findById_WarehouseIdAndId_ProductId(Integer warehouseId, Integer productId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT i FROM Inventory i WHERE i.id.warehouseId = :warehouseId AND i.id.productId = :productId")
+    Optional<Inventory> findByIdWithLock(@Param("warehouseId") Integer warehouseId, @Param("productId") Integer productId);
 
     @Query("SELECT i FROM Inventory i JOIN FETCH i.product p JOIN FETCH i.warehouse w WHERE i.id.warehouseId = :warehouseId")
     List<Inventory> findAllByWarehouseWithDetails(@Param("warehouseId") Integer warehouseId);

@@ -127,6 +127,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="cancelForm" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <div class="modal-body">
                         <p class="text-muted small mb-3">
                             You are about to cancel order <strong id="cancelOrderNo"></strong>.
@@ -134,7 +135,7 @@
                         </p>
                         <div class="mb-3">
                             <label for="cancelReason" class="form-label fw-semibold">Reason for cancellation <span class="text-danger">*</span></label>
-                            <select class="form-select" id="cancelReasonSelect" name="cancelReason" required>
+                            <select class="form-select" id="cancelReasonSelect" required>
                                 <option value="" disabled selected>Select a reason…</option>
                                 <option value="Ordered by mistake">Ordered by mistake</option>
                                 <option value="Wrong item or quantity">Wrong item or quantity</option>
@@ -188,6 +189,8 @@
             otherText.value = '';
             charCount.textContent = '0';
             otherText.removeAttribute('required');
+            var oldHidden = cancelForm.querySelectorAll('input[type="hidden"][name="cancelReason"]');
+            oldHidden.forEach(function (el) { el.remove(); });
         });
 
         // Show/hide "other" text box
@@ -209,6 +212,11 @@
         // On submit: validate and swap reason value if "Other"
         cancelForm.addEventListener('submit', function (e) {
             e.preventDefault();
+
+            // Remove any previously appended hidden cancelReason input
+            var existingHidden = cancelForm.querySelectorAll('input[type="hidden"][name="cancelReason"]');
+            existingHidden.forEach(function (el) { el.remove(); });
+
             var reason = reasonSel.value;
             if (!reason || reason === '__OTHER__') {
                 var custom = otherText.value.trim();

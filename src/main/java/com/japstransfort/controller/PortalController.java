@@ -83,6 +83,19 @@ public class PortalController {
         return tier.getDiscountPct();
     }
 
+    // ─── Portal Home ──────────────────────────────────────────────────────────
+
+    @GetMapping({"", "/"})
+    @Transactional(readOnly = true)
+    public String portalHome(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
+            model.addAttribute("currentUser", userDetails.getUser());
+        }
+        Reseller reseller = loadReseller(userDetails);
+        model.addAttribute("reseller", reseller);
+        return "portal/home";
+    }
+
     // ─── Catalog ──────────────────────────────────────────────────────────────
 
     @GetMapping("/catalog")

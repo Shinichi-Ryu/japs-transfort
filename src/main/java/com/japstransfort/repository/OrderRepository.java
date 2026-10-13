@@ -20,8 +20,12 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     List<Order> findByReseller_ResellerIdAndStatus(Integer resellerId, OrderStatus status);
 
-    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE o.reseller.resellerId = :resellerId AND o.status = 'pending'")
-    BigDecimal sumPendingTotalByReseller(@Param("resellerId") Integer resellerId);
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE o.reseller.resellerId = :resellerId AND o.status = :status")
+    BigDecimal sumTotalByResellerAndStatus(@Param("resellerId") Integer resellerId, @Param("status") OrderStatus status);
+
+    default BigDecimal sumPendingTotalByReseller(Integer resellerId) {
+        return sumTotalByResellerAndStatus(resellerId, OrderStatus.pending);
+    }
 
     @Query("SELECT COUNT(o) FROM Order o WHERE o.orderNo = :orderNo")
     long countByOrderNo(@Param("orderNo") String orderNo);

@@ -10,6 +10,7 @@
         initPasswordToggles();
         initPasswordChecklist();
         initCatalogMultiSelect();
+        initCartCheckboxes();
     });
 
     /**
@@ -231,5 +232,76 @@
         });
 
         syncSelected();
+    }
+
+    /**
+     * Cart page: checkbox-driven selection, live totals, "N of M selected" counter,
+     * and hidden-input injection for the place-order form.
+     */
+    function initCartCheckboxes() {
+        var selectAllCb = document.getElementById('selectAll');
+        var rowChecks   = Array.from(document.querySelectorAll('.row-check'));
+        var subtotalEl  = document.getElementById('summarySubtotal');
+        var totalEl     = document.getElementById('summaryTotal');
+        var placeBtn    = document.getElementById('placeOrderBtn');
+        var container   = document.getElementById('selectedIdsContainer');
+        var selCountEl  = document.getElementById('cartSelectionCount');
+
+        if (rowChecks.length === 0 || !placeBtn) {
+            return;
+        }
+
+        function formatPHP(amount) {
+            return '\u20B1' + amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function updateSummary() {
+            var sum = 0;
+            var checkedCount = 0;
+            if (container) container.innerHTML = '';
+
+            rowChecks.forEach(function (cb) {
+                var tr = cb.closest('tr');
+                var lineTotal = parseFloat(tr ? tr.getAttribute('data-line-total') : 0) || 0;
+                if (cb.checked) {
+                    sum += lineTotal;
+                    checkedCount++;
+                    if (container) {
+                        var hidden = document.createElement('input');
+                        hidden.type  = 'hidden';
+                        hidden.name  = 'selectedIds';
+                        hidden.value = cb.value;
+                        container.appendChild(hidden);
+                    }
+                }
+            });
+
+            if (subtotalEl) subtotalEl.textContent = formatPHP(sum);
+            if (totalEl)    totalEl.textContent    = formatPHP(sum);
+            placeBtn.disabled = (checkedCount === 0);
+
+            if (selCountEl) {
+                selCountEl.textContent = checkedCount + ' of ' + rowChecks.length + ' item' + (rowChecks.length !== 1 ? 's' : '') + ' selected';
+            }
+        }
+
+        if (selectAllCb) {
+            selectAllCb.addEventListener('change', function () {
+                rowChecks.forEach(function (cb) { cb.checked = selectAllCb.checked; });
+                updateSummary();
+            });
+        }
+
+        rowChecks.forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                if (selectAllCb) {
+                    selectAllCb.checked = rowChecks.every(function (c) { return c.checked; });
+                }
+                updateSummary();
+            });
+        });
+
+        // Initialize on page load (all checked by default)
+        updateSummary();
     }
 })();

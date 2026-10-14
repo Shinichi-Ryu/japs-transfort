@@ -2,6 +2,7 @@ package com.japstransfort.service;
 
 import com.japstransfort.dto.CartItem;
 import com.japstransfort.dto.CartRow;
+import com.japstransfort.dto.OrderDetailDto;
 import com.japstransfort.entity.*;
 import com.japstransfort.repository.InventoryRepository;
 import com.japstransfort.repository.OrderRepository;
@@ -232,6 +233,55 @@ public class OrderService {
         orderRepository.save(order);
         orderRepository.touchUpdatedAt(orderId);
         return order;
+    }
+
+    /**
+     * Loads an order for the portal detail page.
+     * Returns an empty Optional if the order does not exist OR belongs to a
+     * different reseller, so the controller can safely return 404 without
+     * leaking the existence of the order.
+     */
+    @Transactional(readOnly = true)
+    public java.util.Optional<OrderDetailDto> getOrderDetailForReseller(Integer orderId, Integer resellerId) {
+        if (orderId == null || resellerId == null) return java.util.Optional.empty();
+
+        return orderRepository.findWithItemsById(orderId).flatMap(order -> {
+            // Ownership check
+            if (order.getReseller() == null
+                    || !order.getReseller().getResellerId().equals(resellerId)) {
+                return java.util.Optional.empty();
+            }
+
+            OrderDetailDto dto = new OrderDetailDto();
+            dto.setOrderId(order.getOrderId());
+            dto.setOrderNo(order.getOrderNo());
+            dto.setCreatedAt(order.getCreatedAt());
+            dto.setStatus(order.getStatus());
+            dto.setSubtotal(order.getSubtotal() != null ? order.getSubtotal() : java.math.BigDecimal.ZERO);
+            dto.setDiscount(order.getDiscount() != null ? order.getDiscount() : java.math.BigDecimal.ZERO);
+            dto.setTotal(order.getTotal() != null ? order.getTotal() : java.math.BigDecimal.ZERO);
+            dto.setCancelReason(order.getCancelReason());
+            dto.setCancelledBy(order.getCancelledBy());
+            dto.setCancelledAt(order.getCancelledAt());
+
+            List<OrderDetailDto.OrderItemDto> itemDtos = new ArrayList<>();
+            for (OrderItem item : order.getItems()) {
+                Product p = item.getProduct();
+                String sku  = p != null ? p.getSku()  : "N/A";
+                String name = p != null ? p.getName() : "Unknown Product";
+                String unit = (p != null && p.getUnit() != null) ? p.getUnit() : "pc";
+                itemDtos.add(new OrderDetailDto.OrderItemDto(
+                        sku, name, unit,
+                        item.getQuantity(),
+                        item.getUnitPrice(),
+                        item.getLineTotal()
+                ));
+            }
+            dto.setItems(itemDtos);
+
+            // Shipment: no Shipment entity exists yet; fields stay null → hasShipment() == false
+            return java.util.Optional.of(dto);
+        });
     }
 
     private String generateOrderNo() {

@@ -52,13 +52,14 @@
                                 <th scope="col" class="ps-3">Order No</th>
                                 <th scope="col">Date Placed</th>
                                 <th scope="col">Status</th>
+                                <th scope="col" class="text-center">Items</th>
                                 <th scope="col" class="text-end">Total Amount</th>
-                                <th scope="col" class="text-end pe-3">Action</th>
+                                <th scope="col" class="text-end pe-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:if="${orders == null or orders.empty}">
-                                <td colspan="5" class="text-center text-muted py-5">
+                                <td colspan="6" class="text-center text-muted py-5">
                                     <div class="mb-2"><i class="bi bi-receipt text-secondary" style="font-size: 2rem;"></i></div>
                                     <div>You haven't placed any orders yet.</div>
                                     <div class="mt-2">
@@ -69,7 +70,11 @@
                                 </td>
                             </tr>
                             <tr th:each="order : ${orders}">
-                                <td class="ps-3 fw-mono fw-semibold text-primary" th:text="${order.orderNo}">ORD-20261013-0001</td>
+                                <td class="ps-3 fw-mono fw-semibold text-primary">
+                                    <a th:href="@{/portal/orders/{id}(id=${order.orderId})}"
+                                       class="text-primary text-decoration-none"
+                                       th:text="${order.orderNo}">ORD-20261013-0001</a>
+                                </td>
                                 <td class="text-muted small" th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-10-13 10:00</td>
                                 <td>
                                     <span class="badge text-uppercase"
@@ -95,8 +100,14 @@
                                               th:text="'on ' + ${#temporals.format(order.cancelledAt, 'yyyy-MM-dd HH:mm')}"></span>
                                     </div>
                                 </td>
+                                <td class="text-center fw-semibold text-secondary"
+                                    th:text="${order.items != null ? order.items.size() : 0}">0</td>
                                 <td class="text-end font-monospace fw-bold text-dark" th:text="'₱' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
                                 <td class="text-end pe-3">
+                                    <a th:href="@{/portal/orders/{id}(id=${order.orderId})}"
+                                       class="btn btn-outline-secondary btn-sm me-1">
+                                        <i class="bi bi-eye me-1"></i> View
+                                    </a>
                                     <!-- Cancel button only for pending / approved -->
                                     <button th:if="${order.status.name() == 'pending' or order.status.name() == 'approved'}"
                                             type="button"
@@ -104,7 +115,8 @@
                                             data-bs-toggle="modal"
                                             data-bs-target="#cancelModal"
                                             th:data-order-id="${order.orderId}"
-                                            th:data-order-no="${order.orderNo}">
+                                            th:data-order-no="${order.orderNo}"
+                                            data-from-detail="false">
                                         <i class="bi bi-x-circle me-1"></i> Cancel
                                     </button>
                                 </td>

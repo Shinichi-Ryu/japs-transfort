@@ -3,6 +3,7 @@ package com.japstransfort.controller;
 import com.japstransfort.config.CustomUserDetails;
 import com.japstransfort.dto.CartItem;
 import com.japstransfort.dto.CartRow;
+import com.japstransfort.dto.OrderDetailDto;
 import com.japstransfort.entity.Order;
 import com.japstransfort.entity.Reseller;
 import com.japstransfort.entity.ResellerTier;
@@ -11,8 +12,10 @@ import com.japstransfort.repository.ProductRepository;
 import com.japstransfort.repository.ResellerRepository;
 import com.japstransfort.service.OrderService;
 import com.japstransfort.service.ProductService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -403,12 +406,42 @@ public class PortalController {
         return "portal/orders";
     }
 
+    // ─── Order Detail ─────────────────────────────────────────────────────────
+
+    @GetMapping("/orders/{id}")
+    public String orderDetail(
+            @PathVariable("id") Integer orderId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
+            HttpServletResponse response) {
+
+        Reseller reseller = loadReseller(userDetails);
+        if (reseller == null) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return "portal/order-not-found";
+        }
+
+        java.util.Optional<OrderDetailDto> opt =
+                orderService.getOrderDetailForReseller(orderId, reseller.getResellerId());
+
+        if (opt.isEmpty()) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return "portal/order-not-found";
+        }
+
+        if (userDetails != null) model.addAttribute("currentUser", userDetails.getUser());
+        model.addAttribute("order", opt.get());
+        model.addAttribute("reseller", reseller);
+        return "portal/order-detail";
+    }
+
     // ─── Cancel Order ─────────────────────────────────────────────────────────
 
     @PostMapping("/orders/{id}/cancel")
     public String cancelOrder(
             @PathVariable("id") Integer orderId,
             @RequestParam(value = "cancelReason", required = false) String cancelReason,
+            @RequestParam(value = "fromDetail", required = false, defaultValue = "false") boolean fromDetail,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
 
@@ -425,6 +458,11 @@ public class PortalController {
         } catch (IllegalStateException | IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
+
+        if (fromDetail) {
+            return "redirect:/portal/orders/" + orderId;
+        }
         return "redirect:/portal/orders";
     }
 }
+

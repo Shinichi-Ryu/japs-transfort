@@ -31,26 +31,29 @@ public class OrderAdminService {
     private final WarehouseRepository warehouseRepository;
     private final ResellerRepository resellerRepository;
     private final ShipmentRepository shipmentRepository;
+    private final com.japstransfort.repository.PaymentRepository paymentRepository;
 
     public OrderAdminService(OrderRepository orderRepository,
                              InventoryRepository inventoryRepository,
                              StockMovementRepository stockMovementRepository,
                              WarehouseRepository warehouseRepository,
                              ResellerRepository resellerRepository,
-                             ShipmentRepository shipmentRepository) {
+                             ShipmentRepository shipmentRepository,
+                             com.japstransfort.repository.PaymentRepository paymentRepository) {
         this.orderRepository = orderRepository;
         this.inventoryRepository = inventoryRepository;
         this.stockMovementRepository = stockMovementRepository;
         this.warehouseRepository = warehouseRepository;
         this.resellerRepository = resellerRepository;
         this.shipmentRepository = shipmentRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     /**
-     * Lists paginated orders filtered by search term and status, newest first.
+     * Lists paginated orders filtered by search term, status, and payment status, newest first.
      */
     @Transactional(readOnly = true)
-    public Page<Order> getOrders(String search, String status, int page, int size) {
+    public Page<Order> getOrders(String search, String status, String paymentStatus, int page, int size) {
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
                 size > 0 ? size : 10,
@@ -72,7 +75,24 @@ public class OrderAdminService {
             }
         }
 
-        return orderRepository.findWithFilters(searchParam, statusNull, orderStatus, pageable);
+        boolean paymentStatusNull = true;
+        PaymentStatus payStatus = PaymentStatus.unpaid;
+
+        if (paymentStatus != null && !paymentStatus.trim().isEmpty() && !"all".equalsIgnoreCase(paymentStatus.trim())) {
+            try {
+                payStatus = PaymentStatus.valueOf(paymentStatus.trim().toLowerCase());
+                paymentStatusNull = false;
+            } catch (IllegalArgumentException ignored) {
+                paymentStatusNull = true;
+            }
+        }
+
+        return orderRepository.findWithFilters(searchParam, statusNull, orderStatus, paymentStatusNull, payStatus, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Order> getOrders(String search, String status, int page, int size) {
+        return getOrders(search, status, null, page, size);
     }
 
     /**
@@ -219,6 +239,10 @@ public class OrderAdminService {
 
         Order order = orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found (ID " + orderId + ")."));
+
+        if (paymentRepository.existsByOrder_OrderId(orderId)) {
+            throw new IllegalStateException("This order has payments recorded. Cancelling is not available yet.");
+        }
 
         if (order.getStatus() != OrderStatus.pending && order.getStatus() != OrderStatus.approved) {
             String current = order.getStatus().name();

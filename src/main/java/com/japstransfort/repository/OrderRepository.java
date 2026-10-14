@@ -2,6 +2,7 @@ package com.japstransfort.repository;
 
 import com.japstransfort.entity.Order;
 import com.japstransfort.entity.OrderStatus;
+import com.japstransfort.entity.PaymentStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,12 +44,19 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query(value = "SELECT o FROM Order o LEFT JOIN FETCH o.reseller r "
             + "WHERE (:search IS NULL OR :search = '' OR LOWER(o.orderNo) LIKE LOWER(CONCAT('%', :search, '%')) "
             + "OR LOWER(r.businessName) LIKE LOWER(CONCAT('%', :search, '%'))) "
-            + "AND (:statusNull = true OR o.status = :status)",
+            + "AND (:statusNull = true OR o.status = :status) "
+            + "AND (:paymentStatusNull = true OR o.paymentStatus = :paymentStatus)",
            countQuery = "SELECT COUNT(o) FROM Order o LEFT JOIN o.reseller r "
             + "WHERE (:search IS NULL OR :search = '' OR LOWER(o.orderNo) LIKE LOWER(CONCAT('%', :search, '%')) "
             + "OR LOWER(r.businessName) LIKE LOWER(CONCAT('%', :search, '%'))) "
-            + "AND (:statusNull = true OR o.status = :status)")
-    Page<Order> findWithFilters(@Param("search") String search, @Param("statusNull") boolean statusNull, @Param("status") OrderStatus status, Pageable pageable);
+            + "AND (:statusNull = true OR o.status = :status) "
+            + "AND (:paymentStatusNull = true OR o.paymentStatus = :paymentStatus)")
+    Page<Order> findWithFilters(@Param("search") String search,
+                                @Param("statusNull") boolean statusNull,
+                                @Param("status") OrderStatus status,
+                                @Param("paymentStatusNull") boolean paymentStatusNull,
+                                @Param("paymentStatus") PaymentStatus paymentStatus,
+                                Pageable pageable);
 
     @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product LEFT JOIN FETCH o.reseller LEFT JOIN FETCH o.warehouse WHERE o.orderId = :id")
     Optional<Order> findWithItemsById(@Param("id") Integer id);

@@ -18,11 +18,17 @@ public class OrderDetailDto {
     private String orderNo;
     private LocalDateTime createdAt;
     private OrderStatus status;
+    private com.japstransfort.entity.PaymentStatus paymentStatus;
 
     // ── Financials ────────────────────────────────────────────────────────────
     private BigDecimal subtotal;
     private BigDecimal discount;
     private BigDecimal total;
+    private BigDecimal amountPaid;
+    private BigDecimal amountRemaining;
+
+    // ── Payments history (snapshot) ──────────────────────────────────────────
+    private List<PaymentHistoryDto> payments = new java.util.ArrayList<>();
 
     // ── Cancellation ─────────────────────────────────────────────────────────
     private String cancelReason;
@@ -37,6 +43,33 @@ public class OrderDetailDto {
     private String trackingNumber;
     private LocalDateTime shippedAt;
     private LocalDateTime deliveredAt;
+
+    // ── Payment History DTO ───────────────────────────────────────────────────
+    public static class PaymentHistoryDto {
+        private Integer paymentId;
+        private BigDecimal amount;
+        private String method;
+        private String referenceNo;
+        private LocalDateTime paidAt;
+        private String receivedByName;
+
+        public PaymentHistoryDto(Integer paymentId, BigDecimal amount, String method,
+                                 String referenceNo, LocalDateTime paidAt, String receivedByName) {
+            this.paymentId = paymentId;
+            this.amount = amount;
+            this.method = method;
+            this.referenceNo = referenceNo;
+            this.paidAt = paidAt;
+            this.receivedByName = receivedByName;
+        }
+
+        public Integer getPaymentId() { return paymentId; }
+        public BigDecimal getAmount() { return amount; }
+        public String getMethod() { return method; }
+        public String getReferenceNo() { return referenceNo; }
+        public LocalDateTime getPaidAt() { return paidAt; }
+        public String getReceivedByName() { return receivedByName; }
+    }
 
     // ── Inner item DTO ────────────────────────────────────────────────────────
     public static class OrderItemDto {
@@ -81,6 +114,9 @@ public class OrderDetailDto {
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
 
+    public com.japstransfort.entity.PaymentStatus getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(com.japstransfort.entity.PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
+
     public BigDecimal getSubtotal() { return subtotal; }
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
 
@@ -89,6 +125,15 @@ public class OrderDetailDto {
 
     public BigDecimal getTotal() { return total; }
     public void setTotal(BigDecimal total) { this.total = total; }
+
+    public BigDecimal getAmountPaid() { return amountPaid; }
+    public void setAmountPaid(BigDecimal amountPaid) { this.amountPaid = amountPaid; }
+
+    public BigDecimal getAmountRemaining() { return amountRemaining; }
+    public void setAmountRemaining(BigDecimal amountRemaining) { this.amountRemaining = amountRemaining; }
+
+    public List<PaymentHistoryDto> getPayments() { return payments; }
+    public void setPayments(List<PaymentHistoryDto> payments) { this.payments = payments; }
 
     public String getCancelReason() { return cancelReason; }
     public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }

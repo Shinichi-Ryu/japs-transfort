@@ -41,7 +41,7 @@
             <div class="card-body p-3">
                 <form th:action="@{/admin/orders}" method="get" class="row g-2 align-items-center">
                     <!-- Search Input -->
-                    <div class="col-12 col-md-5">
+                    <div class="col-12 col-md-4">
                         <div class="input-group input-group-sm">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
                             <input type="text"
@@ -53,9 +53,9 @@
                     </div>
 
                     <!-- Status Filter Dropdown -->
-                    <div class="col-12 col-sm-6 col-md-4">
+                    <div class="col-12 col-sm-6 col-md-3">
                         <select name="status" class="form-select form-select-sm">
-                            <option value="" th:selected="${selectedStatus == null or selectedStatus == '' or selectedStatus == 'all'}">All Statuses</option>
+                            <option value="" th:selected="${selectedStatus == null or selectedStatus == '' or selectedStatus == 'all'}">All Order Statuses</option>
                             <option th:each="st : ${allStatuses}"
                                     th:value="${st.name()}"
                                     th:text="${st.name()}"
@@ -63,8 +63,18 @@
                         </select>
                     </div>
 
+                    <!-- Payment Status Filter Dropdown -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <select name="paymentStatus" class="form-select form-select-sm">
+                            <option value="" th:selected="${selectedPaymentStatus == null or selectedPaymentStatus == '' or selectedPaymentStatus == 'all'}">All Payment Statuses</option>
+                            <option value="unpaid" th:selected="${selectedPaymentStatus != null and selectedPaymentStatus.equalsIgnoreCase('unpaid')}">unpaid</option>
+                            <option value="partial" th:selected="${selectedPaymentStatus != null and selectedPaymentStatus.equalsIgnoreCase('partial')}">partial</option>
+                            <option value="paid" th:selected="${selectedPaymentStatus != null and selectedPaymentStatus.equalsIgnoreCase('paid')}">paid</option>
+                        </select>
+                    </div>
+
                     <!-- Actions -->
-                    <div class="col-12 col-sm-6 col-md-3 d-flex gap-2">
+                    <div class="col-12 col-md-2 d-flex gap-2">
                         <button type="submit" class="btn btn-secondary btn-sm flex-grow-1">
                             <i class="bi bi-funnel me-1"></i> Filter
                         </button>
@@ -92,12 +102,13 @@
                                 <th scope="col">Date</th>
                                 <th scope="col" class="text-end">Total</th>
                                 <th scope="col" class="text-center">Status</th>
+                                <th scope="col" class="text-center">Payment Status</th>
                                 <th scope="col" class="text-end pe-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:if="${ordersPage.empty}">
-                                <td colspan="6" class="text-center text-muted py-4">
+                                <td colspan="7" class="text-center text-muted py-4">
                                     No orders found matching the criteria.
                                 </td>
                             </tr>
@@ -120,11 +131,21 @@
                                         pending
                                     </span>
                                 </td>
+                                <td class="text-center">
+                                    <span class="badge text-uppercase"
+                                          th:classappend="${ord.paymentStatus != null and ord.paymentStatus.name() == 'unpaid' ? 'bg-secondary' :
+                                                           (ord.paymentStatus != null and ord.paymentStatus.name() == 'partial' ? 'bg-info text-dark' :
+                                                           (ord.paymentStatus != null and ord.paymentStatus.name() == 'paid' ? 'bg-success' :
+                                                           (ord.paymentStatus != null and ord.paymentStatus.name() == 'refunded' ? 'bg-dark' : 'bg-secondary')))}"
+                                          th:text="${ord.paymentStatus}">
+                                        unpaid
+                                    </span>
+                                </td>
                                 <td class="text-end pe-3">
                                     <a th:href="@{'/admin/orders/' + ${ord.orderId}}"
                                        class="btn btn-outline-primary btn-sm"
                                        title="View Order Details">
-                                        <i class="bi bi-eye me-1"></i> View
+                                       <i class="bi bi-eye me-1"></i> View
                                     </a>
                                 </td>
                             </tr>
@@ -148,7 +169,7 @@
                         <!-- Previous button -->
                         <li class="page-item" th:classappend="${ordersPage.first ? 'disabled' : ''}">
                             <a class="page-link"
-                               th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, page=${ordersPage.number - 1})}">
+                               th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, page=${ordersPage.number - 1})}">
                                 &laquo;
                             </a>
                         </li>
@@ -158,14 +179,14 @@
                             th:each="i : ${#numbers.sequence(0, ordersPage.totalPages - 1)}"
                             th:classappend="${i == ordersPage.number ? 'active' : ''}">
                             <a class="page-link"
-                               th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, page=${i})}"
+                               th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, page=${i})}"
                                th:text="${i + 1}">1</a>
                         </li>
 
                         <!-- Next button -->
                         <li class="page-item" th:classappend="${ordersPage.last ? 'disabled' : ''}">
                             <a class="page-link"
-                               th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, page=${ordersPage.number + 1})}">
+                               th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, page=${ordersPage.number + 1})}">
                                 &raquo;
                             </a>
                         </li>

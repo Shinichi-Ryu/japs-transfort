@@ -75,6 +75,10 @@ public class Order {
     @OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
     private Shipment shipment;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OrderBy("paidAt DESC, paymentId DESC")
+    private List<Payment> payments = new ArrayList<>();
+
     public Order() {
     }
 
@@ -118,11 +122,17 @@ public class Order {
     public void setCancelledAt(LocalDateTime cancelledAt) { this.cancelledAt = cancelledAt; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
 
     public Shipment getShipment() { return shipment; }
     public void setShipment(Shipment shipment) { this.shipment = shipment; }
+
+    public List<Payment> getPayments() { return payments; }
+    public void setPayments(List<Payment> payments) { this.payments = payments; }
 }

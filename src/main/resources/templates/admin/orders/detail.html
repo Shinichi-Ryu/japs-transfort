@@ -71,7 +71,12 @@
                             <div class="col-6">
                                 <label class="text-muted small">Payment Status</label>
                                 <div>
-                                    <span class="badge bg-secondary text-uppercase" th:text="${order.paymentStatus}">unpaid</span>
+                                    <span class="badge text-uppercase"
+                                          th:classappend="${order.paymentStatus != null and order.paymentStatus.name() == 'unpaid' ? 'bg-secondary' :
+                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'bg-info text-dark' :
+                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'bg-success' :
+                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'refunded' ? 'bg-dark' : 'bg-secondary')))}"
+                                          th:text="${order.paymentStatus}">unpaid</span>
                                 </div>
                             </div>
                             <div class="col-6">
@@ -236,6 +241,124 @@
             </div>
         </div>
 
+        <!-- Payments Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-credit-card text-primary fs-5"></i>
+                    <h6 class="fw-bold mb-0">Payments</h6>
+                </div>
+                <div>
+                    <span class="badge text-uppercase fs-6"
+                          th:classappend="${order.paymentStatus != null and order.paymentStatus.name() == 'unpaid' ? 'bg-secondary' :
+                                           (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'bg-info text-dark' :
+                                           (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'bg-success' :
+                                           (order.paymentStatus != null and order.paymentStatus.name() == 'refunded' ? 'bg-dark' : 'bg-secondary')))}"
+                          th:text="${order.paymentStatus}">
+                        unpaid
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Summary row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-4">
+                        <div class="p-3 bg-light rounded border">
+                            <div class="text-muted small fw-medium text-uppercase mb-1">Total Amount</div>
+                            <div class="fs-5 fw-bold text-dark font-monospace"
+                                 th:text="'₱' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="p-3 bg-light rounded border">
+                            <div class="text-muted small fw-medium text-uppercase mb-1">Amount Paid</div>
+                            <div class="fs-5 fw-bold text-success font-monospace"
+                                 th:text="'₱' + ${#numbers.formatDecimal(amountPaid, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="p-3 bg-light rounded border">
+                            <div class="text-muted small fw-medium text-uppercase mb-1">Amount Remaining</div>
+                            <div class="fs-5 fw-bold text-danger font-monospace"
+                                 th:text="'₱' + ${#numbers.formatDecimal(amountRemaining, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments Table -->
+                <h6 class="fw-semibold text-dark mb-2">Payment History</h6>
+                <div class="table-responsive mb-4">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="ps-3">Date</th>
+                                <th scope="col" class="text-end">Amount</th>
+                                <th scope="col">Method</th>
+                                <th scope="col">Reference</th>
+                                <th scope="col" class="pe-3">Received By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${payments == null or payments.empty}">
+                                <td colspan="5" class="text-center text-muted py-3">No payments recorded yet for this order.</td>
+                            </tr>
+                            <tr th:each="p : ${payments}">
+                                <td class="ps-3 text-muted small"
+                                    th:text="${p.paidAt != null ? #temporals.format(p.paidAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-10-14 10:00</td>
+                                <td class="text-end font-monospace fw-semibold text-success"
+                                    th:text="'₱' + ${#numbers.formatDecimal(p.amount, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border" th:text="${p.method}">Cash</span>
+                                </td>
+                                <td class="font-monospace small" th:text="${p.referenceNo != null && !p.referenceNo.empty ? p.referenceNo : '-'}">-</td>
+                                <td class="pe-3 text-dark small" th:text="${p.receivedBy != null ? p.receivedBy.fullName : 'System'}">Admin Name</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Record Payment Form: show only for approved, packed, shipped, or delivered and remaining > 0 -->
+                <div th:if="${order.status != null and (order.status.name() == 'approved' or order.status.name() == 'packed' or order.status.name() == 'shipped' or order.status.name() == 'delivered') and amountRemaining != null and amountRemaining.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                     class="p-3 bg-light rounded border">
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-plus-circle me-1 text-primary"></i> Record Payment
+                    </h6>
+                    <form th:action="@{'/admin/orders/' + ${order.orderId} + '/payments'}" method="post" id="recordPaymentForm" class="row g-3">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="col-12 col-md-4">
+                            <label for="paymentAmount" class="form-label small fw-semibold">Amount (₱) <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">₱</span>
+                                <input type="number" step="0.01" min="0.01" th:max="${amountRemaining}" class="form-control"
+                                       id="paymentAmount" name="amount" th:value="${amountRemaining}" required />
+                            </div>
+                            <div class="form-text">Max: ₱<span th:text="${#numbers.formatDecimal(amountRemaining, 1, 'COMMA', 2, 'POINT')}">0.00</span></div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="paymentMethod" class="form-label small fw-semibold">Method <span class="text-danger">*</span></label>
+                            <select name="method" id="paymentMethod" class="form-select form-select-sm" required onchange="handlePaymentMethodChange(this)">
+                                <option value="Cash" selected>Cash</option>
+                                <option value="Bank transfer">Bank transfer</option>
+                                <option value="GCash">GCash</option>
+                                <option value="Check">Check</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="paymentRef" class="form-label small fw-semibold">Reference Number <span id="refRequiredMarker" class="text-danger d-none">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="paymentRef" name="referenceNo" maxlength="60"
+                                   placeholder="e.g. Ref # or Check #" />
+                        </div>
+                        <div class="col-12 d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-check-circle me-1"></i> Record Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- Order Actions Card -->
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white py-3 border-bottom">
@@ -250,6 +373,7 @@
                     <div class="d-flex flex-wrap align-items-start gap-3">
                         <!-- Approve Form -->
                         <form th:action="@{'/admin/orders/' + ${order.orderId} + '/approve'}" method="post" class="d-flex align-items-center gap-2">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <label for="warehouseSelect" class="form-label mb-0 small fw-semibold">Fulfill from Warehouse:</label>
                             <select name="warehouseId" id="warehouseSelect" class="form-select form-select-sm" required style="min-width: 200px;">
                                 <option value="" disabled selected>Select Warehouse...</option>
@@ -268,6 +392,7 @@
                         <form th:action="@{'/admin/orders/' + ${order.orderId} + '/cancel'}" method="post"
                               onsubmit="return confirmAdminCancel(this);"
                               class="d-flex align-items-center gap-2 flex-wrap">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <select name="cancelReason" class="form-select form-select-sm" required style="min-width: 230px;">
                                 <option value="" disabled selected>Select cancel reason…</option>
                                 <option value="Ordered by mistake">Ordered by mistake</option>
@@ -296,6 +421,7 @@
                     <div class="d-flex flex-wrap gap-3 align-items-start">
                         <!-- Mark as Packed -->
                         <form th:action="@{'/admin/orders/' + ${order.orderId} + '/pack'}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <button type="submit" class="btn btn-primary btn-sm"
                                     onclick="return confirm('Mark this order as packed?')">
                                 <i class="bi bi-box-seam me-1"></i> Mark as Packed
@@ -313,6 +439,7 @@
                             <form th:action="@{'/admin/orders/' + ${order.orderId} + '/cancel'}" method="post"
                                   onsubmit="return confirmAdminCancel(this);"
                                   class="d-flex align-items-center gap-2 flex-wrap">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <select name="cancelReason" class="form-select form-select-sm" required style="min-width: 230px;">
                                     <option value="" disabled selected>Select cancel reason…</option>
                                     <option value="Ordered by mistake">Ordered by mistake</option>
@@ -338,6 +465,7 @@
                     </div>
                     <!-- Ship Order Form -->
                     <form th:action="@{'/admin/orders/' + ${order.orderId} + '/ship'}" method="post" class="row g-2 align-items-end" style="max-width: 560px;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <div class="col-12 col-md-5">
                             <label class="form-label small fw-semibold mb-1">Courier <span class="text-danger">*</span></label>
                             <input type="text" name="courier" class="form-control form-control-sm"
@@ -363,6 +491,7 @@
                         <div>This order is <strong>shipped</strong>. Mark it as delivered once received by the reseller.</div>
                     </div>
                     <form th:action="@{'/admin/orders/' + ${order.orderId} + '/deliver'}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <button type="submit" class="btn btn-success btn-sm"
                                 onclick="return confirm('Mark this order as delivered?')">
                             <i class="bi bi-check2-all me-1"></i> Mark as Delivered
@@ -395,6 +524,19 @@
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+    function handlePaymentMethodChange(select) {
+        var refInput = document.getElementById('paymentRef');
+        var marker = document.getElementById('refRequiredMarker');
+        if (!refInput) return;
+        if (select.value === 'Cash') {
+            refInput.removeAttribute('required');
+            if (marker) marker.classList.add('d-none');
+        } else {
+            refInput.setAttribute('required', 'required');
+            if (marker) marker.classList.remove('d-none');
+        }
+    }
+
     function confirmAdminCancel(form) {
         var select = form.querySelector('select[name="cancelReason"]');
         if (!select || !select.value) {

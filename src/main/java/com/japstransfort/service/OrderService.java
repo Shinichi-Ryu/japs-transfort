@@ -6,6 +6,7 @@ import com.japstransfort.dto.OrderDetailDto;
 import com.japstransfort.entity.*;
 import com.japstransfort.repository.InventoryRepository;
 import com.japstransfort.repository.OrderRepository;
+import com.japstransfort.repository.PaymentRepository;
 import com.japstransfort.repository.ProductRepository;
 import com.japstransfort.repository.ResellerRepository;
 import com.japstransfort.repository.ShipmentRepository;
@@ -34,19 +35,22 @@ public class OrderService {
     private final StockMovementRepository stockMovementRepository;
     private final ResellerRepository resellerRepository;
     private final ShipmentRepository shipmentRepository;
+    private final PaymentRepository paymentRepository;
 
     public OrderService(OrderRepository orderRepository,
                         ProductRepository productRepository,
                         InventoryRepository inventoryRepository,
                         StockMovementRepository stockMovementRepository,
                         ResellerRepository resellerRepository,
-                        ShipmentRepository shipmentRepository) {
+                        ShipmentRepository shipmentRepository,
+                        PaymentRepository paymentRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.inventoryRepository = inventoryRepository;
         this.stockMovementRepository = stockMovementRepository;
         this.resellerRepository = resellerRepository;
         this.shipmentRepository = shipmentRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     /**
@@ -180,6 +184,10 @@ public class OrderService {
         Order order = orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found."));
 
+        if (paymentRepository.existsByOrder_OrderId(orderId)) {
+            throw new IllegalStateException("This order has payments recorded. Cancelling is not available yet.");
+        }
+
         if (order.getReseller() == null || !order.getReseller().getResellerId().equals(resellerId)) {
             throw new IllegalStateException("You can only cancel your own orders.");
         }
@@ -274,6 +282,32 @@ public class OrderService {
             dto.setCancelledBy(order.getCancelledBy());
             dto.setCancelledAt(order.getCancelledAt());
 
+            // Financials and payments
+            dto.setPaymentStatus(order.getPaymentStatus());
+            BigDecimal amountPaid = paymentRepository.sumAmountByOrderId(orderId);
+            if (amountPaid == null) amountPaid = BigDecimal.ZERO;
+            amountPaid = amountPaid.setScale(2, RoundingMode.HALF_UP);
+            dto.setAmountPaid(amountPaid);
+
+            BigDecimal orderTotal = order.getTotal() != null ? order.getTotal() : BigDecimal.ZERO;
+            BigDecimal remaining = orderTotal.subtract(amountPaid).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+            dto.setAmountRemaining(remaining);
+
+            List<Payment> payments = paymentRepository.findByOrderIdWithReceivedBy(orderId);
+            List<OrderDetailDto.PaymentHistoryDto> paymentDtos = new ArrayList<>();
+            for (Payment p : payments) {
+                String receivedBy = p.getReceivedBy() != null ? p.getReceivedBy().getFullName() : "Admin";
+                paymentDtos.add(new OrderDetailDto.PaymentHistoryDto(
+                        p.getPaymentId(),
+                        p.getAmount(),
+                        p.getMethod(),
+                        p.getReferenceNo(),
+                        p.getPaidAt(),
+                        receivedBy
+                ));
+            }
+            dto.setPayments(paymentDtos);
+
             List<OrderDetailDto.OrderItemDto> itemDtos = new ArrayList<>();
             for (OrderItem item : order.getItems()) {
                 Product p = item.getProduct();
@@ -299,6 +333,137 @@ public class OrderService {
 
             return java.util.Optional.of(dto);
         });
+    }
+
+    /**
+     * Retrieves all payments for an order with receivedBy eagerly loaded.
+     */
+    @Transactional(readOnly = true)
+    public List<Payment> getPaymentsForOrder(Integer orderId) {
+        if (orderId == null) return List.of();
+        return paymentRepository.findByOrderIdWithReceivedBy(orderId);
+    }
+
+    /**
+     * Computes the total amount paid so far for an order.
+     */
+    @Transactional(readOnly = true)
+    public BigDecimal getAmountPaidForOrder(Integer orderId) {
+        if (orderId == null) return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal sum = paymentRepository.sumAmountByOrderId(orderId);
+        return sum != null ? sum.setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Records a payment against an order.
+     * ONE @Transactional method locking both the order and reseller rows.
+     * Re-checks status (approved, packed, shipped, delivered) and remaining amount inside lock.
+     * Enforces amount > 0 with 2 decimals and <= remaining.
+     * Inserts payment, reduces reseller balance, sets paymentStatus to partial or paid, updates updated_at.
+     */
+    @Transactional
+    public Payment recordPayment(Integer orderId, BigDecimal amount, String method, String referenceNo, User admin) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("Order ID must not be null.");
+        }
+
+        // Lock order row (pessimistic write)
+        Order order = orderRepository.findByIdWithLock(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found (ID " + orderId + ")."));
+
+        if (order.getReseller() == null) {
+            throw new IllegalStateException("Order #" + order.getOrderNo() + " has no associated reseller.");
+        }
+
+        // Lock reseller row (pessimistic write)
+        Reseller reseller = resellerRepository.findByIdWithLock(order.getReseller().getResellerId())
+                .orElseThrow(() -> new IllegalStateException("Reseller profile not found."));
+
+        // Re-check order status inside lock: approved, packed, shipped, delivered only
+        OrderStatus status = order.getStatus();
+        if (status != OrderStatus.approved && status != OrderStatus.packed
+                && status != OrderStatus.shipped && status != OrderStatus.delivered) {
+            throw new IllegalStateException(
+                    "Payments can only be recorded for approved, packed, shipped, or delivered orders. Current status: " + status + ".");
+        }
+
+        // Re-check remaining amount inside lock
+        BigDecimal orderTotal = order.getTotal() != null
+                ? order.getTotal().setScale(2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal currentPaid = paymentRepository.sumAmountByOrderId(orderId);
+        if (currentPaid == null) {
+            currentPaid = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        } else {
+            currentPaid = currentPaid.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        BigDecimal remaining = orderTotal.subtract(currentPaid).setScale(2, RoundingMode.HALF_UP);
+
+        if (remaining.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalStateException("This order is already fully paid.");
+        }
+
+        // Validate amount: must be > 0 with at most 2 decimals and <= remaining
+        if (amount == null) {
+            throw new IllegalArgumentException("Payment amount is required.");
+        }
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Payment amount must be greater than zero.");
+        }
+        if (amount.scale() > 2 || amount.stripTrailingZeros().scale() > 2) {
+            throw new IllegalArgumentException("Payment amount cannot have more than 2 decimal places.");
+        }
+        BigDecimal paymentAmount = amount.setScale(2, RoundingMode.HALF_UP);
+
+        if (paymentAmount.compareTo(remaining) > 0) {
+            throw new IllegalStateException(String.format(
+                    "Payment amount (₱%s) exceeds the remaining balance of ₱%s.",
+                    format(paymentAmount), format(remaining)));
+        }
+
+        // Validate method and reference number
+        if (method == null || method.trim().isEmpty()) {
+            throw new IllegalArgumentException("Payment method is required.");
+        }
+        String cleanMethod = method.trim();
+        String cleanRef = referenceNo != null ? referenceNo.trim() : "";
+        if (!"Cash".equalsIgnoreCase(cleanMethod)) {
+            if (cleanRef.isEmpty()) {
+                throw new IllegalArgumentException("Reference number is required for " + cleanMethod + " payments.");
+            }
+        }
+        String refToSave = cleanRef.isEmpty() ? null : cleanRef;
+
+        // Insert payment: paid_at is now, received_by is logged-in admin
+        Payment payment = new Payment(order, paymentAmount, cleanMethod, refToSave, LocalDateTime.now(), admin);
+        Payment savedPayment = paymentRepository.save(payment);
+
+        // Lower reseller's balance by the amount
+        BigDecimal currentBalance = reseller.getBalance() != null
+                ? reseller.getBalance().setScale(2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        reseller.setBalance(currentBalance.subtract(paymentAmount).setScale(2, RoundingMode.HALF_UP));
+        resellerRepository.save(reseller);
+
+        // Set order payment_status: partial (paid > 0 and remaining > 0) or paid (remaining = 0)
+        BigDecimal newPaid = currentPaid.add(paymentAmount).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal newRemaining = orderTotal.subtract(newPaid).setScale(2, RoundingMode.HALF_UP);
+
+        if (newRemaining.compareTo(BigDecimal.ZERO) == 0) {
+            order.setPaymentStatus(PaymentStatus.paid);
+        } else if (newPaid.compareTo(BigDecimal.ZERO) > 0 && newRemaining.compareTo(BigDecimal.ZERO) > 0) {
+            order.setPaymentStatus(PaymentStatus.partial);
+        } else {
+            order.setPaymentStatus(PaymentStatus.unpaid);
+        }
+
+        order.setUpdatedAt(LocalDateTime.now());
+        orderRepository.save(order);
+        orderRepository.touchUpdatedAt(orderId);
+
+        return savedPayment;
     }
 
     private String generateOrderNo() {

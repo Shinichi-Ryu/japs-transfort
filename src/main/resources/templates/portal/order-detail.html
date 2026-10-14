@@ -169,6 +169,27 @@
                                 </div>
                             </div>
                             <div class="col-6">
+                                <label class="text-muted small">Payment Status</label>
+                                <div>
+                                    <span class="badge text-uppercase"
+                                          th:classappend="${order.paymentStatus != null and order.paymentStatus.name() == 'unpaid' ? 'bg-secondary' :
+                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'bg-info text-dark' :
+                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'bg-success' :
+                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'refunded' ? 'bg-dark' : 'bg-secondary')))}"
+                                          th:text="${order.paymentStatus}">unpaid</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small">Amount Paid</label>
+                                <div class="fw-semibold text-success font-monospace"
+                                     th:text="'₱' + ${#numbers.formatDecimal(order.amountPaid != null ? order.amountPaid : 0, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small">Amount Remaining</label>
+                                <div class="fw-semibold text-danger font-monospace"
+                                     th:text="'₱' + ${#numbers.formatDecimal(order.amountRemaining != null ? order.amountRemaining : order.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                            </div>
+                            <div class="col-6">
                                 <label class="text-muted small">Total Items</label>
                                 <div class="fw-medium" th:text="${order.items != null ? order.items.size() : 0}">0</div>
                             </div>
@@ -281,6 +302,53 @@
                                     th:text="'₱' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
                             </tr>
                         </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Card (Read-only) -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-credit-card text-primary fs-5"></i>
+                    <h6 class="fw-bold mb-0">Payment History</h6>
+                </div>
+                <span class="badge text-uppercase"
+                      th:classappend="${order.paymentStatus != null and order.paymentStatus.name() == 'unpaid' ? 'bg-secondary' :
+                                       (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'bg-info text-dark' :
+                                       (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'bg-success' :
+                                       (order.paymentStatus != null and order.paymentStatus.name() == 'refunded' ? 'bg-dark' : 'bg-secondary')))}"
+                      th:text="${order.paymentStatus}">unpaid</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="ps-3">Date</th>
+                                <th scope="col" class="text-end">Amount</th>
+                                <th scope="col">Method</th>
+                                <th scope="col">Reference</th>
+                                <th scope="col" class="pe-3">Received By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${order.payments == null or order.payments.empty}">
+                                <td colspan="5" class="text-center text-muted py-3">No payments recorded yet for this order.</td>
+                            </tr>
+                            <tr th:each="p : ${order.payments}">
+                                <td class="ps-3 text-muted small"
+                                    th:text="${p.paidAt != null ? #temporals.format(p.paidAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-10-14 10:00</td>
+                                <td class="text-end font-monospace fw-semibold text-success"
+                                    th:text="'₱' + ${#numbers.formatDecimal(p.amount, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border" th:text="${p.method}">Cash</span>
+                                </td>
+                                <td class="font-monospace small" th:text="${p.referenceNo != null && !p.referenceNo.empty ? p.referenceNo : '-'}">-</td>
+                                <td class="pe-3 text-dark small" th:text="${p.receivedByName != null ? p.receivedByName : 'System'}">Admin Name</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>

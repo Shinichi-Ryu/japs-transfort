@@ -52,6 +52,7 @@
                                 <th scope="col" class="ps-3">Order No</th>
                                 <th scope="col">Date Placed</th>
                                 <th scope="col">Status</th>
+                                <th scope="col" class="text-center">Payment</th>
                                 <th scope="col" class="text-center">Items</th>
                                 <th scope="col" class="text-end">Total Amount</th>
                                 <th scope="col" class="text-end pe-3">Actions</th>
@@ -59,7 +60,7 @@
                         </thead>
                         <tbody>
                             <tr th:if="${orders == null or orders.empty}">
-                                <td colspan="6" class="text-center text-muted py-5">
+                                <td colspan="7" class="text-center text-muted py-5">
                                     <div class="mb-2"><i class="bi bi-receipt text-secondary" style="font-size: 2rem;"></i></div>
                                     <div>You haven't placed any orders yet.</div>
                                     <div class="mt-2">
@@ -107,6 +108,16 @@
                                               th:if="${order.cancelledAt != null}"
                                               th:text="'on ' + ${#temporals.format(order.cancelledAt, 'yyyy-MM-dd HH:mm')}"></span>
                                     </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge text-uppercase"
+                                          th:classappend="${order.paymentStatus != null and order.paymentStatus.name() == 'unpaid' ? 'bg-secondary' :
+                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'bg-info text-dark' :
+                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'bg-success' :
+                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'refunded' ? 'bg-dark' : 'bg-secondary')))}"
+                                          th:text="${order.paymentStatus}">
+                                        unpaid
+                                    </span>
                                 </td>
                                 <td class="text-center fw-semibold text-secondary"
                                     th:text="${order.items != null ? order.items.size() : 0}">0</td>

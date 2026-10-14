@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .requestMatchers("/portal", "/portal/**").hasRole("RESELLER")
                 .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                 .requestMatchers("/dashboard", "/dashboard/**").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers("/account", "/account/**").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

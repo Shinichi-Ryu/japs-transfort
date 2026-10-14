@@ -80,3 +80,37 @@ body {
 .alert {
     border-radius: 6px;
 }
+
+/* Password UI: Checklist, Match Indicator & Visibility Toggle */
+.password-checklist {
+    font-size: 0.825rem;
+}
+
+.password-checklist .rule-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    transition: color 0.15s ease-in-out;
+}
+
+.password-checklist .rule-item i {
+    font-size: 0.85rem;
+}
+
+.confirm-match-indicator {
+    font-size: 0.825rem;
+    font-weight: 500;
+}
+
+.toggle-password {
+    border-color: #dee2e6;
+    color: #64748b;
+}
+
+.toggle-password:hover,
+.toggle-password:focus {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #334155;
+}
+

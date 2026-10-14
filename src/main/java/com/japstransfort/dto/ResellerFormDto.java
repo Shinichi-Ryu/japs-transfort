@@ -29,8 +29,9 @@ public class ResellerFormDto {
     @Size(max = 120, message = "Email cannot exceed 120 characters.")
     private String email;
 
-    @Size(max = 100, message = "Password cannot exceed 100 characters.")
     private String password;
+
+    private String confirmPassword;
 
     @Size(max = 20, message = "Contact number cannot exceed 20 characters.")
     private String contactNo;
@@ -92,6 +93,14 @@ public class ResellerFormDto {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
     }
 
     public String getContactNo() {

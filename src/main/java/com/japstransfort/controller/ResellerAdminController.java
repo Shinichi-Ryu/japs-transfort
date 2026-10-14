@@ -4,6 +4,7 @@ import com.japstransfort.dto.ResellerFormDto;
 import com.japstransfort.entity.Reseller;
 import com.japstransfort.service.ResellerService;
 import com.japstransfort.service.TierService;
+import com.japstransfort.validator.PasswordValidator;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,6 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 /**
  * Controller for Admin CRUD operations on Resellers (/admin/resellers).
@@ -68,8 +71,17 @@ public class ResellerAdminController {
                                  BindingResult bindingResult,
                                  Model model,
                                  RedirectAttributes redirectAttributes) {
-        if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
+        if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
             bindingResult.rejectValue("password", "required", "Password is required for the new login user.");
+        } else {
+            List<String> passwordErrors = PasswordValidator.validate(dto.getPassword());
+            for (String error : passwordErrors) {
+                bindingResult.rejectValue("password", "invalid", error);
+            }
+        }
+
+        if (dto.getConfirmPassword() == null || !dto.getConfirmPassword().equals(dto.getPassword())) {
+            bindingResult.rejectValue("confirmPassword", "mismatch", "Passwords do not match.");
         }
 
         if (bindingResult.hasErrors()) {
@@ -86,6 +98,10 @@ public class ResellerAdminController {
         } catch (IllegalArgumentException ex) {
             if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("email")) {
                 bindingResult.rejectValue("email", "duplicate", ex.getMessage());
+            } else if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("match")) {
+                bindingResult.rejectValue("confirmPassword", "mismatch", ex.getMessage());
+            } else if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("password")) {
+                bindingResult.rejectValue("password", "invalid", ex.getMessage());
             } else {
                 bindingResult.reject("error", ex.getMessage());
             }
@@ -127,6 +143,24 @@ public class ResellerAdminController {
                                  BindingResult bindingResult,
                                  Model model,
                                  RedirectAttributes redirectAttributes) {
+        boolean hasPassword = dto.getPassword() != null && !dto.getPassword().isEmpty();
+        boolean hasConfirm = dto.getConfirmPassword() != null && !dto.getConfirmPassword().isEmpty();
+
+        if (hasPassword || hasConfirm) {
+            if (!hasPassword) {
+                bindingResult.rejectValue("password", "required", "Password is required.");
+            } else {
+                List<String> passwordErrors = PasswordValidator.validate(dto.getPassword());
+                for (String error : passwordErrors) {
+                    bindingResult.rejectValue("password", "invalid", error);
+                }
+            }
+
+            if (dto.getConfirmPassword() == null || !dto.getConfirmPassword().equals(dto.getPassword())) {
+                bindingResult.rejectValue("confirmPassword", "mismatch", "Passwords do not match.");
+            }
+        }
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("tiers", tierService.findAll());
             model.addAttribute("parentResellers", resellerService.findAllActive(id));
@@ -141,6 +175,10 @@ public class ResellerAdminController {
         } catch (IllegalArgumentException ex) {
             if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("email")) {
                 bindingResult.rejectValue("email", "duplicate", ex.getMessage());
+            } else if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("match")) {
+                bindingResult.rejectValue("confirmPassword", "mismatch", ex.getMessage());
+            } else if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("password")) {
+                bindingResult.rejectValue("password", "invalid", ex.getMessage());
             } else {
                 bindingResult.reject("error", ex.getMessage());
             }

@@ -8,6 +8,7 @@ import com.japstransfort.entity.UserRole;
 import com.japstransfort.repository.ResellerRepository;
 import com.japstransfort.repository.ResellerTierRepository;
 import com.japstransfort.repository.UserRepository;
+import com.japstransfort.validator.PasswordValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -89,8 +90,15 @@ public class ResellerService {
             throw new IllegalArgumentException("A user with email '" + trimmedEmail + "' already exists.");
         }
 
-        if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
+        if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Password is required for the reseller login user.");
+        }
+        List<String> passwordErrors = PasswordValidator.validate(dto.getPassword());
+        if (!passwordErrors.isEmpty()) {
+            throw new IllegalArgumentException(passwordErrors.get(0));
+        }
+        if (dto.getConfirmPassword() == null || !dto.getConfirmPassword().equals(dto.getPassword())) {
+            throw new IllegalArgumentException("Passwords do not match.");
         }
 
         ResellerTier tier = tierRepository.findById(dto.getTierId())
@@ -106,7 +114,7 @@ public class ResellerService {
         User user = new User();
         user.setFullName(dto.getFullName().trim());
         user.setEmail(trimmedEmail);
-        user.setPasswordHash(passwordEncoder.encode(dto.getPassword().trim()));
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(UserRole.reseller);
         user.setIsActive(true);
         User savedUser = userRepository.save(user);
@@ -142,8 +150,21 @@ public class ResellerService {
 
             user.setFullName(dto.getFullName().trim());
             user.setEmail(trimmedEmail);
-            if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
-                user.setPasswordHash(passwordEncoder.encode(dto.getPassword().trim()));
+
+            boolean hasPassword = dto.getPassword() != null && !dto.getPassword().isEmpty();
+            boolean hasConfirm = dto.getConfirmPassword() != null && !dto.getConfirmPassword().isEmpty();
+            if (hasPassword || hasConfirm) {
+                if (!hasPassword) {
+                    throw new IllegalArgumentException("Password is required.");
+                }
+                List<String> passwordErrors = PasswordValidator.validate(dto.getPassword());
+                if (!passwordErrors.isEmpty()) {
+                    throw new IllegalArgumentException(passwordErrors.get(0));
+                }
+                if (dto.getConfirmPassword() == null || !dto.getConfirmPassword().equals(dto.getPassword())) {
+                    throw new IllegalArgumentException("Passwords do not match.");
+                }
+                user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
             }
             userRepository.save(user);
         }

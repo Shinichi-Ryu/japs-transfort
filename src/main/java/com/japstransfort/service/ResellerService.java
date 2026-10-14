@@ -1,6 +1,7 @@
 package com.japstransfort.service;
 
 import com.japstransfort.dto.ResellerFormDto;
+import com.japstransfort.dto.ResellerRegistrationDto;
 import com.japstransfort.entity.Reseller;
 import com.japstransfort.entity.ResellerTier;
 import com.japstransfort.entity.User;
@@ -218,6 +219,89 @@ public class ResellerService {
         reseller.setStatus("active");
         if (reseller.getUser() != null) {
             reseller.getUser().setIsActive(true);
+        }
+        resellerRepository.save(reseller);
+    }
+
+    /**
+     * Self-registration: creates user with role RESELLER and reseller profile in status 'pending',
+     * assigned the lowest-discount tier with credit limit 0 and balance 0.
+     */
+    @Transactional
+    public Reseller register(ResellerRegistrationDto dto) {
+        String trimmedEmail = dto.getEmail().trim().toLowerCase();
+        if (userRepository.existsByEmail(trimmedEmail)) {
+            throw new IllegalArgumentException("A user with email '" + trimmedEmail + "' already exists.");
+        }
+
+        if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password is required.");
+        }
+        List<String> passwordErrors = PasswordValidator.validate(dto.getPassword());
+        if (!passwordErrors.isEmpty()) {
+            throw new IllegalArgumentException(passwordErrors.get(0));
+        }
+        if (dto.getConfirmPassword() == null || !dto.getConfirmPassword().equals(dto.getPassword())) {
+            throw new IllegalArgumentException("Passwords do not match.");
+        }
+
+        ResellerTier lowestTier = tierRepository.findAllByOrderByDiscountPctAsc().stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No reseller tier found in the database."));
+
+        User user = new User();
+        user.setFullName(dto.getFullName().trim());
+        user.setEmail(trimmedEmail);
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        user.setRole(UserRole.reseller);
+        user.setIsActive(true);
+        User savedUser = userRepository.save(user);
+
+        Reseller reseller = new Reseller();
+        reseller.setUser(savedUser);
+        reseller.setBusinessName(dto.getBusinessName().trim());
+        reseller.setContactNo(dto.getContactNo() != null ? dto.getContactNo().trim() : null);
+        reseller.setAddress(dto.getAddress() != null ? dto.getAddress().trim() : null);
+        reseller.setTerritory(dto.getTerritory() != null ? dto.getTerritory().trim() : null);
+        reseller.setTier(lowestTier);
+        reseller.setParentReseller(null);
+        reseller.setCreditLimit(BigDecimal.ZERO);
+        reseller.setBalance(BigDecimal.ZERO);
+        reseller.setStatus("pending");
+
+        return resellerRepository.save(reseller);
+    }
+
+    /**
+     * Approves a pending reseller: assigns chosen tier and credit limit, changes status to 'active'.
+     */
+    @Transactional
+    public void approve(Integer resellerId, Integer tierId, BigDecimal creditLimit) {
+        Reseller reseller = findById(resellerId);
+        ResellerTier tier = tierRepository.findById(tierId)
+                .orElseThrow(() -> new IllegalArgumentException("Selected tier does not exist."));
+        if (creditLimit == null || creditLimit.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Credit limit must be zero or positive.");
+        }
+
+        reseller.setTier(tier);
+        reseller.setCreditLimit(creditLimit);
+        reseller.setStatus("active");
+        if (reseller.getUser() != null) {
+            reseller.getUser().setIsActive(true);
+        }
+        resellerRepository.save(reseller);
+    }
+
+    /**
+     * Rejects a pending reseller application.
+     */
+    @Transactional
+    public void reject(Integer resellerId) {
+        Reseller reseller = findById(resellerId);
+        reseller.setStatus("rejected");
+        if (reseller.getUser() != null) {
+            reseller.getUser().setIsActive(false);
         }
         resellerRepository.save(reseller);
     }

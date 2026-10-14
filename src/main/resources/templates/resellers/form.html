@@ -115,6 +115,8 @@
                                             th:field="*{status}"
                                             th:errorclass="is-invalid">
                                         <option value="active">Active</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="rejected">Rejected</option>
                                         <option value="inactive">Inactive</option>
                                     </select>
                                     <div class="invalid-feedback" th:if="${#fields.hasErrors('status')}" th:errors="*{status}">

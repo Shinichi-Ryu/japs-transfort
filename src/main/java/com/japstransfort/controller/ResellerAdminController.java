@@ -14,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -206,6 +207,33 @@ public class ResellerAdminController {
             resellerService.restore(id);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Reseller restored to active status.");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/resellers";
+    }
+
+    @PostMapping("/approve/{id}")
+    public String approveReseller(@PathVariable("id") Integer id,
+                                  @RequestParam("tierId") Integer tierId,
+                                  @RequestParam("creditLimit") BigDecimal creditLimit,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            resellerService.approve(id, tierId, creditLimit);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Reseller application approved successfully.");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/resellers";
+    }
+
+    @PostMapping("/reject/{id}")
+    public String rejectReseller(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            resellerService.reject(id);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Reseller application rejected.");
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }

@@ -28,6 +28,13 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
 
+                        <!-- Success Banner -->
+                        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show small" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <span th:text="${successMessage}">Success message</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
                         <!-- Logout Banner -->
                         <div th:if="${logoutMessage}" class="alert alert-success alert-dismissible fade show small" role="alert">
                             <i class="bi bi-check-circle-fill me-2"></i>
@@ -58,6 +65,11 @@
                             <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
                                 <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
                             </button>
+
+                            <div class="text-center mt-3 pt-3 border-top">
+                                <span class="small text-muted">Don't have an account?</span>
+                                <a th:href="@{/register}" class="small fw-semibold text-decoration-none ms-1">Create an account</a>
+                            </div>
                         </form>
                     </div>
                     <div class="card-footer bg-light text-center py-3 text-muted small border-0 rounded-bottom-4">

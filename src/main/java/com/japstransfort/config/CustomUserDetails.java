@@ -16,14 +16,24 @@ public class CustomUserDetails implements UserDetails {
 
     private final User user;
     private final boolean enabled;
+    private final String resellerStatus;
 
     public CustomUserDetails(User user) {
-        this(user, Boolean.TRUE.equals(user.getIsActive()));
+        this(user, Boolean.TRUE.equals(user.getIsActive()), null);
     }
 
     public CustomUserDetails(User user, boolean enabled) {
+        this(user, enabled, null);
+    }
+
+    public CustomUserDetails(User user, boolean enabled, String resellerStatus) {
         this.user = user;
         this.enabled = enabled;
+        this.resellerStatus = resellerStatus;
+    }
+
+    public String getResellerStatus() {
+        return resellerStatus;
     }
 
     public User getUser() {

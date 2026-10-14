@@ -24,6 +24,8 @@ public interface ResellerRepository extends JpaRepository<Reseller, Integer> {
 
     List<Reseller> findByStatus(String status);
 
+    long countByStatus(String status);
+
     @Query("SELECT r FROM Reseller r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.tier LEFT JOIN FETCH r.parentReseller")
     List<Reseller> findAllWithDetails();
 

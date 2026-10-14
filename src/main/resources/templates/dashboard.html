@@ -28,8 +28,28 @@
 
         <!-- Metric Stat Cards -->
         <div class="row g-3 mb-4">
+            <!-- Pending Applications Card -->
+            <div class="col-12 col-sm-6 col-xl">
+                <div class="card stat-card shadow-sm p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-medium text-uppercase">Pending Applications</span>
+                            <h2 class="fw-bold mb-0 text-dark" th:text="${pendingApplications}">0</h2>
+                        </div>
+                        <div class="stat-icon bg-warning-subtle text-warning">
+                            <i class="bi bi-person-lines-fill"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top">
+                        <a th:href="@{/admin/resellers(status='pending')}" class="text-decoration-none small fw-semibold text-warning">
+                            Review Applications <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <!-- Products Card -->
-            <div class="col-12 col-sm-6 col-xl-3">
+            <div class="col-12 col-sm-6 col-xl">
                 <div class="card stat-card shadow-sm p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
@@ -49,7 +69,7 @@
             </div>
 
             <!-- Resellers Card -->
-            <div class="col-12 col-sm-6 col-xl-3">
+            <div class="col-12 col-sm-6 col-xl">
                 <div class="card stat-card shadow-sm p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
@@ -69,7 +89,7 @@
             </div>
 
             <!-- Reseller Tiers Card -->
-            <div class="col-12 col-sm-6 col-xl-3">
+            <div class="col-12 col-sm-6 col-xl">
                 <div class="card stat-card shadow-sm p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
@@ -89,7 +109,7 @@
             </div>
 
             <!-- Categories Card -->
-            <div class="col-12 col-sm-6 col-xl-3">
+            <div class="col-12 col-sm-6 col-xl">
                 <div class="card stat-card shadow-sm p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>

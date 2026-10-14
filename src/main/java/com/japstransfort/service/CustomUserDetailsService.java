@@ -35,13 +35,17 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         boolean enabled = Boolean.TRUE.equals(user.getIsActive());
-        if (enabled && user.getRole() == UserRole.reseller) {
+        String resellerStatus = null;
+        if (user.getRole() == UserRole.reseller) {
             Optional<Reseller> resellerOpt = resellerRepository.findByUser_UserId(user.getUserId());
-            if (resellerOpt.isEmpty() || !"active".equalsIgnoreCase(resellerOpt.get().getStatus())) {
+            if (resellerOpt.isPresent()) {
+                resellerStatus = resellerOpt.get().getStatus();
+            }
+            if (resellerOpt.isEmpty() || !"active".equalsIgnoreCase(resellerStatus)) {
                 enabled = false;
             }
         }
 
-        return new CustomUserDetails(user, enabled);
+        return new CustomUserDetails(user, enabled, resellerStatus);
     }
 }

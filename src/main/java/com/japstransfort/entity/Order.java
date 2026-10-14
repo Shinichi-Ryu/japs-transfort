@@ -79,6 +79,9 @@ public class Order {
     @OrderBy("paidAt DESC, paymentId DESC")
     private List<Payment> payments = new ArrayList<>();
 
+    @OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
+    private Commission commission;
+
     public Order() {
     }
 
@@ -135,4 +138,7 @@ public class Order {
 
     public List<Payment> getPayments() { return payments; }
     public void setPayments(List<Payment> payments) { this.payments = payments; }
+
+    public Commission getCommission() { return commission; }
+    public void setCommission(Commission commission) { this.commission = commission; }
 }

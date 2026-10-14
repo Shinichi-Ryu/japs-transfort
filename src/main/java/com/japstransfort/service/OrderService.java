@@ -36,6 +36,7 @@ public class OrderService {
     private final ResellerRepository resellerRepository;
     private final ShipmentRepository shipmentRepository;
     private final PaymentRepository paymentRepository;
+    private final CommissionService commissionService;
 
     public OrderService(OrderRepository orderRepository,
                         ProductRepository productRepository,
@@ -43,7 +44,8 @@ public class OrderService {
                         StockMovementRepository stockMovementRepository,
                         ResellerRepository resellerRepository,
                         ShipmentRepository shipmentRepository,
-                        PaymentRepository paymentRepository) {
+                        PaymentRepository paymentRepository,
+                        CommissionService commissionService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.inventoryRepository = inventoryRepository;
@@ -51,6 +53,7 @@ public class OrderService {
         this.resellerRepository = resellerRepository;
         this.shipmentRepository = shipmentRepository;
         this.paymentRepository = paymentRepository;
+        this.commissionService = commissionService;
     }
 
     /**
@@ -462,6 +465,8 @@ public class OrderService {
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
         orderRepository.touchUpdatedAt(orderId);
+
+        commissionService.createCommissionIfEligible(order);
 
         return savedPayment;
     }

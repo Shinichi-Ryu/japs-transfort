@@ -179,6 +179,41 @@
             </div>
         </div>
 
+        <!-- Commission Info Card (shown when commission exists) -->
+        <div class="card shadow-sm border-0 mb-4" th:if="${commission != null or (order.commission != null)}">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-cash-stack text-success fs-5"></i>
+                    <h6 class="fw-bold mb-0">Reseller Commission</h6>
+                </div>
+                <span class="badge text-uppercase fs-6"
+                      th:classappend="${(commission != null ? commission.status : order.commission.status) == 'paid' ? 'bg-success' : 'bg-warning text-dark'}"
+                      th:text="${commission != null ? commission.status : order.commission.status}">pending</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4">
+                        <label class="text-muted small">Commission Amount</label>
+                        <div class="fw-bold text-dark font-monospace fs-5"
+                             th:text="'₱' + ${#numbers.formatDecimal(commission != null ? commission.amount : order.commission.amount, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <label class="text-muted small">Status</label>
+                        <div>
+                            <span class="badge text-uppercase"
+                                  th:classappend="${(commission != null ? commission.status : order.commission.status) == 'paid' ? 'bg-success' : 'bg-warning text-dark'}"
+                                  th:text="${commission != null ? commission.status : order.commission.status}">pending</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4" th:if="${(commission != null ? commission.createdAt : order.commission.createdAt) != null}">
+                        <label class="text-muted small">Date Created</label>
+                        <div class="fw-medium text-dark"
+                             th:text="${#temporals.format(commission != null ? commission.createdAt : order.commission.createdAt, 'yyyy-MM-dd HH:mm')}">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Order Items Card -->
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">

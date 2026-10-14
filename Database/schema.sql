@@ -192,6 +192,7 @@ CREATE INDEX idx_orders_reseller ON orders(reseller_id);
 CREATE INDEX idx_orders_status   ON orders(status);
 CREATE INDEX idx_items_order     ON order_items(order_id);
 CREATE INDEX idx_stock_product   ON stock_movements(product_id);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_commissions_order ON commissions(order_id);
 
 -- ===== Seed data =====
 INSERT INTO reseller_tiers (tier_name, discount_pct, commission_pct, min_monthly_purchase) VALUES

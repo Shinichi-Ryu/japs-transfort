@@ -6,6 +6,7 @@ import com.japstransfort.entity.OrderStatus;
 import com.japstransfort.entity.Payment;
 import com.japstransfort.entity.Shipment;
 import com.japstransfort.entity.User;
+import com.japstransfort.service.CommissionService;
 import com.japstransfort.service.OrderAdminService;
 import com.japstransfort.service.OrderService;
 import org.springframework.data.domain.Page;
@@ -31,10 +32,14 @@ public class OrderAdminController {
 
     private final OrderAdminService orderAdminService;
     private final OrderService orderService;
+    private final CommissionService commissionService;
 
-    public OrderAdminController(OrderAdminService orderAdminService, OrderService orderService) {
+    public OrderAdminController(OrderAdminService orderAdminService,
+                                OrderService orderService,
+                                CommissionService commissionService) {
         this.orderAdminService = orderAdminService;
         this.orderService = orderService;
+        this.commissionService = commissionService;
     }
 
     /**
@@ -86,6 +91,8 @@ public class OrderAdminController {
             model.addAttribute("warehouses", orderAdminService.findAllWarehouses());
             // Attach shipment so the template can show courier/tracking/dates
             orderAdminService.getShipmentForOrder(id).ifPresent(s -> model.addAttribute("shipment", s));
+            // Attach commission if one exists for this order
+            commissionService.getCommissionForOrder(id).ifPresent(c -> model.addAttribute("commission", c));
 
             List<Payment> payments = orderService.getPaymentsForOrder(id);
             BigDecimal amountPaid = orderService.getAmountPaidForOrder(id);

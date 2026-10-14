@@ -41,6 +41,11 @@
                     </a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" th:classappend="${activeTab == 'commissions' ? 'active fw-semibold' : ''}" th:href="@{/admin/commissions}">
+                        <i class="bi bi-cash-stack me-1"></i> Commissions
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" th:classappend="${activeTab == 'inventory' ? 'active fw-semibold' : ''}" th:href="@{/admin/inventory}">
                         <i class="bi bi-box-seam me-1"></i> Inventory
                     </a>
@@ -101,6 +106,11 @@
                 <li class="nav-item">
                     <a class="nav-link" th:classappend="${activeTab == 'orders' ? 'active fw-semibold' : ''}" th:href="@{/portal/orders}">
                         <i class="bi bi-receipt me-1"></i> My Orders
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${activeTab == 'commissions' ? 'active fw-semibold' : ''}" th:href="@{/portal/commissions}">
+                        <i class="bi bi-cash-stack me-1"></i> Commissions
                     </a>
                 </li>
             </ul>

@@ -32,6 +32,7 @@ public class OrderAdminService {
     private final ResellerRepository resellerRepository;
     private final ShipmentRepository shipmentRepository;
     private final com.japstransfort.repository.PaymentRepository paymentRepository;
+    private final CommissionService commissionService;
 
     public OrderAdminService(OrderRepository orderRepository,
                              InventoryRepository inventoryRepository,
@@ -39,7 +40,8 @@ public class OrderAdminService {
                              WarehouseRepository warehouseRepository,
                              ResellerRepository resellerRepository,
                              ShipmentRepository shipmentRepository,
-                             com.japstransfort.repository.PaymentRepository paymentRepository) {
+                             com.japstransfort.repository.PaymentRepository paymentRepository,
+                             CommissionService commissionService) {
         this.orderRepository = orderRepository;
         this.inventoryRepository = inventoryRepository;
         this.stockMovementRepository = stockMovementRepository;
@@ -47,6 +49,7 @@ public class OrderAdminService {
         this.resellerRepository = resellerRepository;
         this.shipmentRepository = shipmentRepository;
         this.paymentRepository = paymentRepository;
+        this.commissionService = commissionService;
     }
 
     /**
@@ -398,6 +401,9 @@ public class OrderAdminService {
         order.setStatus(OrderStatus.delivered);
         orderRepository.save(order);
         orderRepository.touchUpdatedAt(orderId);
+
+        commissionService.createCommissionIfEligible(order);
+
         return order;
     }
 

@@ -4,12 +4,14 @@ import com.japstransfort.config.CustomUserDetails;
 import com.japstransfort.dto.CartItem;
 import com.japstransfort.dto.CartRow;
 import com.japstransfort.dto.OrderDetailDto;
+import com.japstransfort.entity.Commission;
 import com.japstransfort.entity.Order;
 import com.japstransfort.entity.Reseller;
 import com.japstransfort.entity.ResellerTier;
 import com.japstransfort.repository.CategoryRepository;
 import com.japstransfort.repository.ProductRepository;
 import com.japstransfort.repository.ResellerRepository;
+import com.japstransfort.service.CommissionService;
 import com.japstransfort.service.OrderService;
 import com.japstransfort.service.ProductService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,17 +48,20 @@ public class PortalController {
     private final ProductRepository productRepository;
     private final ProductService productService;
     private final OrderService orderService;
+    private final CommissionService commissionService;
 
     public PortalController(ResellerRepository resellerRepository,
                             CategoryRepository categoryRepository,
                             ProductRepository productRepository,
                             ProductService productService,
-                            OrderService orderService) {
+                            OrderService orderService,
+                            CommissionService commissionService) {
         this.resellerRepository = resellerRepository;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productService = productService;
         this.orderService = orderService;
+        this.commissionService = commissionService;
     }
 
     // ─── Cart helper ──────────────────────────────────────────────────────────
@@ -463,6 +468,36 @@ public class PortalController {
             return "redirect:/portal/orders/" + orderId;
         }
         return "redirect:/portal/orders";
+    }
+
+    // ─── My Commissions ──────────────────────────────────────────────────────
+
+    @GetMapping("/commissions")
+    public String myCommissions(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
+
+        Reseller reseller = loadReseller(userDetails);
+        if (reseller == null) {
+            model.addAttribute("commissions", List.of());
+            model.addAttribute("totalPending", BigDecimal.ZERO);
+            model.addAttribute("totalPaid", BigDecimal.ZERO);
+            return "portal/commissions";
+        }
+
+        List<Commission> commissions = commissionService.getCommissionsForReseller(reseller.getResellerId());
+        BigDecimal totalPending = commissionService.getPendingTotalForReseller(reseller.getResellerId());
+        BigDecimal totalPaid = commissionService.getPaidTotalForReseller(reseller.getResellerId());
+
+        if (userDetails != null) {
+            model.addAttribute("currentUser", userDetails.getUser());
+        }
+        model.addAttribute("commissions", commissions);
+        model.addAttribute("totalPending", totalPending);
+        model.addAttribute("totalPaid", totalPaid);
+        model.addAttribute("reseller", reseller);
+
+        return "portal/commissions";
     }
 }
 

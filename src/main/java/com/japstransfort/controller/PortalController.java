@@ -165,6 +165,107 @@ public class PortalController {
         return "redirect:/portal/catalog";
     }
 
+    // ─── Add selected to cart ─────────────────────────────────────────────────
+
+    @PostMapping("/cart/add-selected")
+    public String addSelectedToCart(
+            @RequestParam(value = "selectedIds", required = false) List<String> selectedIds,
+            @RequestParam(value = "productIds", required = false) List<String> productIds,
+            @RequestParam(value = "quantities", required = false) List<String> quantities,
+            @RequestParam Map<String, String> allParams,
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "categoryId", required = false) Integer categoryId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "sort", defaultValue = "name") String sort,
+            @RequestParam(name = "dir", defaultValue = "asc") String dir,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        List<String> ids = (selectedIds != null && !selectedIds.isEmpty()) ? selectedIds : productIds;
+        if (ids == null || ids.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "No items selected.");
+            return redirectCatalog(search, categoryId, sort, dir, page);
+        }
+
+        int addedCount = 0;
+        int skippedCount = 0;
+        Map<Integer, Integer> cart = getCart(session);
+
+        for (int i = 0; i < ids.size(); i++) {
+            Integer productId = null;
+            try {
+                productId = Integer.parseInt(ids.get(i).trim());
+            } catch (Exception e) {
+                skippedCount++;
+                continue;
+            }
+
+            Integer quantity = null;
+            if (quantities != null && i < quantities.size()) {
+                try {
+                    quantity = Integer.parseInt(quantities.get(i).trim());
+                } catch (Exception e) {
+                    quantity = null;
+                }
+            } else if (allParams.containsKey("quantity_" + productId)) {
+                try {
+                    quantity = Integer.parseInt(allParams.get("quantity_" + productId).trim());
+                } catch (Exception e) {
+                    quantity = null;
+                }
+            }
+
+            if (quantity == null || quantity < 1 || quantity > 9999) {
+                skippedCount++;
+                continue;
+            }
+
+            Product product = productRepository.findById(productId).orElse(null);
+            if (product == null || !Boolean.TRUE.equals(product.getIsActive())) {
+                skippedCount++;
+                continue;
+            }
+
+            cart.merge(productId, quantity, Integer::sum);
+            addedCount++;
+        }
+
+        saveCart(session, cart);
+
+        if (addedCount > 0) {
+            String itemPart = addedCount == 1 ? "1 item added to cart" : (addedCount + " items added to cart");
+            String skipPart = skippedCount > 0 ? " (" + skippedCount + " skipped)" : "";
+            redirectAttributes.addFlashAttribute("successMessage", itemPart + skipPart + ".");
+        } else if (skippedCount > 0) {
+            redirectAttributes.addFlashAttribute("errorMessage", "No items added to cart (" + skippedCount + " skipped).");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "No items selected.");
+        }
+
+        return redirectCatalog(search, categoryId, sort, dir, page);
+    }
+
+    private String redirectCatalog(String search, Integer categoryId, String sort, String dir, int page) {
+        org.springframework.web.util.UriComponentsBuilder builder =
+                org.springframework.web.util.UriComponentsBuilder.fromPath("/portal/catalog");
+        if (search != null && !search.trim().isEmpty()) {
+            builder.queryParam("search", search);
+        }
+        if (categoryId != null) {
+            builder.queryParam("categoryId", categoryId);
+        }
+        if (sort != null && !sort.trim().isEmpty()) {
+            builder.queryParam("sort", sort);
+        }
+        if (dir != null && !dir.trim().isEmpty()) {
+            builder.queryParam("dir", dir);
+        }
+        if (page > 0) {
+            builder.queryParam("page", page);
+        }
+        return "redirect:" + builder.toUriString();
+    }
+
     // ─── Cart view ────────────────────────────────────────────────────────────
 
     @GetMapping("/cart")

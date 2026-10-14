@@ -9,6 +9,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         initPasswordToggles();
         initPasswordChecklist();
+        initCatalogMultiSelect();
     });
 
     /**
@@ -142,5 +143,93 @@
 
         // Initialize state on page load
         updateRules();
+    }
+
+    /**
+     * Catalog multi-select handling for bulk adding products to cart.
+     */
+    function initCatalogMultiSelect() {
+        var selectAllCb = document.getElementById('selectAllCatalog');
+        var rowChecks = Array.from(document.querySelectorAll('.catalog-row-check'));
+        var addBtn = document.getElementById('addSelectedBtn');
+        var countEl = document.getElementById('selectedCount');
+        var container = document.getElementById('bulkSelectedContainer');
+        var form = document.getElementById('bulkAddForm');
+
+        if (!form || rowChecks.length === 0) {
+            return;
+        }
+
+        function syncSelected() {
+            if (container) {
+                container.innerHTML = '';
+            }
+            var count = 0;
+            rowChecks.forEach(function (cb) {
+                if (cb.checked) {
+                    count++;
+                    if (container) {
+                        var tr = cb.closest('tr');
+                        var qtyInput = tr ? tr.querySelector('.catalog-item-qty') : null;
+                        var qtyVal = qtyInput ? qtyInput.value : '1';
+
+                        var idHidden = document.createElement('input');
+                        idHidden.type = 'hidden';
+                        idHidden.name = 'selectedIds';
+                        idHidden.value = cb.value;
+                        container.appendChild(idHidden);
+
+                        var qtyHidden = document.createElement('input');
+                        qtyHidden.type = 'hidden';
+                        qtyHidden.name = 'quantities';
+                        qtyHidden.value = qtyVal;
+                        container.appendChild(qtyHidden);
+                    }
+                }
+            });
+
+            if (countEl) {
+                countEl.textContent = count;
+            }
+            if (addBtn) {
+                addBtn.disabled = (count === 0);
+            }
+        }
+
+        if (selectAllCb) {
+            selectAllCb.addEventListener('change', function () {
+                rowChecks.forEach(function (cb) {
+                    cb.checked = selectAllCb.checked;
+                });
+                syncSelected();
+            });
+        }
+
+        rowChecks.forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                if (!cb.checked && selectAllCb) {
+                    selectAllCb.checked = false;
+                } else if (selectAllCb && rowChecks.length > 0 && rowChecks.every(function (c) { return c.checked; })) {
+                    selectAllCb.checked = true;
+                }
+                syncSelected();
+            });
+        });
+
+        form.addEventListener('submit', function () {
+            syncSelected();
+        });
+
+        document.querySelectorAll('.catalog-item-qty').forEach(function (input) {
+            input.addEventListener('input', function () {
+                var tr = input.closest('tr');
+                var cb = tr ? tr.querySelector('.catalog-row-check') : null;
+                if (cb && cb.checked) {
+                    syncSelected();
+                }
+            });
+        });
+
+        syncSelected();
     }
 })();

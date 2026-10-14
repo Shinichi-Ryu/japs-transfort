@@ -87,6 +87,14 @@
                                           th:text="${order.status}">
                                         pending
                                     </span>
+                                    <!-- Shipment info for shipped/delivered -->
+                                    <div th:if="${(order.status.name() == 'shipped' or order.status.name() == 'delivered') and order.shipment != null}"
+                                         class="small text-muted mt-1">
+                                        <i class="bi bi-truck me-1"></i>
+                                        <span th:text="${order.shipment.courier}"></span>
+                                        <span th:if="${order.shipment.trackingNo != null}" class="ms-1 font-monospace"
+                                              th:text="'#' + ${order.shipment.trackingNo}"></span>
+                                    </div>
                                     <!-- Cancellation info shown inline -->
                                     <div th:if="${order.status.name() == 'cancelled' and order.cancelReason != null}"
                                          class="small text-muted mt-1">

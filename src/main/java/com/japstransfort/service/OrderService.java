@@ -8,6 +8,7 @@ import com.japstransfort.repository.InventoryRepository;
 import com.japstransfort.repository.OrderRepository;
 import com.japstransfort.repository.ProductRepository;
 import com.japstransfort.repository.ResellerRepository;
+import com.japstransfort.repository.ShipmentRepository;
 import com.japstransfort.repository.StockMovementRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,17 +33,20 @@ public class OrderService {
     private final InventoryRepository inventoryRepository;
     private final StockMovementRepository stockMovementRepository;
     private final ResellerRepository resellerRepository;
+    private final ShipmentRepository shipmentRepository;
 
     public OrderService(OrderRepository orderRepository,
                         ProductRepository productRepository,
                         InventoryRepository inventoryRepository,
                         StockMovementRepository stockMovementRepository,
-                        ResellerRepository resellerRepository) {
+                        ResellerRepository resellerRepository,
+                        ShipmentRepository shipmentRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.inventoryRepository = inventoryRepository;
         this.stockMovementRepository = stockMovementRepository;
         this.resellerRepository = resellerRepository;
+        this.shipmentRepository = shipmentRepository;
     }
 
     /**
@@ -181,6 +185,12 @@ public class OrderService {
         }
 
         if (order.getStatus() != OrderStatus.pending && order.getStatus() != OrderStatus.approved) {
+            String s = order.getStatus().name();
+            if ("packed".equals(s) || "shipped".equals(s) || "delivered".equals(s)) {
+                throw new IllegalStateException(
+                        "This order cannot be cancelled because it has already been " + s +
+                        ". Only pending or approved orders can be cancelled.");
+            }
             throw new IllegalStateException("Only orders that are pending or approved can be cancelled. This order is: " + order.getStatus() + ".");
         }
 
@@ -279,7 +289,14 @@ public class OrderService {
             }
             dto.setItems(itemDtos);
 
-            // Shipment: no Shipment entity exists yet; fields stay null → hasShipment() == false
+            // Shipment: load from DB if present
+            shipmentRepository.findByOrder_OrderId(orderId).ifPresent(s -> {
+                dto.setCourier(s.getCourier());
+                dto.setTrackingNumber(s.getTrackingNo());
+                dto.setShippedAt(s.getShippedAt());
+                dto.setDeliveredAt(s.getDeliveredAt());
+            });
+
             return java.util.Optional.of(dto);
         });
     }

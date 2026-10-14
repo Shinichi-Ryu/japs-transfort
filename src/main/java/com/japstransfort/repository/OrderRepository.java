@@ -22,7 +22,8 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
 
-    List<Order> findByReseller_ResellerIdOrderByCreatedAtDesc(Integer resellerId);
+    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product LEFT JOIN FETCH o.shipment WHERE o.reseller.resellerId = :resellerId ORDER BY o.createdAt DESC, o.orderId DESC")
+    List<Order> findByReseller_ResellerIdOrderByCreatedAtDesc(@Param("resellerId") Integer resellerId);
 
     List<Order> findByReseller_ResellerIdAndStatus(Integer resellerId, OrderStatus status);
 

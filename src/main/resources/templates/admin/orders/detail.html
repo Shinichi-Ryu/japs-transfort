@@ -146,6 +146,34 @@
             </div>
         </div>
 
+        <!-- Shipment Info Card (shown when shipment exists) -->
+        <div class="card shadow-sm border-0 mb-4" th:if="${shipment != null}">
+            <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+                <i class="bi bi-truck text-primary me-2 fs-5"></i>
+                <h6 class="fw-bold mb-0">Shipment Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <label class="text-muted small">Courier</label>
+                        <div class="fw-semibold" th:text="${shipment.courier}">-</div>
+                    </div>
+                    <div class="col-6 col-md-3" th:if="${shipment.trackingNo != null}">
+                        <label class="text-muted small">Tracking Number</label>
+                        <div class="fw-semibold font-monospace" th:text="${shipment.trackingNo}">-</div>
+                    </div>
+                    <div class="col-6 col-md-3" th:if="${shipment.shippedAt != null}">
+                        <label class="text-muted small">Shipped Date</label>
+                        <div class="fw-medium" th:text="${#temporals.format(shipment.shippedAt, 'yyyy-MM-dd HH:mm')}">-</div>
+                    </div>
+                    <div class="col-6 col-md-3" th:if="${shipment.deliveredAt != null}">
+                        <label class="text-muted small">Delivered Date</label>
+                        <div class="fw-medium text-success" th:text="${#temporals.format(shipment.deliveredAt, 'yyyy-MM-dd HH:mm')}">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Order Items Card -->
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
@@ -265,39 +293,98 @@
                             Stock has been deducted from inventory and the order amount added to the reseller's outstanding balance.
                         </div>
                     </div>
-                    <div class="p-3 bg-light rounded border">
-                        <p class="text-danger small mb-2 fw-semibold">
-                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Stock Reversal on Cancellation:
-                        </p>
-                        <p class="text-muted small mb-3">
-                            Cancelling this approved order will return all ordered item quantities back into the warehouse inventory and subtract <strong>₱<span th:text="${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">0.00</span></strong> from the reseller's balance.
-                        </p>
-                        <form th:action="@{'/admin/orders/' + ${order.orderId} + '/cancel'}" method="post"
-                              onsubmit="return confirmAdminCancel(this);"
-                              class="d-flex align-items-center gap-2 flex-wrap">
-                            <select name="cancelReason" class="form-select form-select-sm" required style="min-width: 230px;">
-                                <option value="" disabled selected>Select cancel reason…</option>
-                                <option value="Ordered by mistake">Ordered by mistake</option>
-                                <option value="Wrong item or quantity">Wrong item or quantity</option>
-                                <option value="Found a better price elsewhere">Found a better price elsewhere</option>
-                                <option value="No longer needed">No longer needed</option>
-                                <option value="Taking too long to process">Taking too long to process</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="bi bi-x-octagon me-1"></i> Cancel Order &amp; Reverse Stock
+                    <div class="d-flex flex-wrap gap-3 align-items-start">
+                        <!-- Mark as Packed -->
+                        <form th:action="@{'/admin/orders/' + ${order.orderId} + '/pack'}" method="post">
+                            <button type="submit" class="btn btn-primary btn-sm"
+                                    onclick="return confirm('Mark this order as packed?')">
+                                <i class="bi bi-box-seam me-1"></i> Mark as Packed
                             </button>
                         </form>
+                        <div class="vr mx-2 d-none d-md-block" style="height: 36px;"></div>
+                        <!-- Cancel (approved) -->
+                        <div class="p-3 bg-light rounded border">
+                            <p class="text-danger small mb-2 fw-semibold">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Stock Reversal on Cancellation:
+                            </p>
+                            <p class="text-muted small mb-3">
+                                Cancelling this approved order will return all ordered item quantities back into the warehouse inventory and subtract <strong>₱<span th:text="${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">0.00</span></strong> from the reseller's balance.
+                            </p>
+                            <form th:action="@{'/admin/orders/' + ${order.orderId} + '/cancel'}" method="post"
+                                  onsubmit="return confirmAdminCancel(this);"
+                                  class="d-flex align-items-center gap-2 flex-wrap">
+                                <select name="cancelReason" class="form-select form-select-sm" required style="min-width: 230px;">
+                                    <option value="" disabled selected>Select cancel reason…</option>
+                                    <option value="Ordered by mistake">Ordered by mistake</option>
+                                    <option value="Wrong item or quantity">Wrong item or quantity</option>
+                                    <option value="Found a better price elsewhere">Found a better price elsewhere</option>
+                                    <option value="No longer needed">No longer needed</option>
+                                    <option value="Taking too long to process">Taking too long to process</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-x-octagon me-1"></i> Cancel Order &amp; Reverse Stock
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Status: Other (packed, shipped, delivered, cancelled, returned) -->
-                <div th:if="${order.status != null and order.status.name() != 'pending' and order.status.name() != 'approved'}">
+                <!-- Status: PACKED -->
+                <div th:if="${order.status != null and order.status.name() == 'packed'}">
+                    <div class="alert alert-primary border-0 mb-3 small d-flex align-items-center">
+                        <i class="bi bi-box-seam fs-5 me-2"></i>
+                        <div>This order has been <strong>packed</strong> and is ready to be shipped.</div>
+                    </div>
+                    <!-- Ship Order Form -->
+                    <form th:action="@{'/admin/orders/' + ${order.orderId} + '/ship'}" method="post" class="row g-2 align-items-end" style="max-width: 560px;">
+                        <div class="col-12 col-md-5">
+                            <label class="form-label small fw-semibold mb-1">Courier <span class="text-danger">*</span></label>
+                            <input type="text" name="courier" class="form-control form-control-sm"
+                                   placeholder="e.g. JRS Express" required maxlength="60">
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label class="form-label small fw-semibold mb-1">Tracking Number <span class="text-muted">(optional)</span></label>
+                            <input type="text" name="trackingNo" class="form-control form-control-sm"
+                                   placeholder="e.g. JRS1234567890" maxlength="60">
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-truck me-1"></i> Ship Order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Status: SHIPPED -->
+                <div th:if="${order.status != null and order.status.name() == 'shipped'}">
+                    <div class="alert alert-primary border-0 mb-3 small d-flex align-items-center">
+                        <i class="bi bi-truck fs-5 me-2"></i>
+                        <div>This order is <strong>shipped</strong>. Mark it as delivered once received by the reseller.</div>
+                    </div>
+                    <form th:action="@{'/admin/orders/' + ${order.orderId} + '/deliver'}" method="post">
+                        <button type="submit" class="btn btn-success btn-sm"
+                                onclick="return confirm('Mark this order as delivered?')">
+                            <i class="bi bi-check2-all me-1"></i> Mark as Delivered
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Status: DELIVERED -->
+                <div th:if="${order.status != null and order.status.name() == 'delivered'}">
+                    <div class="alert alert-success border-0 mb-0 small d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+                        <div>This order has been <strong>delivered</strong> to the reseller. No further actions required.</div>
+                    </div>
+                </div>
+
+                <!-- Status: CANCELLED / RETURNED / OTHER -->
+                <div th:if="${order.status != null and order.status.name() != 'pending' and order.status.name() != 'approved' and order.status.name() != 'packed' and order.status.name() != 'shipped' and order.status.name() != 'delivered'}">
                     <div class="alert alert-secondary border-0 mb-0 small d-flex align-items-center">
                         <i class="bi bi-shield-check fs-5 me-2"></i>
                         <div>
                             This order is currently in <strong class="text-uppercase" th:text="${order.status}">STATUS</strong> status.
-                            No administrative approval or cancellation actions are available from this screen.
+                            No administrative actions are available from this screen.
                         </div>
                     </div>
                 </div>
@@ -321,5 +408,6 @@
         return confirm(msg);
     }
     </script>
+
 </body>
 </html>

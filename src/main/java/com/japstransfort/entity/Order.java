@@ -72,6 +72,9 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
+    @OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
+    private Shipment shipment;
+
     public Order() {
     }
 
@@ -119,4 +122,7 @@ public class Order {
 
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
+
+    public Shipment getShipment() { return shipment; }
+    public void setShipment(Shipment shipment) { this.shipment = shipment; }
 }

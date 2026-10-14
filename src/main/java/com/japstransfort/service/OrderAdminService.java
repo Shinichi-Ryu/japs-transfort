@@ -4,6 +4,7 @@ import com.japstransfort.entity.*;
 import com.japstransfort.repository.InventoryRepository;
 import com.japstransfort.repository.OrderRepository;
 import com.japstransfort.repository.ResellerRepository;
+import com.japstransfort.repository.ShipmentRepository;
 import com.japstransfort.repository.StockMovementRepository;
 import com.japstransfort.repository.WarehouseRepository;
 import org.springframework.data.domain.Page;
@@ -29,17 +30,20 @@ public class OrderAdminService {
     private final StockMovementRepository stockMovementRepository;
     private final WarehouseRepository warehouseRepository;
     private final ResellerRepository resellerRepository;
+    private final ShipmentRepository shipmentRepository;
 
     public OrderAdminService(OrderRepository orderRepository,
                              InventoryRepository inventoryRepository,
                              StockMovementRepository stockMovementRepository,
                              WarehouseRepository warehouseRepository,
-                             ResellerRepository resellerRepository) {
+                             ResellerRepository resellerRepository,
+                             ShipmentRepository shipmentRepository) {
         this.orderRepository = orderRepository;
         this.inventoryRepository = inventoryRepository;
         this.stockMovementRepository = stockMovementRepository;
         this.warehouseRepository = warehouseRepository;
         this.resellerRepository = resellerRepository;
+        this.shipmentRepository = shipmentRepository;
     }
 
     /**
@@ -217,6 +221,12 @@ public class OrderAdminService {
                 .orElseThrow(() -> new IllegalArgumentException("Order not found (ID " + orderId + ")."));
 
         if (order.getStatus() != OrderStatus.pending && order.getStatus() != OrderStatus.approved) {
+            String current = order.getStatus().name();
+            if ("packed".equals(current) || "shipped".equals(current) || "delivered".equals(current)) {
+                throw new IllegalStateException(
+                        "Order cannot be cancelled because it is already " + current +
+                        ". Only pending or approved orders can be cancelled.");
+            }
             throw new IllegalStateException("Only pending or approved orders can be cancelled. Current status: " + order.getStatus());
         }
 
@@ -281,5 +291,97 @@ public class OrderAdminService {
     @Transactional(readOnly = true)
     public List<Warehouse> findAllWarehouses() {
         return warehouseRepository.findAll();
+    }
+
+    /**
+     * Marks an approved order as packed. Enforces approved → packed transition.
+     */
+    @Transactional
+    public Order markPacked(Integer orderId) {
+        Order order = orderRepository.findByIdWithLock(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found (ID " + orderId + ")."));
+
+        if (order.getStatus() != OrderStatus.approved) {
+            throw new IllegalStateException(
+                    "Order cannot be marked as packed. Expected status: approved, current: " + order.getStatus() + ".");
+        }
+
+        order.setStatus(OrderStatus.packed);
+        orderRepository.save(order);
+        orderRepository.touchUpdatedAt(orderId);
+        return order;
+    }
+
+    /**
+     * Ships a packed order: inserts a shipments row, sets order status shipped.
+     * Enforces packed → shipped, and that no shipment row exists yet.
+     */
+    @Transactional
+    public Order shipOrder(Integer orderId, String courier, String trackingNo) {
+        String courierTrimmed = courier != null ? courier.trim() : "";
+        if (courierTrimmed.isEmpty()) {
+            throw new IllegalArgumentException("Courier name is required.");
+        }
+
+        Order order = orderRepository.findByIdWithLock(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found (ID " + orderId + ")."));
+
+        if (order.getStatus() != OrderStatus.packed) {
+            throw new IllegalStateException(
+                    "Order cannot be shipped. Expected status: packed, current: " + order.getStatus() + ".");
+        }
+
+        // Guard: one shipment per order
+        if (shipmentRepository.findByOrderIdWithLock(orderId).isPresent()) {
+            throw new IllegalStateException("A shipment record already exists for this order.");
+        }
+
+        Shipment shipment = new Shipment();
+        shipment.setOrder(order);
+        shipment.setCourier(courierTrimmed);
+        String tn = trackingNo != null ? trackingNo.trim() : null;
+        shipment.setTrackingNo(tn != null && tn.isEmpty() ? null : tn);
+        shipment.setStatus("shipped");
+        shipment.setShippedAt(LocalDateTime.now());
+        shipmentRepository.save(shipment);
+
+        order.setStatus(OrderStatus.shipped);
+        orderRepository.save(order);
+        orderRepository.touchUpdatedAt(orderId);
+        return order;
+    }
+
+    /**
+     * Marks a shipped order as delivered: updates shipment status and delivered_at, sets order delivered.
+     */
+    @Transactional
+    public Order markDelivered(Integer orderId) {
+        Order order = orderRepository.findByIdWithLock(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found (ID " + orderId + ")."));
+
+        if (order.getStatus() != OrderStatus.shipped) {
+            throw new IllegalStateException(
+                    "Order cannot be marked as delivered. Expected status: shipped, current: " + order.getStatus() + ".");
+        }
+
+        Shipment shipment = shipmentRepository.findByOrderIdWithLock(orderId)
+                .orElseThrow(() -> new IllegalStateException("Shipment record not found for this order."));
+
+        shipment.setStatus("delivered");
+        shipment.setDeliveredAt(LocalDateTime.now());
+        shipmentRepository.save(shipment);
+
+        order.setStatus(OrderStatus.delivered);
+        orderRepository.save(order);
+        orderRepository.touchUpdatedAt(orderId);
+        return order;
+    }
+
+    /**
+     * Returns the shipment for the given order, or empty if not yet created.
+     */
+    @Transactional(readOnly = true)
+    public java.util.Optional<Shipment> getShipmentForOrder(Integer orderId) {
+        return shipmentRepository.findByOrder_OrderId(orderId);
     }
 }

@@ -56,8 +56,8 @@
                 <h6 class="fw-bold mb-0">Order Status</h6>
             </div>
             <div class="card-body py-4">
-                <div class="d-flex flex-wrap align-items-center gap-0">
-                    <!-- placed / pending -->
+                <div class="d-flex flex-wrap align-items-start gap-0">
+                    <!-- Placed / Pending -->
                     <div class="text-center" style="min-width: 90px;">
                         <div th:classappend="${order.status != null and order.status.name() == 'cancelled' ? 'text-muted' :
                                               (order.status != null ? 'text-success' : 'text-muted')}"
@@ -68,9 +68,12 @@
                         </div>
                         <div th:classappend="${order.status != null and order.status.name() != 'cancelled' ? 'fw-semibold text-dark' : 'text-muted'}"
                              class="small">Placed</div>
+                        <div class="x-small text-muted" style="font-size:0.72rem;"
+                             th:if="${order.createdAt != null}"
+                             th:text="${#temporals.format(order.createdAt, 'MM-dd HH:mm')}"></div>
                     </div>
-                    <div class="flex-grow-1" style="height: 2px; background: #dee2e6; min-width: 20px;"></div>
-                    <!-- approved -->
+                    <div class="flex-grow-1 mt-2" style="height: 2px; background: #dee2e6; min-width: 20px;"></div>
+                    <!-- Approved -->
                     <div class="text-center" style="min-width: 90px;">
                         <div th:classappend="${order.status != null and order.status.name() == 'cancelled' ? 'text-muted' :
                                               (order.status != null and (order.status.name() == 'approved' or order.status.name() == 'packed' or order.status.name() == 'shipped' or order.status.name() == 'delivered') ? 'text-success' : 'text-muted')}"
@@ -81,8 +84,8 @@
                         <div th:classappend="${order.status != null and order.status.name() != 'cancelled' and (order.status.name() == 'approved' or order.status.name() == 'packed' or order.status.name() == 'shipped' or order.status.name() == 'delivered') ? 'fw-semibold text-dark' : 'text-muted'}"
                              class="small">Approved</div>
                     </div>
-                    <div class="flex-grow-1" style="height: 2px; background: #dee2e6; min-width: 20px;"></div>
-                    <!-- packed -->
+                    <div class="flex-grow-1 mt-2" style="height: 2px; background: #dee2e6; min-width: 20px;"></div>
+                    <!-- Packed -->
                     <div class="text-center" style="min-width: 90px;">
                         <div th:classappend="${order.status != null and order.status.name() != 'cancelled' and (order.status.name() == 'packed' or order.status.name() == 'shipped' or order.status.name() == 'delivered') ? 'text-success' : 'text-muted'}"
                              class="mb-1">
@@ -92,8 +95,8 @@
                         <div th:classappend="${order.status != null and order.status.name() != 'cancelled' and (order.status.name() == 'packed' or order.status.name() == 'shipped' or order.status.name() == 'delivered') ? 'fw-semibold text-dark' : 'text-muted'}"
                              class="small">Packed</div>
                     </div>
-                    <div class="flex-grow-1" style="height: 2px; background: #dee2e6; min-width: 20px;"></div>
-                    <!-- shipped -->
+                    <div class="flex-grow-1 mt-2" style="height: 2px; background: #dee2e6; min-width: 20px;"></div>
+                    <!-- Shipped -->
                     <div class="text-center" style="min-width: 90px;">
                         <div th:classappend="${order.status != null and order.status.name() != 'cancelled' and (order.status.name() == 'shipped' or order.status.name() == 'delivered') ? 'text-success' : 'text-muted'}"
                              class="mb-1">
@@ -102,9 +105,15 @@
                         </div>
                         <div th:classappend="${order.status != null and order.status.name() != 'cancelled' and (order.status.name() == 'shipped' or order.status.name() == 'delivered') ? 'fw-semibold text-dark' : 'text-muted'}"
                              class="small">Shipped</div>
+                        <div class="text-muted" style="font-size:0.72rem;"
+                             th:if="${order.shippedAt != null}"
+                             th:text="${#temporals.format(order.shippedAt, 'MM-dd HH:mm')}"></div>
+                        <div class="text-muted" style="font-size:0.72rem;"
+                             th:if="${order.courier != null}"
+                             th:text="${order.courier}"></div>
                     </div>
-                    <div class="flex-grow-1" style="height: 2px; background: #dee2e6; min-width: 20px;"></div>
-                    <!-- delivered -->
+                    <div class="flex-grow-1 mt-2" style="height: 2px; background: #dee2e6; min-width: 20px;"></div>
+                    <!-- Delivered -->
                     <div class="text-center" style="min-width: 90px;">
                         <div th:classappend="${order.status != null and order.status.name() != 'cancelled' and order.status.name() == 'delivered' ? 'text-success' : 'text-muted'}"
                              class="mb-1">
@@ -113,10 +122,13 @@
                         </div>
                         <div th:classappend="${order.status != null and order.status.name() != 'cancelled' and order.status.name() == 'delivered' ? 'fw-semibold text-dark' : 'text-muted'}"
                              class="small">Delivered</div>
+                        <div class="text-muted" style="font-size:0.72rem;"
+                             th:if="${order.deliveredAt != null}"
+                             th:text="${#temporals.format(order.deliveredAt, 'MM-dd HH:mm')}"></div>
                     </div>
-                    <!-- cancelled indicator (shown separately) -->
+                    <!-- Cancelled indicator (shown separately) -->
                     <th:block th:if="${order.status != null and order.status.name() == 'cancelled'}">
-                        <div class="flex-grow-1" style="height: 2px; background: #dee2e6; min-width: 20px;"></div>
+                        <div class="flex-grow-1 mt-2" style="height: 2px; background: #dee2e6; min-width: 20px;"></div>
                         <div class="text-center" style="min-width: 90px;">
                             <div class="text-danger mb-1"><i class="bi bi-x-circle-fill fs-3"></i></div>
                             <div class="fw-semibold text-danger small">Cancelled</div>
@@ -252,13 +264,13 @@
                         <tfoot class="table-light border-top">
                             <tr>
                                 <td colspan="4" class="border-0"></td>
-                                <td class="text-end text-muted small fw-semibold">Subtotal:</td>
+                                <td class="text-end text-muted small fw-semibold">List Price Total:</td>
                                 <td class="text-end pe-3 font-monospace"
-                                    th:text="'₱' + ${#numbers.formatDecimal(order.subtotal, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    th:text="'₱' + ${#numbers.formatDecimal(order.srpTotal, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
                             </tr>
-                            <tr>
+                            <tr th:if="${order.discount != null and #numbers.formatDecimal(order.discount, 1, 'DEFAULT', 2, 'DEFAULT') != '0.00'}">
                                 <td colspan="4" class="border-0"></td>
-                                <td class="text-end text-muted small fw-semibold">Discount:</td>
+                                <td class="text-end text-muted small fw-semibold">Tier Discount:</td>
                                 <td class="text-end pe-3 font-monospace text-success"
                                     th:text="'-₱' + ${#numbers.formatDecimal(order.discount, 1, 'COMMA', 2, 'POINT')}">-₱0.00</td>
                             </tr>

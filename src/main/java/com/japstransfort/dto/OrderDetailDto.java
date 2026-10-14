@@ -114,6 +114,13 @@ public class OrderDetailDto {
     public LocalDateTime getDeliveredAt() { return deliveredAt; }
     public void setDeliveredAt(LocalDateTime deliveredAt) { this.deliveredAt = deliveredAt; }
 
+    /** List price total = total + discount (sum of qty × SRP at order time). */
+    public java.math.BigDecimal getSrpTotal() {
+        java.math.BigDecimal t = total != null ? total : java.math.BigDecimal.ZERO;
+        java.math.BigDecimal d = discount != null ? discount : java.math.BigDecimal.ZERO;
+        return t.add(d).setScale(2, java.math.RoundingMode.HALF_UP);
+    }
+
     /** Convenience: is this order cancellable by the reseller? */
     public boolean isCancellable() {
         return status == com.japstransfort.entity.OrderStatus.pending

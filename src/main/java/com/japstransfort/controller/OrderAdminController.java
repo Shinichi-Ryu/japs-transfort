@@ -3,6 +3,7 @@ package com.japstransfort.controller;
 import com.japstransfort.config.CustomUserDetails;
 import com.japstransfort.entity.Order;
 import com.japstransfort.entity.OrderStatus;
+import com.japstransfort.entity.Shipment;
 import com.japstransfort.entity.User;
 import com.japstransfort.service.OrderAdminService;
 import org.springframework.data.domain.Page;
@@ -56,7 +57,7 @@ public class OrderAdminController {
     }
 
     /**
-     * Displays detail view for a specific order.
+     * Displays detail view for a specific order, including any shipment data.
      */
     @GetMapping("/{id}")
     public String orderDetail(
@@ -73,6 +74,8 @@ public class OrderAdminController {
             }
             model.addAttribute("order", order);
             model.addAttribute("warehouses", orderAdminService.findAllWarehouses());
+            // Attach shipment so the template can show courier/tracking/dates
+            orderAdminService.getShipmentForOrder(id).ifPresent(s -> model.addAttribute("shipment", s));
             return "admin/orders/detail";
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
@@ -95,6 +98,62 @@ public class OrderAdminController {
             Order order = orderAdminService.approveOrder(id, warehouseId, admin);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Order #" + order.getOrderNo() + " approved successfully.");
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/orders/" + id;
+    }
+
+    /**
+     * Marks an approved order as packed.
+     */
+    @PostMapping("/{id}/pack")
+    public String packOrder(
+            @PathVariable("id") Integer id,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            Order order = orderAdminService.markPacked(id);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Order #" + order.getOrderNo() + " marked as packed.");
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/orders/" + id;
+    }
+
+    /**
+     * Ships a packed order: requires courier name, optional tracking number.
+     */
+    @PostMapping("/{id}/ship")
+    public String shipOrder(
+            @PathVariable("id") Integer id,
+            @RequestParam(value = "courier", required = false) String courier,
+            @RequestParam(value = "trackingNo", required = false) String trackingNo,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            Order order = orderAdminService.shipOrder(id, courier, trackingNo);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Order #" + order.getOrderNo() + " shipped successfully.");
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/orders/" + id;
+    }
+
+    /**
+     * Marks a shipped order as delivered.
+     */
+    @PostMapping("/{id}/deliver")
+    public String deliverOrder(
+            @PathVariable("id") Integer id,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            Order order = orderAdminService.markDelivered(id);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Order #" + order.getOrderNo() + " marked as delivered.");
         } catch (IllegalStateException | IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }

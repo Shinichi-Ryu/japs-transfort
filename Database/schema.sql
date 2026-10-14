@@ -42,6 +42,8 @@ CREATE TABLE resellers (
 );
 
 -- ===== Products & Inventory =====
+CREATE SEQUENCE IF NOT EXISTS product_sku_seq START 1;
+
 CREATE TABLE categories (
   category_id SERIAL PRIMARY KEY,
   name        VARCHAR(80) UNIQUE NOT NULL

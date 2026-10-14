@@ -69,9 +69,16 @@ public class ProductService {
 
     @Transactional
     public Product create(ProductFormDto dto) {
-        String trimmedSku = dto.getSku().trim();
-        if (productRepository.existsBySku(trimmedSku)) {
-            throw new IllegalArgumentException("A product with SKU '" + trimmedSku + "' already exists.");
+        String trimmedSku = dto.getSku() != null ? dto.getSku().trim() : "";
+        if (trimmedSku.isEmpty()) {
+            do {
+                Long nextVal = productRepository.getNextSkuSequenceValue();
+                trimmedSku = String.format("PRD-%06d", nextVal);
+            } while (productRepository.existsBySkuIgnoreCase(trimmedSku));
+        } else {
+            if (productRepository.existsBySkuIgnoreCase(trimmedSku)) {
+                throw new IllegalArgumentException("A product with SKU '" + trimmedSku + "' already exists.");
+            }
         }
 
         Category category = categoryRepository.findById(dto.getCategoryId())
@@ -94,8 +101,12 @@ public class ProductService {
     public Product update(Integer id, ProductFormDto dto) {
         Product product = findById(id);
 
-        String trimmedSku = dto.getSku().trim();
-        productRepository.findBySku(trimmedSku).ifPresent(existing -> {
+        String trimmedSku = dto.getSku() != null ? dto.getSku().trim() : "";
+        if (trimmedSku.isEmpty()) {
+            throw new IllegalArgumentException("SKU is required.");
+        }
+
+        productRepository.findBySkuIgnoreCase(trimmedSku).ifPresent(existing -> {
             if (!existing.getProductId().equals(id)) {
                 throw new IllegalArgumentException("Another product with SKU '" + trimmedSku + "' already exists.");
             }

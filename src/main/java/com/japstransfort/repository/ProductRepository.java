@@ -20,7 +20,14 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     Optional<Product> findBySku(String sku);
 
+    Optional<Product> findBySkuIgnoreCase(String sku);
+
     boolean existsBySku(String sku);
+
+    boolean existsBySkuIgnoreCase(String sku);
+
+    @Query(value = "SELECT nextval('product_sku_seq')", nativeQuery = true)
+    Long getNextSkuSequenceValue();
 
     List<Product> findByIsActiveTrue();
 

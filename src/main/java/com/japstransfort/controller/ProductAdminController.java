@@ -108,6 +108,10 @@ public class ProductAdminController {
                                 BindingResult bindingResult,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
+        if (dto.getSku() == null || dto.getSku().trim().isEmpty()) {
+            bindingResult.rejectValue("sku", "NotBlank", "SKU is required.");
+        }
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryService.findAll());
             return "products/form";

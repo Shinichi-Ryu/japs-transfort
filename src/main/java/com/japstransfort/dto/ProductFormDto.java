@@ -16,7 +16,6 @@ public class ProductFormDto {
 
     private Integer productId;
 
-    @NotBlank(message = "SKU is required.")
     @Size(max = 40, message = "SKU cannot exceed 40 characters.")
     private String sku;
 
@@ -60,7 +59,7 @@ public class ProductFormDto {
     }
 
     public void setSku(String sku) {
-        this.sku = sku;
+        this.sku = sku != null ? sku.trim() : null;
     }
 
     public String getName() {

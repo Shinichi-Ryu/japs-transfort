@@ -44,14 +44,14 @@
                             <div class="row g-3">
                                 <!-- SKU -->
                                 <div class="col-12 col-md-6">
-                                    <label for="sku" class="form-label small fw-medium">Stock Keeping Unit (SKU) <span class="text-danger">*</span></label>
+                                    <label for="sku" class="form-label small fw-medium">Stock Keeping Unit (SKU) <span class="text-danger" th:if="${productDto.productId != null}">*</span></label>
                                     <input type="text"
                                            class="form-control"
                                            id="sku"
                                            th:field="*{sku}"
                                            placeholder="e.g. PRD-001"
-                                           th:errorclass="is-invalid"
-                                           required>
+                                           th:errorclass="is-invalid">
+                                    <div class="form-text" th:if="${productDto.productId == null}">Leave blank to auto-generate</div>
                                     <div class="invalid-feedback" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}">
                                         SKU is required.
                                     </div>

@@ -4,6 +4,7 @@ import com.japstransfort.config.CustomUserDetails;
 import com.japstransfort.entity.Order;
 import com.japstransfort.entity.OrderStatus;
 import com.japstransfort.entity.Payment;
+import com.japstransfort.entity.PaymentMethod;
 import com.japstransfort.entity.Shipment;
 import com.japstransfort.entity.User;
 import com.japstransfort.service.CommissionService;
@@ -50,12 +51,13 @@ public class OrderAdminController {
             @RequestParam(name = "search", required = false) String search,
             @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "paymentStatus", required = false) String paymentStatus,
+            @RequestParam(name = "paymentMethod", required = false) String paymentMethod,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
-        Page<Order> ordersPage = orderAdminService.getOrders(search, status, paymentStatus, page, size);
+        Page<Order> ordersPage = orderAdminService.getOrders(search, status, paymentStatus, paymentMethod, page, size);
 
         if (userDetails != null) {
             model.addAttribute("currentUser", userDetails.getUser());
@@ -66,7 +68,9 @@ public class OrderAdminController {
         model.addAttribute("search", search != null ? search : "");
         model.addAttribute("selectedStatus", status != null ? status : "");
         model.addAttribute("selectedPaymentStatus", paymentStatus != null ? paymentStatus : "");
+        model.addAttribute("selectedPaymentMethod", paymentMethod != null ? paymentMethod : "");
         model.addAttribute("allStatuses", OrderStatus.values());
+        model.addAttribute("allPaymentMethods", PaymentMethod.values());
 
         return "admin/orders/list";
     }
@@ -197,10 +201,13 @@ public class OrderAdminController {
     @PostMapping("/{id}/deliver")
     public String deliverOrder(
             @PathVariable("id") Integer id,
+            @RequestParam(value = "cashCollected", defaultValue = "false") boolean cashCollected,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
 
         try {
-            Order order = orderAdminService.markDelivered(id);
+            User admin = userDetails != null ? userDetails.getUser() : null;
+            Order order = orderAdminService.markDelivered(id, cashCollected, admin);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Order #" + order.getOrderNo() + " marked as delivered.");
         } catch (IllegalStateException | IllegalArgumentException ex) {

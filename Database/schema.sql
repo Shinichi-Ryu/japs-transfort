@@ -119,6 +119,7 @@ CREATE TABLE orders (
   warehouse_id INT REFERENCES warehouses(warehouse_id),
   status       order_status DEFAULT 'pending',
   payment_status payment_status DEFAULT 'unpaid',
+  payment_method VARCHAR(20) NOT NULL DEFAULT 'CREDIT',
   subtotal     NUMERIC(12,2) DEFAULT 0,
   discount     NUMERIC(12,2) DEFAULT 0,
   total        NUMERIC(12,2) DEFAULT 0,

@@ -2,6 +2,7 @@ package com.japstransfort.repository;
 
 import com.japstransfort.entity.Order;
 import com.japstransfort.entity.OrderStatus;
+import com.japstransfort.entity.PaymentMethod;
 import com.japstransfort.entity.PaymentStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
@@ -45,18 +46,31 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
             + "WHERE (:search IS NULL OR :search = '' OR LOWER(o.orderNo) LIKE LOWER(CONCAT('%', :search, '%')) "
             + "OR LOWER(r.businessName) LIKE LOWER(CONCAT('%', :search, '%'))) "
             + "AND (:statusNull = true OR o.status = :status) "
-            + "AND (:paymentStatusNull = true OR o.paymentStatus = :paymentStatus)",
+            + "AND (:paymentStatusNull = true OR o.paymentStatus = :paymentStatus) "
+            + "AND (:paymentMethodNull = true OR o.paymentMethod = :paymentMethod)",
            countQuery = "SELECT COUNT(o) FROM Order o LEFT JOIN o.reseller r "
             + "WHERE (:search IS NULL OR :search = '' OR LOWER(o.orderNo) LIKE LOWER(CONCAT('%', :search, '%')) "
             + "OR LOWER(r.businessName) LIKE LOWER(CONCAT('%', :search, '%'))) "
             + "AND (:statusNull = true OR o.status = :status) "
-            + "AND (:paymentStatusNull = true OR o.paymentStatus = :paymentStatus)")
+            + "AND (:paymentStatusNull = true OR o.paymentStatus = :paymentStatus) "
+            + "AND (:paymentMethodNull = true OR o.paymentMethod = :paymentMethod)")
     Page<Order> findWithFilters(@Param("search") String search,
                                 @Param("statusNull") boolean statusNull,
                                 @Param("status") OrderStatus status,
                                 @Param("paymentStatusNull") boolean paymentStatusNull,
                                 @Param("paymentStatus") PaymentStatus paymentStatus,
+                                @Param("paymentMethodNull") boolean paymentMethodNull,
+                                @Param("paymentMethod") PaymentMethod paymentMethod,
                                 Pageable pageable);
+
+    default Page<Order> findWithFilters(String search,
+                                        boolean statusNull,
+                                        OrderStatus status,
+                                        boolean paymentStatusNull,
+                                        PaymentStatus paymentStatus,
+                                        Pageable pageable) {
+        return findWithFilters(search, statusNull, status, paymentStatusNull, paymentStatus, true, PaymentMethod.CREDIT, pageable);
+    }
 
     @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product LEFT JOIN FETCH o.reseller LEFT JOIN FETCH o.warehouse WHERE o.orderId = :id")
     Optional<Order> findWithItemsById(@Param("id") Integer id);

@@ -19,6 +19,7 @@ public class OrderDetailDto {
     private LocalDateTime createdAt;
     private OrderStatus status;
     private com.japstransfort.entity.PaymentStatus paymentStatus;
+    private com.japstransfort.entity.PaymentMethod paymentMethod;
 
     // ── Financials ────────────────────────────────────────────────────────────
     private BigDecimal subtotal;
@@ -116,6 +117,9 @@ public class OrderDetailDto {
 
     public com.japstransfort.entity.PaymentStatus getPaymentStatus() { return paymentStatus; }
     public void setPaymentStatus(com.japstransfort.entity.PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public com.japstransfort.entity.PaymentMethod getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(com.japstransfort.entity.PaymentMethod paymentMethod) { this.paymentMethod = paymentMethod; }
 
     public BigDecimal getSubtotal() { return subtotal; }
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }

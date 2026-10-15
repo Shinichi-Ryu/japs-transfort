@@ -42,6 +42,10 @@ public class Order {
     @Column(name = "payment_status", columnDefinition = "payment_status")
     private PaymentStatus paymentStatus = PaymentStatus.unpaid;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", length = 20, nullable = false)
+    private PaymentMethod paymentMethod = PaymentMethod.CREDIT;
+
     @Column(name = "subtotal", precision = 12, scale = 2)
     private BigDecimal subtotal = BigDecimal.ZERO;
 
@@ -102,6 +106,9 @@ public class Order {
 
     public PaymentStatus getPaymentStatus() { return paymentStatus; }
     public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public PaymentMethod getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(PaymentMethod paymentMethod) { this.paymentMethod = paymentMethod; }
 
     public BigDecimal getSubtotal() { return subtotal; }
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }

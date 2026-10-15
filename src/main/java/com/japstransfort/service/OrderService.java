@@ -81,9 +81,28 @@ public class OrderService {
      * Throws IllegalStateException with a user-friendly message on validation failure.
      */
     @Transactional
-    public Order placeOrder(Reseller reseller, Map<Integer, Integer> cart, BigDecimal discountPct) {
+    public Order placeOrder(Reseller reseller, Map<Integer, Integer> cart, BigDecimal discountPct, String paymentMethod) {
         if (cart == null || cart.isEmpty()) {
             throw new IllegalStateException("Your cart is empty. Please add items before placing an order.");
+        }
+
+        // Validate payment method
+        if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+            throw new IllegalArgumentException("Please select a payment method.");
+        }
+        String cleanPm = paymentMethod.trim().toUpperCase();
+        if ("ONLINE".equals(cleanPm)) {
+            throw new IllegalArgumentException("Online payment is currently unavailable. Please choose another payment method.");
+        }
+        if (!"COD".equals(cleanPm) && !"CREDIT".equals(cleanPm)) {
+            throw new IllegalArgumentException("Invalid payment method selected.");
+        }
+
+        PaymentMethod pm = PaymentMethod.valueOf(cleanPm);
+
+        BigDecimal creditLimit = reseller.getCreditLimit() != null ? reseller.getCreditLimit() : BigDecimal.ZERO;
+        if (pm == PaymentMethod.CREDIT && creditLimit.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalStateException("On account (credit) is only available for accounts with a credit limit.");
         }
 
         // Build rows to compute total (server-side prices, skip inactive)
@@ -106,31 +125,32 @@ public class OrderService {
 
         BigDecimal total = subtotal;
 
-        // Credit limit check
-        BigDecimal creditLimit = reseller.getCreditLimit() != null ? reseller.getCreditLimit() : BigDecimal.ZERO;
-        BigDecimal balance = reseller.getBalance() != null ? reseller.getBalance() : BigDecimal.ZERO;
-        BigDecimal pendingTotal = BigDecimal.ZERO;
-        try {
-            BigDecimal pt = orderRepository.sumPendingTotalByReseller(reseller.getResellerId());
-            if (pt != null) {
-                pendingTotal = pt;
-            }
-        } catch (Exception e) {
+        // Credit limit check applies ONLY to On account (CREDIT) orders. COD orders skip it.
+        if (pm == PaymentMethod.CREDIT) {
+            BigDecimal balance = reseller.getBalance() != null ? reseller.getBalance() : BigDecimal.ZERO;
+            BigDecimal pendingTotal = BigDecimal.ZERO;
             try {
-                pendingTotal = getMyOrders(reseller.getResellerId()).stream()
-                        .filter(o -> o.getStatus() == OrderStatus.pending && o.getTotal() != null)
-                        .map(Order::getTotal)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-            } catch (Exception ignored) {
+                BigDecimal pt = orderRepository.sumPendingTotalByReseller(reseller.getResellerId());
+                if (pt != null) {
+                    pendingTotal = pt;
+                }
+            } catch (Exception e) {
+                try {
+                    pendingTotal = getMyOrders(reseller.getResellerId()).stream()
+                            .filter(o -> o.getStatus() == OrderStatus.pending && o.getTotal() != null)
+                            .map(Order::getTotal)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                } catch (Exception ignored) {
+                }
             }
-        }
 
-        BigDecimal availableCredit = creditLimit.subtract(balance).subtract(pendingTotal);
+            BigDecimal availableCredit = creditLimit.subtract(balance).subtract(pendingTotal);
 
-        if (total.compareTo(availableCredit) > 0) {
-            throw new IllegalStateException(String.format(
-                    "Insufficient credit. Order total: ₱%s | Available credit: ₱%s (Limit: ₱%s − Outstanding balance: ₱%s − Pending orders: ₱%s).",
-                    format(total), format(availableCredit), format(creditLimit), format(balance), format(pendingTotal)));
+            if (total.compareTo(availableCredit) > 0) {
+                throw new IllegalStateException(String.format(
+                        "Insufficient credit. Order total: ₱%s | Available credit: ₱%s (Limit: ₱%s − Outstanding balance: ₱%s − Pending orders: ₱%s).",
+                        format(total), format(availableCredit), format(creditLimit), format(balance), format(pendingTotal)));
+            }
         }
 
         // Generate unique order number
@@ -143,6 +163,7 @@ public class OrderService {
         order.setWarehouse(null);
         order.setStatus(OrderStatus.pending);
         order.setPaymentStatus(PaymentStatus.unpaid);
+        order.setPaymentMethod(pm);
         order.setSubtotal(subtotal);
         order.setDiscount(discountAmount);
         order.setTotal(total);
@@ -159,6 +180,11 @@ public class OrderService {
         }
 
         return orderRepository.save(order);
+    }
+
+    @Transactional
+    public Order placeOrder(Reseller reseller, Map<Integer, Integer> cart, BigDecimal discountPct) {
+        return placeOrder(reseller, cart, discountPct, PaymentMethod.CREDIT.name());
     }
 
     /**
@@ -287,6 +313,7 @@ public class OrderService {
 
             // Financials and payments
             dto.setPaymentStatus(order.getPaymentStatus());
+            dto.setPaymentMethod(order.getPaymentMethod());
             BigDecimal amountPaid = paymentRepository.sumAmountByOrderId(orderId);
             if (amountPaid == null) amountPaid = BigDecimal.ZERO;
             amountPaid = amountPaid.setScale(2, RoundingMode.HALF_UP);

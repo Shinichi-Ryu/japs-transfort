@@ -345,6 +345,7 @@ public class PortalController {
     public String placeOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "selectedIds", required = false) List<Integer> selectedIds,
+            @RequestParam(value = "paymentMethod", required = false) String paymentMethod,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
@@ -372,7 +373,7 @@ public class PortalController {
         }
 
         try {
-            Order order = orderService.placeOrder(reseller, subCart, discountPct);
+            Order order = orderService.placeOrder(reseller, subCart, discountPct, paymentMethod);
             // Remove only the ordered items from the session cart; leave unchecked items
             for (Integer pid : subCart.keySet()) {
                 cart.remove(pid);

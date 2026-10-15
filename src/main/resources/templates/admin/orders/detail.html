@@ -80,6 +80,18 @@
                                 </div>
                             </div>
                             <div class="col-6">
+                                <label class="text-muted small">Payment Method</label>
+                                <div>
+                                    <span class="badge"
+                                          th:classappend="${order.paymentMethod != null and order.paymentMethod.name() == 'COD' ? 'bg-primary-subtle text-primary border border-primary-subtle' :
+                                                           (order.paymentMethod != null and order.paymentMethod.name() == 'ONLINE' ? 'bg-info-subtle text-info border border-info-subtle' :
+                                                           'bg-secondary-subtle text-secondary border border-secondary-subtle')}"
+                                          th:text="${order.paymentMethod != null ? (order.paymentMethod.name() == 'COD' ? 'Cash on delivery' : (order.paymentMethod.name() == 'ONLINE' ? 'Online' : 'On account')) : 'On account'}">
+                                        On account
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-6">
                                 <label class="text-muted small">Warehouse</label>
                                 <div class="fw-medium">
                                     <span th:if="${order.warehouse != null}" class="badge bg-info-subtle text-info-emphasis border border-info-subtle" th:text="${order.warehouse.name}">Main Warehouse</span>
@@ -527,6 +539,14 @@
                     </div>
                     <form th:action="@{'/admin/orders/' + ${order.orderId} + '/deliver'}" method="post">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <!-- Cash collected checkbox for COD orders -->
+                        <div th:if="${order.paymentMethod != null and order.paymentMethod.name() == 'COD'}" class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="cashCollected" id="cashCollected" value="true" checked>
+                            <label class="form-check-label fw-semibold text-dark small" for="cashCollected">
+                                Cash collected (<span class="font-monospace text-primary" th:text="'₱' + ${#numbers.formatDecimal(amountRemaining, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>)
+                            </label>
+                            <div class="form-text text-muted">Automatically record full cash payment upon delivery.</div>
+                        </div>
                         <button type="submit" class="btn btn-success btn-sm"
                                 onclick="return confirm('Mark this order as delivered?')">
                             <i class="bi bi-check2-all me-1"></i> Mark as Delivered

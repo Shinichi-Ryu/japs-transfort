@@ -180,6 +180,18 @@
                                 </div>
                             </div>
                             <div class="col-6">
+                                <label class="text-muted small">Payment Method</label>
+                                <div>
+                                    <span class="badge"
+                                          th:classappend="${order.paymentMethod != null and order.paymentMethod.name() == 'COD' ? 'bg-primary-subtle text-primary border border-primary-subtle' :
+                                                           (order.paymentMethod != null and order.paymentMethod.name() == 'ONLINE' ? 'bg-info-subtle text-info border border-info-subtle' :
+                                                           'bg-secondary-subtle text-secondary border border-secondary-subtle')}"
+                                          th:text="${order.paymentMethod != null ? (order.paymentMethod.name() == 'COD' ? 'Cash on delivery' : (order.paymentMethod.name() == 'ONLINE' ? 'Online' : 'On account')) : 'On account'}">
+                                        On account
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-6">
                                 <label class="text-muted small">Amount Paid</label>
                                 <div class="fw-semibold text-success font-monospace"
                                      th:text="'₱' + ${#numbers.formatDecimal(order.amountPaid != null ? order.amountPaid : 0, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>

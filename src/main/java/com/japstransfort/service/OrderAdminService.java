@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -33,6 +34,7 @@ public class OrderAdminService {
     private final ShipmentRepository shipmentRepository;
     private final com.japstransfort.repository.PaymentRepository paymentRepository;
     private final CommissionService commissionService;
+    private final OrderService orderService;
 
     public OrderAdminService(OrderRepository orderRepository,
                              InventoryRepository inventoryRepository,
@@ -41,7 +43,8 @@ public class OrderAdminService {
                              ResellerRepository resellerRepository,
                              ShipmentRepository shipmentRepository,
                              com.japstransfort.repository.PaymentRepository paymentRepository,
-                             CommissionService commissionService) {
+                             CommissionService commissionService,
+                             OrderService orderService) {
         this.orderRepository = orderRepository;
         this.inventoryRepository = inventoryRepository;
         this.stockMovementRepository = stockMovementRepository;
@@ -50,13 +53,14 @@ public class OrderAdminService {
         this.shipmentRepository = shipmentRepository;
         this.paymentRepository = paymentRepository;
         this.commissionService = commissionService;
+        this.orderService = orderService;
     }
 
     /**
-     * Lists paginated orders filtered by search term, status, and payment status, newest first.
+     * Lists paginated orders filtered by search term, status, payment status, and payment method, newest first.
      */
     @Transactional(readOnly = true)
-    public Page<Order> getOrders(String search, String status, String paymentStatus, int page, int size) {
+    public Page<Order> getOrders(String search, String status, String paymentStatus, String paymentMethod, int page, int size) {
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
                 size > 0 ? size : 10,
@@ -90,12 +94,29 @@ public class OrderAdminService {
             }
         }
 
-        return orderRepository.findWithFilters(searchParam, statusNull, orderStatus, paymentStatusNull, payStatus, pageable);
+        boolean paymentMethodNull = true;
+        PaymentMethod payMethod = PaymentMethod.CREDIT;
+
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty() && !"all".equalsIgnoreCase(paymentMethod.trim())) {
+            try {
+                payMethod = PaymentMethod.valueOf(paymentMethod.trim().toUpperCase());
+                paymentMethodNull = false;
+            } catch (IllegalArgumentException ignored) {
+                paymentMethodNull = true;
+            }
+        }
+
+        return orderRepository.findWithFilters(searchParam, statusNull, orderStatus, paymentStatusNull, payStatus, paymentMethodNull, payMethod, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Order> getOrders(String search, String status, String paymentStatus, int page, int size) {
+        return getOrders(search, status, paymentStatus, null, page, size);
     }
 
     @Transactional(readOnly = true)
     public Page<Order> getOrders(String search, String status, int page, int size) {
-        return getOrders(search, status, null, page, size);
+        return getOrders(search, status, null, null, page, size);
     }
 
     /**
@@ -380,9 +401,10 @@ public class OrderAdminService {
 
     /**
      * Marks a shipped order as delivered: updates shipment status and delivered_at, sets order delivered.
+     * For COD orders, if cashCollected is true, records full remaining payment in cash ("COD-" + orderNo) in the same transaction.
      */
     @Transactional
-    public Order markDelivered(Integer orderId) {
+    public Order markDelivered(Integer orderId, boolean cashCollected, User admin) {
         Order order = orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found (ID " + orderId + ")."));
 
@@ -402,9 +424,24 @@ public class OrderAdminService {
         orderRepository.save(order);
         orderRepository.touchUpdatedAt(orderId);
 
+        if (order.getPaymentMethod() == PaymentMethod.COD && cashCollected) {
+            BigDecimal orderTotal = order.getTotal() != null ? order.getTotal() : BigDecimal.ZERO;
+            BigDecimal currentPaid = paymentRepository.sumAmountByOrderId(orderId);
+            if (currentPaid == null) currentPaid = BigDecimal.ZERO;
+            BigDecimal remaining = orderTotal.subtract(currentPaid).setScale(2, RoundingMode.HALF_UP);
+            if (remaining.compareTo(BigDecimal.ZERO) > 0) {
+                orderService.recordPayment(orderId, remaining, "Cash", "COD-" + order.getOrderNo(), admin);
+            }
+        }
+
         commissionService.createCommissionIfEligible(order);
 
         return order;
+    }
+
+    @Transactional
+    public Order markDelivered(Integer orderId) {
+        return markDelivered(orderId, false, null);
     }
 
     /**

@@ -167,6 +167,40 @@
                         <form id="placeOrderForm" th:action="@{/portal/cart/place-order}" method="post">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <div id="selectedIdsContainer"></div>
+
+                            <!-- Payment Method Selection -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark small mb-2">
+                                    <i class="bi bi-wallet2 me-1"></i> Payment Method <span class="text-danger">*</span>
+                                </label>
+
+                                <!-- Cash on delivery -->
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pmCod" value="COD" required>
+                                    <label class="form-check-label text-dark small" for="pmCod">
+                                        Cash on delivery
+                                    </label>
+                                </div>
+
+                                <!-- Online payment (GCash / bank transfer) - DISABLED -->
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pmOnline" value="ONLINE" disabled>
+                                    <label class="form-check-label text-muted small" for="pmOnline">
+                                        Online payment (GCash / bank transfer)
+                                        <span class="badge bg-secondary ms-1">Coming soon</span>
+                                    </label>
+                                    <div class="text-muted small ps-1" style="font-size: 0.75rem;">Online payment is a work in progress</div>
+                                </div>
+
+                                <!-- On account (credit) - shown ONLY if credit_limit > 0 -->
+                                <div class="form-check mb-2" th:if="${reseller != null and reseller.creditLimit != null and reseller.creditLimit.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pmCredit" value="CREDIT" required>
+                                    <label class="form-check-label text-dark small" for="pmCredit">
+                                        On account (credit)
+                                    </label>
+                                </div>
+                            </div>
+
                             <button type="submit" id="placeOrderBtn" class="btn btn-primary w-100 py-2 fw-semibold">
                                 <i class="bi bi-check2-circle me-1"></i> Place Order
                             </button>

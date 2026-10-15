@@ -21,6 +21,9 @@ import java.util.Optional;
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, InventoryId> {
 
+    @Query("SELECT COUNT(i) FROM Inventory i WHERE i.quantity <= COALESCE(i.product.reorderLevel, 0)")
+    long countLowStockItems();
+
     List<Inventory> findById_WarehouseId(Integer warehouseId);
 
     List<Inventory> findById_ProductId(Integer productId);

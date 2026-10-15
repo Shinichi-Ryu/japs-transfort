@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,9 @@ import java.util.Optional;
  */
 @Repository
 public interface ResellerRepository extends JpaRepository<Reseller, Integer> {
+
+    @Query("SELECT COALESCE(SUM(r.balance), 0) FROM Reseller r")
+    BigDecimal sumTotalBalance();
 
     Optional<Reseller> findByUser_UserId(Integer userId);
 

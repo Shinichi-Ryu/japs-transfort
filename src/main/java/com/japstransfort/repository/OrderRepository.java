@@ -15,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +24,66 @@ import java.util.Optional;
  */
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
+
+    long countByStatus(OrderStatus status);
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.status IN (:salesStatuses) AND o.createdAt >= :startDateTime AND o.createdAt < :endDateTime")
+    long countSalesOrders(@Param("salesStatuses") List<OrderStatus> salesStatuses,
+                          @Param("startDateTime") LocalDateTime startDateTime,
+                          @Param("endDateTime") LocalDateTime endDateTime);
+
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE o.status IN (:salesStatuses) AND o.createdAt >= :startDateTime AND o.createdAt < :endDateTime")
+    BigDecimal sumGrossSales(@Param("salesStatuses") List<OrderStatus> salesStatuses,
+                             @Param("startDateTime") LocalDateTime startDateTime,
+                             @Param("endDateTime") LocalDateTime endDateTime);
+
+    @Query("SELECT new com.japstransfort.dto.ResellerSalesDto(r.businessName, COUNT(o), COALESCE(SUM(o.total), 0)) " +
+           "FROM Order o JOIN o.reseller r " +
+           "WHERE o.status IN (:salesStatuses) AND o.createdAt >= :startDateTime AND o.createdAt < :endDateTime " +
+           "GROUP BY r.resellerId, r.businessName " +
+           "ORDER BY SUM(o.total) DESC")
+    List<com.japstransfort.dto.ResellerSalesDto> findSalesByReseller(
+            @Param("salesStatuses") List<OrderStatus> salesStatuses,
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime);
+
+    @Query("SELECT new com.japstransfort.dto.ProductSalesDto(p.sku, p.name, SUM(i.quantity), COALESCE(SUM(i.lineTotal), 0)) " +
+           "FROM OrderItem i JOIN i.order o JOIN i.product p " +
+           "WHERE o.status IN (:salesStatuses) AND o.createdAt >= :startDateTime AND o.createdAt < :endDateTime " +
+           "GROUP BY p.productId, p.sku, p.name " +
+           "ORDER BY SUM(i.lineTotal) DESC")
+    List<com.japstransfort.dto.ProductSalesDto> findSalesByProduct(
+            @Param("salesStatuses") List<OrderStatus> salesStatuses,
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime);
+
+    @Query("SELECT new com.japstransfort.dto.PaymentMethodSalesDto(o.paymentMethod, COUNT(o), COALESCE(SUM(o.total), 0)) " +
+           "FROM Order o " +
+           "WHERE o.status IN (:salesStatuses) AND o.createdAt >= :startDateTime AND o.createdAt < :endDateTime " +
+           "GROUP BY o.paymentMethod " +
+           "ORDER BY SUM(o.total) DESC")
+    List<com.japstransfort.dto.PaymentMethodSalesDto> findSalesByPaymentMethod(
+            @Param("salesStatuses") List<OrderStatus> salesStatuses,
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime);
+
+    @Query(value = "SELECT TO_CHAR(o.created_at, 'YYYY-MM-DD') AS saleDate, COUNT(o.order_id) AS orderCount, COALESCE(SUM(o.total), 0) AS totalAmount " +
+                   "FROM orders o " +
+                   "WHERE o.status IN ('approved', 'packed', 'shipped', 'delivered') " +
+                   "  AND o.created_at >= :startDateTime " +
+                   "  AND o.created_at < :endDateTime " +
+                   "GROUP BY TO_CHAR(o.created_at, 'YYYY-MM-DD') " +
+                   "ORDER BY saleDate DESC", nativeQuery = true)
+    List<Object[]> findDailySales(@Param("startDateTime") LocalDateTime startDateTime,
+                                  @Param("endDateTime") LocalDateTime endDateTime);
+
+    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.reseller LEFT JOIN FETCH o.payments " +
+           "WHERE o.status IN (:salesStatuses) AND o.createdAt >= :startDateTime AND o.createdAt < :endDateTime " +
+           "ORDER BY o.createdAt DESC, o.orderId DESC")
+    List<Order> findSalesOrdersForExport(
+            @Param("salesStatuses") List<OrderStatus> salesStatuses,
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime);
 
     @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product LEFT JOIN FETCH o.shipment WHERE o.reseller.resellerId = :resellerId ORDER BY o.createdAt DESC, o.orderId DESC")
     List<Order> findByReseller_ResellerIdOrderByCreatedAtDesc(@Param("resellerId") Integer resellerId);

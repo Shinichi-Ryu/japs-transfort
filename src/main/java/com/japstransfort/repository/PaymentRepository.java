@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -17,6 +18,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
 
     @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Payment p WHERE p.order.orderId = :orderId")
     BigDecimal sumAmountByOrderId(@Param("orderId") Integer orderId);
+
+    @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Payment p WHERE p.paidAt >= :startDateTime AND p.paidAt < :endDateTime")
+    BigDecimal sumAmountByPaidAtBetween(@Param("startDateTime") LocalDateTime startDateTime, @Param("endDateTime") LocalDateTime endDateTime);
 
     boolean existsByOrder_OrderId(Integer orderId);
 }

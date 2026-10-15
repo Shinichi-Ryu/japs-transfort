@@ -2,7 +2,11 @@ package com.japstransfort.controller;
 
 import com.japstransfort.config.CustomUserDetails;
 import com.japstransfort.dto.ResellerRegistrationDto;
+import com.japstransfort.entity.OrderStatus;
 import com.japstransfort.repository.CategoryRepository;
+import com.japstransfort.repository.CommissionRepository;
+import com.japstransfort.repository.InventoryRepository;
+import com.japstransfort.repository.OrderRepository;
 import com.japstransfort.repository.ProductRepository;
 import com.japstransfort.repository.ResellerRepository;
 import com.japstransfort.repository.ResellerTierRepository;
@@ -43,19 +47,28 @@ public class AuthController {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final ResellerService resellerService;
+    private final OrderRepository orderRepository;
+    private final InventoryRepository inventoryRepository;
+    private final CommissionRepository commissionRepository;
 
     public AuthController(ProductRepository productRepository,
                           ResellerRepository resellerRepository,
                           ResellerTierRepository tierRepository,
                           CategoryRepository categoryRepository,
                           UserRepository userRepository,
-                          ResellerService resellerService) {
+                          ResellerService resellerService,
+                          OrderRepository orderRepository,
+                          InventoryRepository inventoryRepository,
+                          CommissionRepository commissionRepository) {
         this.productRepository = productRepository;
         this.resellerRepository = resellerRepository;
         this.tierRepository = tierRepository;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
         this.resellerService = resellerService;
+        this.orderRepository = orderRepository;
+        this.inventoryRepository = inventoryRepository;
+        this.commissionRepository = commissionRepository;
     }
 
     @GetMapping("/")
@@ -189,6 +202,14 @@ public class AuthController {
         model.addAttribute("totalTiers", tierRepository.count());
         model.addAttribute("totalCategories", categoryRepository.count());
         model.addAttribute("pendingApplications", resellerRepository.countByStatus("pending"));
+
+        // Operational metric cards
+        model.addAttribute("pendingOrders", orderRepository.countByStatus(OrderStatus.pending));
+        model.addAttribute("toPackOrders", orderRepository.countByStatus(OrderStatus.approved));
+        model.addAttribute("toShipOrders", orderRepository.countByStatus(OrderStatus.packed));
+        model.addAttribute("lowStockItems", inventoryRepository.countLowStockItems());
+        model.addAttribute("unpaidBalances", resellerRepository.sumTotalBalance());
+        model.addAttribute("pendingCommissions", commissionRepository.sumAmountByStatus("pending"));
 
         return "dashboard";
     }

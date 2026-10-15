@@ -22,7 +22,130 @@
                 <p class="text-muted mb-0 small">Welcome back, <span class="fw-semibold text-primary" th:text="${currentUser != null ? currentUser.fullName : 'Administrator'}">User</span>! Here is your system overview.</p>
             </div>
             <div class="badge bg-light text-dark border p-2 px-3 small">
-                <i class="bi bi-clock-history me-1 text-primary"></i> Phase 1 Active &bull; Spring Boot 4
+                <i class="bi bi-speedometer2 me-1 text-primary"></i> Admin dashboard
+            </div>
+        </div>
+
+        <!-- Operational Cards -->
+        <div class="row g-3 mb-4">
+            <!-- Pending Orders Card -->
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
+                <div class="card stat-card shadow-sm p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-medium text-uppercase">Pending Orders</span>
+                            <h2 class="fw-bold mb-0 text-dark" th:text="${pendingOrders}">0</h2>
+                        </div>
+                        <div class="stat-icon bg-warning-subtle text-warning">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top">
+                        <a th:href="@{/admin/orders(status='pending')}" class="text-decoration-none small fw-semibold text-warning">
+                            Pending Orders <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- To Pack (Approved) Card -->
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
+                <div class="card stat-card shadow-sm p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-medium text-uppercase">To Pack</span>
+                            <h2 class="fw-bold mb-0 text-dark" th:text="${toPackOrders}">0</h2>
+                        </div>
+                        <div class="stat-icon bg-info-subtle text-info">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top">
+                        <a th:href="@{/admin/orders(status='approved')}" class="text-decoration-none small fw-semibold text-info">
+                            To Pack <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- To Ship (Packed) Card -->
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
+                <div class="card stat-card shadow-sm p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-medium text-uppercase">To Ship</span>
+                            <h2 class="fw-bold mb-0 text-dark" th:text="${toShipOrders}">0</h2>
+                        </div>
+                        <div class="stat-icon bg-primary-subtle text-primary">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top">
+                        <a th:href="@{/admin/orders(status='packed')}" class="text-decoration-none small fw-semibold text-primary">
+                            To Ship <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Low Stock Items Card -->
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
+                <div class="card stat-card shadow-sm p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-medium text-uppercase">Low Stock Items</span>
+                            <h2 class="fw-bold mb-0 text-danger" th:text="${lowStockItems}">0</h2>
+                        </div>
+                        <div class="stat-icon bg-danger-subtle text-danger">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top">
+                        <a th:href="@{/admin/inventory}" class="text-decoration-none small fw-semibold text-danger">
+                            Low Stock Items <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unpaid Balances Card -->
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
+                <div class="card stat-card shadow-sm p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-medium text-uppercase">Unpaid Balances</span>
+                            <h4 class="fw-bold mb-0 text-dark" th:text="'₱' + ${#numbers.formatDecimal(unpaidBalances, 1, 'COMMA', 2, 'POINT')}">₱0.00</h4>
+                        </div>
+                        <div class="stat-icon bg-danger-subtle text-danger">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top">
+                        <a th:href="@{/admin/resellers}" class="text-decoration-none small fw-semibold text-danger">
+                            Unpaid Balances <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Commissions Card -->
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
+                <div class="card stat-card shadow-sm p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-medium text-uppercase">Pending Commissions</span>
+                            <h4 class="fw-bold mb-0 text-dark" th:text="'₱' + ${#numbers.formatDecimal(pendingCommissions, 1, 'COMMA', 2, 'POINT')}">₱0.00</h4>
+                        </div>
+                        <div class="stat-icon bg-success-subtle text-success">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-top">
+                        <a th:href="@{/admin/commissions(status='pending')}" class="text-decoration-none small fw-semibold text-success">
+                            Pending Commissions <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 

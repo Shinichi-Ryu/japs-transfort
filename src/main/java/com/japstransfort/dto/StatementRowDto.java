@@ -17,8 +17,11 @@ public class StatementRowDto {
     /** order_no (Invoice) or formatted receipt number (Payment) */
     private String reference;
 
-    /** URL to the order detail or receipt page */
-    private String referenceUrl;
+    /** orderId for Invoice rows (used to build order detail link) */
+    private Integer orderId;
+
+    /** paymentId for Payment rows (used to build receipt link) */
+    private Integer paymentId;
 
     /** debit amount (charges) – null for payments */
     private BigDecimal debit;
@@ -34,12 +37,14 @@ public class StatementRowDto {
 
     public StatementRowDto() {}
 
-    public StatementRowDto(LocalDate date, String type, String reference, String referenceUrl,
+    public StatementRowDto(LocalDate date, String type, String reference,
+                           Integer orderId, Integer paymentId,
                            BigDecimal debit, BigDecimal credit, int sortOrder) {
         this.date = date;
         this.type = type;
         this.reference = reference;
-        this.referenceUrl = referenceUrl;
+        this.orderId = orderId;
+        this.paymentId = paymentId;
         this.debit = debit;
         this.credit = credit;
         this.sortOrder = sortOrder;
@@ -54,8 +59,11 @@ public class StatementRowDto {
     public String getReference() { return reference; }
     public void setReference(String reference) { this.reference = reference; }
 
-    public String getReferenceUrl() { return referenceUrl; }
-    public void setReferenceUrl(String referenceUrl) { this.referenceUrl = referenceUrl; }
+    public Integer getOrderId() { return orderId; }
+    public void setOrderId(Integer orderId) { this.orderId = orderId; }
+
+    public Integer getPaymentId() { return paymentId; }
+    public void setPaymentId(Integer paymentId) { this.paymentId = paymentId; }
 
     public BigDecimal getDebit() { return debit; }
     public void setDebit(BigDecimal debit) { this.debit = debit; }

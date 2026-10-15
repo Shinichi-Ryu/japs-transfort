@@ -1,9 +1,12 @@
 package com.japstransfort.service;
 
 import com.japstransfort.dto.ProductFormDto;
+import com.japstransfort.dto.ProductImageMeta;
 import com.japstransfort.entity.Category;
 import com.japstransfort.entity.Product;
+import com.japstransfort.entity.ProductImage;
 import com.japstransfort.repository.CategoryRepository;
+import com.japstransfort.repository.ProductImageRepository;
 import com.japstransfort.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,7 +14,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -24,12 +41,19 @@ public class ProductService {
             "productId", "name", "sku", "costPrice", "srp", "reorderLevel", "isActive"
     );
 
+    private static final long MAX_IMAGE_BYTES = 2L * 1024 * 1024; // 2 MB
+    private static final int  MAX_SIDE_PX    = 800;
+
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductImageRepository productImageRepository;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductService(ProductRepository productRepository,
+                          CategoryRepository categoryRepository,
+                          ProductImageRepository productImageRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.productImageRepository = productImageRepository;
     }
 
     @Transactional(readOnly = true)
@@ -145,4 +169,130 @@ public class ProductService {
         product.setIsActive(true);
         productRepository.save(product);
     }
+
+    // ── Image helpers ─────────────────────────────────────────────────────────
+
+    /** Lightweight metadata for list pages; never loads byte[] data. */
+    @Transactional(readOnly = true)
+    public ProductImageMeta getImageMeta(Integer productId) {
+        Optional<java.time.LocalDateTime> ts = productImageRepository.findUpdatedAtByProductId(productId);
+        return new ProductImageMeta(productId, ts.isPresent(), ts.orElse(null));
+    }
+
+    /** Full image for the serving endpoint. */
+    @Transactional(readOnly = true)
+    public Optional<ProductImage> getImage(Integer productId) {
+        return productImageRepository.findByProductId(productId);
+    }
+
+    /**
+     * Validates, processes, and saves (or replaces) a product image.
+     * Runs in the same transaction as the product save when called from create/update.
+     */
+    @Transactional
+    public void saveImage(Integer productId, MultipartFile file) {
+        if (file == null || file.isEmpty()) return;
+
+        // Magic-byte detection (JPEG: FF D8 FF; PNG: 89 50 4E 47)
+        byte[] rawBytes;
+        try {
+            rawBytes = file.getBytes();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not read uploaded file.");
+        }
+        if (rawBytes.length > MAX_IMAGE_BYTES) {
+            throw new IllegalArgumentException("Image exceeds 2 MB limit.");
+        }
+        if (!isJpegOrPng(rawBytes)) {
+            throw new IllegalArgumentException("Only JPEG and PNG images are accepted (detected from file content).");
+        }
+
+        // Decode with ImageIO
+        BufferedImage original;
+        try {
+            original = ImageIO.read(new ByteArrayInputStream(rawBytes));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not decode image file.");
+        }
+        if (original == null) {
+            throw new IllegalArgumentException("File could not be decoded as a valid image.");
+        }
+
+        // Scale down if largest side > MAX_SIDE_PX; never enlarge
+        BufferedImage scaled = scaleDown(original, MAX_SIDE_PX);
+
+        // Flatten transparency onto white background and re-encode as JPEG
+        byte[] jpegBytes = encodeJpeg(scaled, 0.85f);
+
+        Product product = findById(productId);
+        ProductImage img = productImageRepository.findByProductId(productId).orElse(new ProductImage());
+        img.setProduct(product);
+        img.setContentType("image/jpeg");
+        img.setData(jpegBytes);
+        img.setUpdatedAt(LocalDateTime.now());
+        productImageRepository.save(img);
+    }
+
+    @Transactional
+    public void removeImage(Integer productId) {
+        productImageRepository.deleteByProductId(productId);
+    }
+
+    // ── Private image utilities ───────────────────────────────────────────────
+
+    private boolean isJpegOrPng(byte[] bytes) {
+        if (bytes.length < 4) return false;
+        // JPEG: FF D8 FF
+        if ((bytes[0] & 0xFF) == 0xFF && (bytes[1] & 0xFF) == 0xD8 && (bytes[2] & 0xFF) == 0xFF) {
+            return true;
+        }
+        // PNG: 89 50 4E 47
+        return (bytes[0] & 0xFF) == 0x89 && (bytes[1] & 0xFF) == 0x50
+                && (bytes[2] & 0xFF) == 0x4E && (bytes[3] & 0xFF) == 0x47;
+    }
+
+    private BufferedImage scaleDown(BufferedImage src, int maxSide) {
+        int w = src.getWidth();
+        int h = src.getHeight();
+        if (w <= maxSide && h <= maxSide) return src;
+        double ratio = (double) maxSide / Math.max(w, h);
+        int nw = (int) Math.max(1, w * ratio);
+        int nh = (int) Math.max(1, h * ratio);
+        BufferedImage result = new BufferedImage(nw, nh, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = result.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, nw, nh);
+        g.drawImage(src, 0, 0, nw, nh, null);
+        g.dispose();
+        return result;
+    }
+
+    private byte[] encodeJpeg(BufferedImage img, float quality) {
+        // Flatten onto white background (handles PNG with alpha channel)
+        BufferedImage rgb = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = rgb.createGraphics();
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, rgb.getWidth(), rgb.getHeight());
+        g.drawImage(img, 0, 0, null);
+        g.dispose();
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
+            if (!writers.hasNext()) throw new IllegalStateException("No JPEG writer found.");
+            ImageWriter writer = writers.next();
+            ImageWriteParam param = writer.getDefaultWriteParam();
+            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            param.setCompressionQuality(quality);
+            try (ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {
+                writer.setOutput(ios);
+                writer.write(null, new IIOImage(rgb, null, null), param);
+                writer.dispose();
+            }
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to encode image as JPEG.", e);
+        }
+    }
 }
+

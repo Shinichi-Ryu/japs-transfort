@@ -104,7 +104,9 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="ps-3">
+                                <!-- Photo column header (no sort) -->
+                                <th scope="col" class="ps-3" style="width: 64px;">Photo</th>
+                                <th scope="col">
                                     <a class="text-decoration-none text-muted d-inline-flex align-items-center"
                                        th:href="@{/admin/products(search=${search}, categoryId=${categoryId}, status=${status}, sort='sku', dir=${sort == 'sku' ? reverseDir : 'asc'})}">
                                         SKU
@@ -153,12 +155,30 @@
                         </thead>
                         <tbody>
                             <tr th:if="${productsPage.empty}">
-                                <td colspan="9" class="text-center text-muted py-4">
+                                <td colspan="10" class="text-center text-muted py-4">
                                     No products found matching the criteria.
                                 </td>
                             </tr>
-                            <tr th:each="product : ${productsPage.content}">
-                                <td class="ps-3 fw-mono small fw-semibold text-secondary" th:text="${product.sku}">SKU-001</td>
+                            <tr th:each="product : ${productsPage.content}"
+                                th:with="meta=${imageMetas[product.productId]}">
+                                <!-- Thumbnail cell -->
+                                <td class="ps-3">
+                                    <img th:if="${meta != null and meta.hasImage}"
+                                         th:src="@{/products/{id}/image(id=${product.productId}, v=${meta.version})}"
+                                         alt="Product photo"
+                                         class="product-thumb-sm"
+                                         width="48" height="48">
+                                    <!-- Neutral placeholder (inline SVG, no external font/image) -->
+                                    <span th:unless="${meta != null and meta.hasImage}"
+                                          class="product-thumb-placeholder-sm"
+                                          aria-label="No photo">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#adb5bd" viewBox="0 0 16 16">
+                                            <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                            <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                                        </svg>
+                                    </span>
+                                </td>
+                                <td class="ps-0 fw-mono small fw-semibold text-secondary" th:text="${product.sku}">SKU-001</td>
                                 <td class="fw-medium text-dark" th:text="${product.name}">Product Name</td>
                                 <td>
                                     <span class="badge bg-light text-dark border"

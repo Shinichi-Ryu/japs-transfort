@@ -177,3 +177,41 @@ body {
     }
 }
 
+/* Product Photos & Placeholders */
+.product-thumb-sm {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+.product-thumb-placeholder-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background-color: #f1f5f9;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+.product-thumb-catalog {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border: 1px solid #e2e8f0;
+}
+
+.product-thumb-placeholder-catalog {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background-color: #f1f5f9;
+    border-radius: 0.375rem;
+    border: 1px solid #e2e8f0;
+}
+

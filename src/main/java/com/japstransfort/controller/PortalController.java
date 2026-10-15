@@ -131,8 +131,15 @@ public class PortalController {
 
         int cartSize = getCart(session).values().stream().mapToInt(Integer::intValue).sum();
 
+        // Lightweight image metadata for thumbnail column (no bytes loaded)
+        Map<Integer, com.japstransfort.dto.ProductImageMeta> imageMetas = new java.util.HashMap<>();
+        for (Product product : productsPage.getContent()) {
+            imageMetas.put(product.getProductId(), productService.getImageMeta(product.getProductId()));
+        }
+
         if (userDetails != null) model.addAttribute("currentUser", userDetails.getUser());
         model.addAttribute("productsPage", productsPage);
+        model.addAttribute("imageMetas", imageMetas);
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("reseller", reseller);
         model.addAttribute("tierName", tierName);

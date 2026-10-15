@@ -81,24 +81,10 @@ public class StatementPortalController {
             return "portal/order-not-found";
         }
 
-        // Rewrite invoice reference URLs to portal-facing paths
-        StatementDto stmt = opt.get();
-        for (StatementRowDto row : stmt.getRows()) {
-            if ("Invoice".equals(row.getType())) {
-                // extract orderId from admin URL and build portal URL by order number lookup
-                // The order URL uses orderId; we keep the same ID but point to portal
-                String adminUrl = row.getReferenceUrl();
-                if (adminUrl != null && adminUrl.startsWith("/admin/orders/")) {
-                    String orderId = adminUrl.substring("/admin/orders/".length());
-                    row.setReferenceUrl("/portal/orders/" + orderId);
-                }
-            }
-            // Payment receipt URLs already point to /portal/payments/…/receipt
-        }
-
-        model.addAttribute("statement", stmt);
-        model.addAttribute("company", stmt.getCompany());
+        model.addAttribute("statement", opt.get());
+        model.addAttribute("company", opt.get().getCompany());
         return "statement/view";
+
     }
 
     @GetMapping("/statement/export")

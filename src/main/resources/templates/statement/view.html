@@ -202,8 +202,21 @@
                             <span th:if="${row.type == 'Invoice'}" class="badge bg-primary-subtle text-primary border border-primary-subtle">Invoice</span>
                             <span th:unless="${row.type == 'Invoice'}" class="badge bg-success-subtle text-success border border-success-subtle">Payment</span>
                         </td>
-                        <td class="small font-monospace">
-                            <a th:href="${row.referenceUrl}" th:text="${row.reference}" class="text-decoration-none">REF</a>
+                        <td class="small font-monospace" style="white-space: nowrap;">
+                            <!-- Invoice row: link to order detail -->
+                            <a th:if="${row.type == 'Invoice' and isAdmin and row.orderId != null}"
+                               th:href="@{/admin/orders/{id}(id=${row.orderId})}"
+                               th:text="${row.reference}" class="text-decoration-none">REF</a>
+                            <a th:if="${row.type == 'Invoice' and !isAdmin and row.orderId != null}"
+                               th:href="@{/portal/orders/{id}(id=${row.orderId})}"
+                               th:text="${row.reference}" class="text-decoration-none">REF</a>
+                            <!-- Payment row: link to receipt -->
+                            <a th:if="${row.type != 'Invoice' and isAdmin and row.paymentId != null}"
+                               th:href="@{/admin/payments/{id}/receipt(id=${row.paymentId})}"
+                               th:text="${row.reference}" class="text-decoration-none">REF</a>
+                            <a th:if="${row.type != 'Invoice' and !isAdmin and row.paymentId != null}"
+                               th:href="@{/portal/payments/{id}/receipt(id=${row.paymentId})}"
+                               th:text="${row.reference}" class="text-decoration-none">REF</a>
                         </td>
                         <td class="text-end font-monospace small text-dark"
                             th:if="${row.debit != null}"

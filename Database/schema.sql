@@ -61,6 +61,13 @@ CREATE TABLE products (
   is_active   BOOLEAN DEFAULT TRUE
 );
 
+CREATE TABLE IF NOT EXISTS product_images (
+  product_id   INT PRIMARY KEY REFERENCES products(product_id) ON DELETE CASCADE,
+  content_type VARCHAR(50) NOT NULL,
+  data         BYTEA NOT NULL,
+  updated_at   TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE warehouses (
   warehouse_id SERIAL PRIMARY KEY,
   name         VARCHAR(80) NOT NULL,

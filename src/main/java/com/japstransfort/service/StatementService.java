@@ -97,7 +97,8 @@ public class StatementService {
                     o.getCreatedAt() != null ? o.getCreatedAt().toLocalDate() : from,
                     "Invoice",
                     o.getOrderNo(),
-                    "/admin/orders/" + o.getOrderId(),   // admin URL; portal gets overridden later if needed
+                    o.getOrderId(),  // orderId for link
+                    null,            // no paymentId
                     scale2(o.getTotal()),
                     null,
                     0  // sort order: Invoices first
@@ -112,13 +113,15 @@ public class StatementService {
                     p.getPaidAt() != null ? p.getPaidAt().toLocalDate() : from,
                     "Payment",
                     receiptNo,
-                    "/portal/payments/" + p.getPaymentId() + "/receipt",
+                    null,            // no orderId
+                    p.getPaymentId(), // paymentId for link
                     null,
                     scale2(p.getAmount()),
                     1  // sort order: Payments after Invoices on same date
             );
             rows.add(row);
         }
+
 
         // Sort: by date ASC, then sortOrder (Invoice=0 before Payment=1)
         rows.sort(Comparator.comparing(StatementRowDto::getDate)

@@ -226,6 +226,7 @@ public class ProductService {
 
         Product product = findById(productId);
         ProductImage img = productImageRepository.findByProductId(productId).orElse(new ProductImage());
+        img.setProductId(productId);
         img.setProduct(product);
         img.setContentType("image/jpeg");
         img.setData(jpegBytes);
@@ -279,19 +280,30 @@ public class ProductService {
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
-            if (!writers.hasNext()) throw new IllegalStateException("No JPEG writer found.");
-            ImageWriter writer = writers.next();
-            ImageWriteParam param = writer.getDefaultWriteParam();
-            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-            param.setCompressionQuality(quality);
-            try (ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {
-                writer.setOutput(ios);
-                writer.write(null, new IIOImage(rgb, null, null), param);
-                writer.dispose();
+            if (writers.hasNext()) {
+                ImageWriter writer = writers.next();
+                try (ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {
+                    writer.setOutput(ios);
+                    ImageWriteParam param = writer.getDefaultWriteParam();
+                    if (param.canWriteCompressed()) {
+                        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                        param.setCompressionQuality(quality);
+                    }
+                    writer.write(null, new IIOImage(rgb, null, null), param);
+                    ios.flush();
+                } finally {
+                    writer.dispose();
+                }
+            }
+            if (baos.size() == 0) {
+                boolean success = ImageIO.write(rgb, "jpg", baos);
+                if (!success) {
+                    throw new IllegalArgumentException("Failed to encode image as JPEG.");
+                }
             }
             return baos.toByteArray();
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to encode image as JPEG.", e);
+            throw new IllegalArgumentException("Failed to encode image as JPEG.", e);
         }
     }
 }

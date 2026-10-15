@@ -207,24 +207,6 @@ public class ProductAdminController {
     }
 
     /**
-     * Serves a product image. Accessible to any authenticated user (admin or reseller).
-     * Cache-Control: private, max-age=86400.
-     */
-    @GetMapping("/{id}/image")
-    @ResponseBody
-    public ResponseEntity<byte[]> serveImage(@PathVariable("id") Integer id) {
-        Optional<ProductImage> opt = productService.getImage(id);
-        if (opt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        ProductImage img = opt.get();
-        return ResponseEntity.ok()
-                .contentType(org.springframework.http.MediaType.parseMediaType(img.getContentType()))
-                .cacheControl(CacheControl.maxAge(86400, TimeUnit.SECONDS).cachePrivate())
-                .body(img.getData());
-    }
-
-    /**
      * Handles multipart size exceeded — shows a friendly error on the form.
      */
     @ExceptionHandler(MaxUploadSizeExceededException.class)

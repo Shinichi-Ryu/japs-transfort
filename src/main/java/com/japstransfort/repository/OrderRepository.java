@@ -85,6 +85,46 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
             @Param("startDateTime") LocalDateTime startDateTime,
             @Param("endDateTime") LocalDateTime endDateTime);
 
+    /**
+     * Receivables report: per reseller, sums remaining (total - paid) bucketed by age in days from order created_at.
+     * Only open orders (approved/packed/shipped/delivered) with remaining > 0 are included.
+     * Returns: reseller_id, business_name, balance, credit_limit, open_order_count, oldest_order_date,
+     *          bucket_0_30, bucket_31_60, bucket_61_90, bucket_over_90, total_remaining
+     */
+    @Query(value =
+        "SELECT r.reseller_id, r.business_name, r.balance, r.credit_limit, " +
+        "       COUNT(DISTINCT o.order_id) AS open_order_count, " +
+        "       MIN(o.created_at::date) AS oldest_order_date, " +
+        "       COALESCE(SUM(CASE WHEN CURRENT_DATE - o.created_at::date BETWEEN 0 AND 30 THEN GREATEST(o.total - COALESCE(paid.paid_sum,0), 0) ELSE 0 END), 0) AS bucket_0_30, " +
+        "       COALESCE(SUM(CASE WHEN CURRENT_DATE - o.created_at::date BETWEEN 31 AND 60 THEN GREATEST(o.total - COALESCE(paid.paid_sum,0), 0) ELSE 0 END), 0) AS bucket_31_60, " +
+        "       COALESCE(SUM(CASE WHEN CURRENT_DATE - o.created_at::date BETWEEN 61 AND 90 THEN GREATEST(o.total - COALESCE(paid.paid_sum,0), 0) ELSE 0 END), 0) AS bucket_61_90, " +
+        "       COALESCE(SUM(CASE WHEN CURRENT_DATE - o.created_at::date > 90 THEN GREATEST(o.total - COALESCE(paid.paid_sum,0), 0) ELSE 0 END), 0) AS bucket_over_90, " +
+        "       COALESCE(SUM(GREATEST(o.total - COALESCE(paid.paid_sum,0), 0)), 0) AS total_remaining " +
+        "FROM resellers r " +
+        "JOIN orders o ON o.reseller_id = r.reseller_id " +
+        "     AND o.status IN ('approved','packed','shipped','delivered') " +
+        "LEFT JOIN (SELECT order_id, SUM(amount) AS paid_sum FROM payments GROUP BY order_id) paid ON paid.order_id = o.order_id " +
+        "WHERE (:searchNull = true OR LOWER(r.business_name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+        "GROUP BY r.reseller_id, r.business_name, r.balance, r.credit_limit " +
+        "HAVING (:balanceOnly = false OR COALESCE(SUM(GREATEST(o.total - COALESCE(paid.paid_sum,0), 0)), 0) > 0) " +
+        "ORDER BY total_remaining DESC",
+        nativeQuery = true)
+    List<Object[]> findReceivablesRows(
+            @Param("searchNull") boolean searchNull,
+            @Param("search") String search,
+            @Param("balanceOnly") boolean balanceOnly);
+
+    /**
+     * Sum of all remaining amounts across all open orders (for reconciliation).
+     */
+    @Query(value =
+        "SELECT COALESCE(SUM(GREATEST(o.total - COALESCE(paid.paid_sum,0), 0)), 0) " +
+        "FROM orders o " +
+        "LEFT JOIN (SELECT order_id, SUM(amount) AS paid_sum FROM payments GROUP BY order_id) paid ON paid.order_id = o.order_id " +
+        "WHERE o.status IN ('approved','packed','shipped','delivered')",
+        nativeQuery = true)
+    BigDecimal sumTotalRemainingOpenOrders();
+
     @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product LEFT JOIN FETCH o.shipment WHERE o.reseller.resellerId = :resellerId ORDER BY o.createdAt DESC, o.orderId DESC")
     List<Order> findByReseller_ResellerIdOrderByCreatedAtDesc(@Param("resellerId") Integer resellerId);
 

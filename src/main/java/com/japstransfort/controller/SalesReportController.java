@@ -1,15 +1,11 @@
 package com.japstransfort.controller;
 
-import com.japstransfort.dto.DailySalesDto;
-import com.japstransfort.dto.PaymentMethodSalesDto;
-import com.japstransfort.dto.ProductSalesDto;
-import com.japstransfort.dto.ResellerSalesDto;
+import com.japstransfort.dto.*;
 import com.japstransfort.entity.Order;
 import com.japstransfort.entity.OrderStatus;
 import com.japstransfort.entity.Payment;
 import com.japstransfort.entity.PaymentMethod;
-import com.japstransfort.repository.OrderRepository;
-import com.japstransfort.repository.PaymentRepository;
+import com.japstransfort.repository.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,7 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Controller for admin sales reporting, analytics breakdowns, and CSV export.
+ * Controller for admin reports: index, sales, receivables, stock, commissions.
  */
 @Controller
 @RequestMapping("/admin/reports")
@@ -44,13 +40,38 @@ public class SalesReportController {
             OrderStatus.delivered
     );
 
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
+
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
+    private final ResellerRepository resellerRepository;
+    private final StockMovementRepository stockMovementRepository;
+    private final CommissionRepository commissionRepository;
+    private final WarehouseRepository warehouseRepository;
 
-    public SalesReportController(OrderRepository orderRepository, PaymentRepository paymentRepository) {
+    public SalesReportController(OrderRepository orderRepository,
+                                 PaymentRepository paymentRepository,
+                                 ResellerRepository resellerRepository,
+                                 StockMovementRepository stockMovementRepository,
+                                 CommissionRepository commissionRepository,
+                                 WarehouseRepository warehouseRepository) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
+        this.resellerRepository = resellerRepository;
+        this.stockMovementRepository = stockMovementRepository;
+        this.commissionRepository = commissionRepository;
+        this.warehouseRepository = warehouseRepository;
     }
+
+    // ── Reports Index ──────────────────────────────────────────────────────────
+
+    @GetMapping({"", "/"})
+    public String reportsIndex(Model model) {
+        return "admin/reports/index";
+    }
+
+    // ── Sales Report ───────────────────────────────────────────────────────────
 
     @GetMapping("/sales")
     public String salesReport(
@@ -60,12 +81,8 @@ public class SalesReportController {
             @RequestParam(value = "showAllProducts", defaultValue = "false") boolean showAllProducts,
             Model model) {
 
-        if (from == null) {
-            from = LocalDate.now().withDayOfMonth(1);
-        }
-        if (to == null) {
-            to = LocalDate.now();
-        }
+        if (from == null) from = LocalDate.now().withDayOfMonth(1);
+        if (to == null) to = LocalDate.now();
 
         model.addAttribute("fromDate", from);
         model.addAttribute("toDate", to);
@@ -93,13 +110,9 @@ public class SalesReportController {
         LocalDateTime endDateTime = to.plusDays(1).atStartOfDay();
 
         long totalOrders = orderRepository.countSalesOrders(SALES_STATUSES, startDateTime, endDateTime);
-        BigDecimal grossSales = orderRepository.sumGrossSales(SALES_STATUSES, startDateTime, endDateTime);
-        if (grossSales == null) grossSales = BigDecimal.ZERO;
-
-        BigDecimal totalCollected = paymentRepository.sumAmountByPaidAtBetween(startDateTime, endDateTime);
-        if (totalCollected == null) totalCollected = BigDecimal.ZERO;
-
-        BigDecimal averageOrderValue = (totalOrders > 0)
+        BigDecimal grossSales = coalesce(orderRepository.sumGrossSales(SALES_STATUSES, startDateTime, endDateTime));
+        BigDecimal totalCollected = coalesce(paymentRepository.sumAmountByPaidAtBetween(startDateTime, endDateTime));
+        BigDecimal averageOrderValue = totalOrders > 0
                 ? grossSales.divide(BigDecimal.valueOf(totalOrders), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
@@ -108,41 +121,28 @@ public class SalesReportController {
         model.addAttribute("totalCollected", totalCollected);
         model.addAttribute("averageOrderValue", averageOrderValue);
 
-        // Sales by Reseller
         List<ResellerSalesDto> allResellers = orderRepository.findSalesByReseller(SALES_STATUSES, startDateTime, endDateTime);
         boolean hasMoreResellers = allResellers.size() > 20;
-        List<ResellerSalesDto> displayedResellers = (hasMoreResellers && !showAllResellers)
-                ? allResellers.subList(0, 20)
-                : allResellers;
-        model.addAttribute("resellerSales", displayedResellers);
+        model.addAttribute("resellerSales", hasMoreResellers && !showAllResellers ? allResellers.subList(0, 20) : allResellers);
         model.addAttribute("hasMoreResellers", hasMoreResellers);
         model.addAttribute("totalResellersCount", allResellers.size());
 
-        // Sales by Product
         List<ProductSalesDto> allProducts = orderRepository.findSalesByProduct(SALES_STATUSES, startDateTime, endDateTime);
         boolean hasMoreProducts = allProducts.size() > 20;
-        List<ProductSalesDto> displayedProducts = (hasMoreProducts && !showAllProducts)
-                ? allProducts.subList(0, 20)
-                : allProducts;
-        model.addAttribute("productSales", displayedProducts);
+        model.addAttribute("productSales", hasMoreProducts && !showAllProducts ? allProducts.subList(0, 20) : allProducts);
         model.addAttribute("hasMoreProducts", hasMoreProducts);
         model.addAttribute("totalProductsCount", allProducts.size());
 
-        // Daily Sales
         List<Object[]> rawDaily = orderRepository.findDailySales(startDateTime, endDateTime);
-        List<DailySalesDto> dailySales = rawDaily.stream().map(row -> {
-            String date = String.valueOf(row[0]);
-            long count = ((Number) row[1]).longValue();
-            BigDecimal amount = row[2] instanceof BigDecimal bd ? bd : new BigDecimal(row[2].toString());
-            return new DailySalesDto(date, count, amount);
-        }).toList();
-        model.addAttribute("dailySales", dailySales);
+        model.addAttribute("dailySales", rawDaily.stream().map(row -> new DailySalesDto(
+                String.valueOf(row[0]),
+                ((Number) row[1]).longValue(),
+                row[2] instanceof BigDecimal bd ? bd : new BigDecimal(row[2].toString())
+        )).toList());
 
-        // Sales by Payment Method (COD, Online, On account)
         List<PaymentMethodSalesDto> queryPmSales = orderRepository.findSalesByPaymentMethod(SALES_STATUSES, startDateTime, endDateTime);
         Map<PaymentMethod, PaymentMethodSalesDto> pmMap = queryPmSales.stream()
                 .collect(Collectors.toMap(PaymentMethodSalesDto::paymentMethod, d -> d, (a, b) -> a));
-
         List<PaymentMethodSalesDto> paymentMethodSales = new ArrayList<>();
         for (PaymentMethod pm : List.of(PaymentMethod.COD, PaymentMethod.ONLINE, PaymentMethod.CREDIT)) {
             paymentMethodSales.add(pmMap.getOrDefault(pm, new PaymentMethodSalesDto(pm, 0L, BigDecimal.ZERO)));
@@ -158,72 +158,311 @@ public class SalesReportController {
             @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             HttpServletResponse response) throws IOException {
 
-        if (from == null) {
-            from = LocalDate.now().withDayOfMonth(1);
-        }
-        if (to == null) {
-            to = LocalDate.now();
-        }
+        if (from == null) from = LocalDate.now().withDayOfMonth(1);
+        if (to == null) to = LocalDate.now();
 
         LocalDateTime startDateTime = from.atStartOfDay();
         LocalDateTime endDateTime = to.plusDays(1).atStartOfDay();
 
-        List<Order> orders = (from.isAfter(to))
+        List<Order> orders = from.isAfter(to)
                 ? Collections.emptyList()
                 : orderRepository.findSalesOrdersForExport(SALES_STATUSES, startDateTime, endDateTime);
 
-        response.setContentType("text/csv; charset=UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=\"sales_report_" + from + "_to_" + to + ".csv\"");
-
+        setupCsvResponse(response, "sales_report_" + from + "_to_" + to + ".csv");
         PrintWriter writer = response.getWriter();
-        // UTF-8 BOM so Excel opens it with proper encoding
         writer.write('\uFEFF');
-
-        writer.println("\"Order No\",\"Date\",\"Reseller\",\"Payment Method\",\"Status\",\"Payment Status\",\"Total\",\"Amount Paid\"");
-
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        writer.println("\"Order No\",\"Date\",\"Time\",\"Reseller\",\"Payment Method\",\"Status\",\"Payment Status\",\"Total\",\"Amount Paid\"");
 
         for (Order ord : orders) {
-            String orderNo = escapeCsv(ord.getOrderNo());
-            String date = escapeCsv(ord.getCreatedAt() != null ? ord.getCreatedAt().format(dtf) : "");
-            String resellerName = escapeCsv(ord.getReseller() != null ? ord.getReseller().getBusinessName() : "");
+            String orderNo = esc(ord.getOrderNo());
+            String date = esc(ord.getCreatedAt() != null ? ord.getCreatedAt().format(DATE_FMT) : "");
+            String time = esc(ord.getCreatedAt() != null ? ord.getCreatedAt().format(TIME_FMT) : "");
+            String resellerName = esc(ord.getReseller() != null ? ord.getReseller().getBusinessName() : "");
+            String paymentMethod = esc(pmDisplayName(ord.getPaymentMethod()));
+            String status = esc(ord.getStatus() != null ? ord.getStatus().name() : "");
+            String paymentStatus = esc(ord.getPaymentStatus() != null ? ord.getPaymentStatus().name() : "");
+            BigDecimal total = scale2(ord.getTotal());
+            BigDecimal paid = ord.getPayments() == null ? BigDecimal.ZERO.setScale(2) :
+                    ord.getPayments().stream().map(Payment::getAmount).filter(Objects::nonNull)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP);
 
-            String paymentMethodName = "On account";
-            if (ord.getPaymentMethod() == PaymentMethod.COD) {
-                paymentMethodName = "Cash on delivery";
-            } else if (ord.getPaymentMethod() == PaymentMethod.ONLINE) {
-                paymentMethodName = "Online";
-            }
-            String paymentMethod = escapeCsv(paymentMethodName);
-
-            String status = escapeCsv(ord.getStatus() != null ? ord.getStatus().name() : "");
-            String paymentStatus = escapeCsv(ord.getPaymentStatus() != null ? ord.getPaymentStatus().name() : "");
-
-            BigDecimal total = ord.getTotal() != null ? ord.getTotal().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO.setScale(2);
-            BigDecimal paid = BigDecimal.ZERO;
-            if (ord.getPayments() != null) {
-                paid = ord.getPayments().stream()
-                        .map(Payment::getAmount)
-                        .filter(Objects::nonNull)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add)
-                        .setScale(2, RoundingMode.HALF_UP);
-            }
-
-            writer.println(String.join(",",
-                    orderNo,
-                    date,
-                    resellerName,
-                    paymentMethod,
-                    status,
-                    paymentStatus,
-                    total.toPlainString(),
-                    paid.toPlainString()
-            ));
+            writer.println(String.join(",", orderNo, date, time, resellerName, paymentMethod,
+                    status, paymentStatus, total.toPlainString(), paid.toPlainString()));
         }
-
         writer.flush();
     }
+
+    // ── Receivables Report ─────────────────────────────────────────────────────
+
+    @GetMapping("/receivables")
+    public String receivablesReport(
+            @RequestParam(value = "search", required = false, defaultValue = "") String search,
+            @RequestParam(value = "balanceOnly", defaultValue = "false") boolean balanceOnly,
+            Model model) {
+
+        model.addAttribute("search", search);
+        model.addAttribute("balanceOnly", balanceOnly);
+
+        boolean searchNull = search == null || search.trim().isEmpty();
+        List<Object[]> rows = orderRepository.findReceivablesRows(searchNull, search == null ? "" : search.trim(), balanceOnly);
+
+        List<ReceivablesRowDto> receivables = rows.stream().map(r -> {
+            Integer resellerId = ((Number) r[0]).intValue();
+            String businessName = String.valueOf(r[1]);
+            BigDecimal balance = r[2] instanceof BigDecimal b ? b : new BigDecimal(r[2].toString());
+            BigDecimal creditLimit = r[3] instanceof BigDecimal c ? c : new BigDecimal(r[3].toString());
+            long openOrderCount = ((Number) r[4]).longValue();
+            LocalDate oldestDate = r[5] != null ? (r[5] instanceof java.sql.Date sd ? sd.toLocalDate() : LocalDate.parse(r[5].toString())) : null;
+            BigDecimal b030 = toBD(r[6]);
+            BigDecimal b3160 = toBD(r[7]);
+            BigDecimal b6190 = toBD(r[8]);
+            BigDecimal bOver = toBD(r[9]);
+            BigDecimal total = toBD(r[10]);
+            return new ReceivablesRowDto(resellerId, businessName, balance, creditLimit,
+                    openOrderCount, oldestDate, b030, b3160, b6190, bOver, total);
+        }).toList();
+
+        BigDecimal totalOutstanding = receivables.stream()
+                .map(ReceivablesRowDto::getTotalRemaining).reduce(BigDecimal.ZERO, BigDecimal::add);
+        long resellersWithBalance = resellerRepository.countWithBalance();
+        long resellersOverLimit = resellerRepository.countOverCreditLimit();
+
+        // Reconciliation: sum of reseller balance columns vs sum of open order remainders
+        BigDecimal sumBalances = resellerRepository.sumTotalBalance();
+        BigDecimal sumOpenOrders = coalesce(orderRepository.sumTotalRemainingOpenOrders());
+        BigDecimal diff = sumBalances.subtract(sumOpenOrders).abs();
+        boolean balanced = diff.compareTo(new BigDecimal("0.01")) < 0;
+        String reconciliationMsg = balanced
+                ? "Balances match open orders"
+                : "Difference of ₱" + diff.setScale(2, RoundingMode.HALF_UP).toPlainString() + " between balances and open orders";
+
+        model.addAttribute("receivables", receivables);
+        model.addAttribute("totalOutstanding", totalOutstanding);
+        model.addAttribute("resellersWithBalance", resellersWithBalance);
+        model.addAttribute("resellersOverLimit", resellersOverLimit);
+        model.addAttribute("reconciliationMsg", reconciliationMsg);
+        model.addAttribute("reconciliationOk", balanced);
+
+        return "admin/reports/receivables";
+    }
+
+    @GetMapping("/receivables/export")
+    public void exportReceivablesCsv(
+            @RequestParam(value = "search", required = false, defaultValue = "") String search,
+            @RequestParam(value = "balanceOnly", defaultValue = "false") boolean balanceOnly,
+            HttpServletResponse response) throws IOException {
+
+        boolean searchNull = search == null || search.trim().isEmpty();
+        List<Object[]> rows = orderRepository.findReceivablesRows(searchNull, search == null ? "" : search.trim(), balanceOnly);
+
+        setupCsvResponse(response, "receivables_report.csv");
+        PrintWriter writer = response.getWriter();
+        writer.write('\uFEFF');
+        writer.println("\"Business Name\",\"Balance\",\"Credit Limit\",\"Available Credit\",\"Open Orders\",\"Oldest Order Date\",\"0-30 Days\",\"31-60 Days\",\"61-90 Days\",\"Over 90 Days\",\"Total Remaining\"");
+
+        for (Object[] r : rows) {
+            String businessName = esc(String.valueOf(r[1]));
+            BigDecimal balance = toBD(r[2]);
+            BigDecimal creditLimit = toBD(r[3]);
+            BigDecimal available = creditLimit.subtract(balance);
+            long openCount = ((Number) r[4]).longValue();
+            String oldestDate = r[5] != null ? (r[5] instanceof java.sql.Date sd ? sd.toLocalDate().format(DATE_FMT) : r[5].toString()) : "";
+            BigDecimal b030 = toBD(r[6]);
+            BigDecimal b3160 = toBD(r[7]);
+            BigDecimal b6190 = toBD(r[8]);
+            BigDecimal bOver = toBD(r[9]);
+            BigDecimal total = toBD(r[10]);
+
+            writer.println(String.join(",",
+                    businessName, esc(scale2(balance).toPlainString()), esc(scale2(creditLimit).toPlainString()),
+                    esc(scale2(available).toPlainString()), String.valueOf(openCount), esc(oldestDate),
+                    esc(scale2(b030).toPlainString()), esc(scale2(b3160).toPlainString()),
+                    esc(scale2(b6190).toPlainString()), esc(scale2(bOver).toPlainString()),
+                    esc(scale2(total).toPlainString())));
+        }
+        writer.flush();
+    }
+
+    // ── Stock Report ───────────────────────────────────────────────────────────
+
+    @GetMapping("/stock")
+    public String stockReport(
+            @RequestParam(value = "search", required = false, defaultValue = "") String search,
+            @RequestParam(value = "warehouseId", required = false) Integer warehouseId,
+            @RequestParam(value = "statusFilter", required = false, defaultValue = "all") String statusFilter,
+            @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            Model model) {
+
+        if (from == null) from = LocalDate.now().withDayOfMonth(1);
+        if (to == null) to = LocalDate.now();
+
+        model.addAttribute("search", search);
+        model.addAttribute("warehouseId", warehouseId);
+        model.addAttribute("statusFilter", statusFilter);
+        model.addAttribute("fromDate", from);
+        model.addAttribute("toDate", to);
+        model.addAttribute("warehouses", warehouseRepository.findAll());
+
+        boolean searchNull = search == null || search.trim().isEmpty();
+        String sf = (statusFilter == null || statusFilter.isBlank()) ? "all" : statusFilter;
+        List<Object[]> rawStock = stockMovementRepository.findStockRows(
+                searchNull, searchNull ? "" : search.trim(),
+                warehouseId == null, warehouseId,
+                sf);
+
+        List<StockRowDto> stockRows = rawStock.stream().map(r -> new StockRowDto(
+                ((Number) r[0]).intValue(), String.valueOf(r[1]), String.valueOf(r[2]),
+                ((Number) r[3]).intValue(), String.valueOf(r[4]),
+                ((Number) r[5]).intValue(), ((Number) r[6]).intValue(),
+                toBD(r[7]), toBD(r[8])
+        )).toList();
+
+        // Summary from full (unfiltered) stock
+        Object[] summary = stockMovementRepository.findStockSummary();
+        BigDecimal totalUnits = summary != null && summary[0] != null ? toBD(summary[0]) : BigDecimal.ZERO;
+        BigDecimal costValue = summary != null && summary[1] != null ? toBD(summary[1]) : BigDecimal.ZERO;
+        long outOfStockCount = stockMovementRepository.countOutOfStockItems();
+        long lowStockCount = stockMovementRepository.countLowStockItemsCross();
+
+        model.addAttribute("stockRows", stockRows);
+        model.addAttribute("totalUnits", totalUnits.longValue());
+        model.addAttribute("costValue", costValue);
+        model.addAttribute("outOfStockCount", outOfStockCount);
+        model.addAttribute("lowStockCount", lowStockCount);
+
+        // Movement summary table
+        if (from.isAfter(to)) {
+            model.addAttribute("errorMessage", "The 'From' date cannot be after the 'To' date.");
+            model.addAttribute("movementSummary", Collections.emptyList());
+        } else {
+            LocalDateTime startDateTime = from.atStartOfDay();
+            LocalDateTime endDateTime = to.plusDays(1).atStartOfDay();
+            List<Object[]> rawMov = stockMovementRepository.findMovementSummaryByProduct(
+                    startDateTime, endDateTime, searchNull, searchNull ? "" : search.trim());
+            model.addAttribute("movementSummary", rawMov.stream().map(r -> new StockMovementSummaryDto(
+                    ((Number) r[0]).intValue(), String.valueOf(r[1]), String.valueOf(r[2]),
+                    ((Number) r[3]).longValue(), ((Number) r[4]).longValue(),
+                    ((Number) r[5]).longValue(), ((Number) r[6]).longValue()
+            )).toList());
+        }
+
+        return "admin/reports/stock";
+    }
+
+    @GetMapping("/stock/export")
+    public void exportStockCsv(
+            @RequestParam(value = "search", required = false, defaultValue = "") String search,
+            @RequestParam(value = "warehouseId", required = false) Integer warehouseId,
+            @RequestParam(value = "statusFilter", required = false, defaultValue = "all") String statusFilter,
+            HttpServletResponse response) throws IOException {
+
+        boolean searchNull = search == null || search.trim().isEmpty();
+        String sf = (statusFilter == null || statusFilter.isBlank()) ? "all" : statusFilter;
+        List<Object[]> rawStock = stockMovementRepository.findStockRows(
+                searchNull, searchNull ? "" : search.trim(),
+                warehouseId == null, warehouseId, sf);
+
+        setupCsvResponse(response, "stock_report.csv");
+        PrintWriter writer = response.getWriter();
+        writer.write('\uFEFF');
+        writer.println("\"SKU\",\"Product Name\",\"Warehouse\",\"Quantity\",\"Reorder Level\",\"Status\",\"Stock Value (Cost)\",\"Stock Value (SRP)\"");
+
+        for (Object[] r : rawStock) {
+            StockRowDto row = new StockRowDto(
+                    ((Number) r[0]).intValue(), String.valueOf(r[1]), String.valueOf(r[2]),
+                    ((Number) r[3]).intValue(), String.valueOf(r[4]),
+                    ((Number) r[5]).intValue(), ((Number) r[6]).intValue(),
+                    toBD(r[7]), toBD(r[8]));
+            writer.println(String.join(",",
+                    esc(row.getSku()), esc(row.getName()), esc(row.getWarehouseName()),
+                    String.valueOf(row.getQuantity()), String.valueOf(row.getReorderLevel()),
+                    esc(row.getStockStatus()),
+                    scale2(row.getStockValueAtCost()).toPlainString(),
+                    scale2(row.getStockValueAtSrp()).toPlainString()));
+        }
+        writer.flush();
+    }
+
+    // ── Commission Report ──────────────────────────────────────────────────────
+
+    @GetMapping("/commissions")
+    public String commissionsReport(
+            @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(value = "statusFilter", required = false, defaultValue = "all") String statusFilter,
+            Model model) {
+
+        if (from == null) from = LocalDate.now().withDayOfMonth(1);
+        if (to == null) to = LocalDate.now();
+
+        model.addAttribute("fromDate", from);
+        model.addAttribute("toDate", to);
+        model.addAttribute("statusFilter", statusFilter);
+
+        if (from.isAfter(to)) {
+            model.addAttribute("errorMessage", "The 'From' date cannot be after the 'To' date.");
+            model.addAttribute("commissionRows", Collections.emptyList());
+            model.addAttribute("totalAmount", BigDecimal.ZERO);
+            model.addAttribute("pendingAmount", BigDecimal.ZERO);
+            model.addAttribute("paidAmount", BigDecimal.ZERO);
+            return "admin/reports/commissions";
+        }
+
+        LocalDateTime startDateTime = from.atStartOfDay();
+        LocalDateTime endDateTime = to.plusDays(1).atStartOfDay();
+        String sf = (statusFilter == null || statusFilter.isBlank()) ? "all" : statusFilter.trim().toLowerCase();
+
+        List<Object[]> rawRows = commissionRepository.findCommissionReportByReseller(startDateTime, endDateTime, sf);
+        List<CommissionReportRowDto> commissionRows = rawRows.stream().map(r -> new CommissionReportRowDto(
+                ((Number) r[0]).intValue(), String.valueOf(r[1]),
+                ((Number) r[2]).longValue(), toBD(r[3]), toBD(r[4]), toBD(r[5])
+        )).toList();
+
+        BigDecimal totalAmount = coalesce(commissionRepository.sumTotalInRange(startDateTime, endDateTime));
+        BigDecimal pendingAmount = coalesce(commissionRepository.sumPendingInRange(startDateTime, endDateTime));
+        BigDecimal paidAmount = coalesce(commissionRepository.sumPaidInRange(startDateTime, endDateTime));
+
+        model.addAttribute("commissionRows", commissionRows);
+        model.addAttribute("totalAmount", totalAmount);
+        model.addAttribute("pendingAmount", pendingAmount);
+        model.addAttribute("paidAmount", paidAmount);
+
+        return "admin/reports/commissions";
+    }
+
+    @GetMapping("/commissions/export")
+    public void exportCommissionsCsv(
+            @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(value = "statusFilter", required = false, defaultValue = "all") String statusFilter,
+            HttpServletResponse response) throws IOException {
+
+        if (from == null) from = LocalDate.now().withDayOfMonth(1);
+        if (to == null) to = LocalDate.now();
+
+        List<Object[]> rawRows = from.isAfter(to) ? Collections.emptyList() :
+                commissionRepository.findCommissionReportByReseller(
+                        from.atStartOfDay(), to.plusDays(1).atStartOfDay(),
+                        (statusFilter == null || statusFilter.isBlank()) ? "all" : statusFilter.trim().toLowerCase());
+
+        setupCsvResponse(response, "commissions_report_" + from + "_to_" + to + ".csv");
+        PrintWriter writer = response.getWriter();
+        writer.write('\uFEFF');
+        writer.println("\"Business Name\",\"Commissions\",\"Pending Amount\",\"Paid Amount\",\"Total Amount\"");
+
+        for (Object[] r : rawRows) {
+            writer.println(String.join(",",
+                    esc(String.valueOf(r[1])),
+                    String.valueOf(((Number) r[2]).longValue()),
+                    scale2(toBD(r[3])).toPlainString(),
+                    scale2(toBD(r[4])).toPlainString(),
+                    scale2(toBD(r[5])).toPlainString()));
+        }
+        writer.flush();
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
 
     private List<PaymentMethodSalesDto> defaultPaymentMethodSales() {
         return List.of(
@@ -233,10 +472,37 @@ public class SalesReportController {
         );
     }
 
-    private String escapeCsv(String value) {
-        if (value == null) {
-            return "\"\"";
-        }
+    private String pmDisplayName(PaymentMethod pm) {
+        if (pm == null) return "On account";
+        return switch (pm) {
+            case COD -> "Cash on delivery";
+            case ONLINE -> "Online";
+            case CREDIT -> "On account";
+        };
+    }
+
+    private void setupCsvResponse(HttpServletResponse response, String filename) {
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+    }
+
+    private String esc(String value) {
+        if (value == null) return "\"\"";
         return "\"" + value.replace("\"", "\"\"") + "\"";
+    }
+
+    private BigDecimal coalesce(BigDecimal v) {
+        return v != null ? v : BigDecimal.ZERO;
+    }
+
+    private BigDecimal toBD(Object o) {
+        if (o == null) return BigDecimal.ZERO;
+        if (o instanceof BigDecimal bd) return bd;
+        return new BigDecimal(o.toString());
+    }
+
+    private BigDecimal scale2(BigDecimal v) {
+        return (v != null ? v : BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
     }
 }

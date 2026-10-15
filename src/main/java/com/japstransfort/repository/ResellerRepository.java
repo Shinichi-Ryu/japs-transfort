@@ -49,4 +49,10 @@ public interface ResellerRepository extends JpaRepository<Reseller, Integer> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT r FROM Reseller r WHERE r.resellerId = :id")
     Optional<Reseller> findByIdWithLock(@Param("id") Integer id);
+
+    @Query("SELECT COUNT(r) FROM Reseller r WHERE r.balance > 0")
+    long countWithBalance();
+
+    @Query("SELECT COUNT(r) FROM Reseller r WHERE r.creditLimit > 0 AND r.balance > r.creditLimit")
+    long countOverCreditLimit();
 }

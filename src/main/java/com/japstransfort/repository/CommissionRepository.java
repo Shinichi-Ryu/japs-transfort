@@ -60,4 +60,39 @@ public interface CommissionRepository extends JpaRepository<Commission, Integer>
     int insertIfNotExists(@Param("resellerId") Integer resellerId,
                           @Param("orderId") Integer orderId,
                           @Param("amount") BigDecimal amount);
+
+    /**
+     * Commission report: per reseller with count, pending, paid, total amounts in a date range.
+     * statusFilter: 'all' | 'pending' | 'paid'
+     */
+    @Query(value =
+        "SELECT r.reseller_id, r.business_name, " +
+        "  COUNT(c.commission_id) AS commission_count, " +
+        "  COALESCE(SUM(CASE WHEN LOWER(c.status)='pending' THEN c.amount ELSE 0 END), 0) AS pending_amount, " +
+        "  COALESCE(SUM(CASE WHEN LOWER(c.status)='paid' THEN c.amount ELSE 0 END), 0) AS paid_amount, " +
+        "  COALESCE(SUM(c.amount), 0) AS total_amount " +
+        "FROM resellers r " +
+        "JOIN commissions c ON c.reseller_id = r.reseller_id " +
+        "  AND c.created_at >= :startDateTime AND c.created_at < :endDateTime " +
+        "  AND (:statusFilter = 'all' OR LOWER(c.status) = :statusFilter) " +
+        "GROUP BY r.reseller_id, r.business_name " +
+        "ORDER BY total_amount DESC",
+        nativeQuery = true)
+    List<Object[]> findCommissionReportByReseller(
+            @Param("startDateTime") java.time.LocalDateTime startDateTime,
+            @Param("endDateTime") java.time.LocalDateTime endDateTime,
+            @Param("statusFilter") String statusFilter);
+
+    @Query("SELECT COALESCE(SUM(c.amount), 0) FROM Commission c WHERE c.createdAt >= :startDateTime AND c.createdAt < :endDateTime")
+    BigDecimal sumTotalInRange(@Param("startDateTime") java.time.LocalDateTime startDateTime,
+                               @Param("endDateTime") java.time.LocalDateTime endDateTime);
+
+    @Query("SELECT COALESCE(SUM(c.amount), 0) FROM Commission c WHERE LOWER(c.status) = 'pending' AND c.createdAt >= :startDateTime AND c.createdAt < :endDateTime")
+    BigDecimal sumPendingInRange(@Param("startDateTime") java.time.LocalDateTime startDateTime,
+                                 @Param("endDateTime") java.time.LocalDateTime endDateTime);
+
+    @Query("SELECT COALESCE(SUM(c.amount), 0) FROM Commission c WHERE LOWER(c.status) = 'paid' AND c.createdAt >= :startDateTime AND c.createdAt < :endDateTime")
+    BigDecimal sumPaidInRange(@Param("startDateTime") java.time.LocalDateTime startDateTime,
+                              @Param("endDateTime") java.time.LocalDateTime endDateTime);
 }
+

@@ -175,7 +175,7 @@
                                 <!-- Thumbnail cell with click-to-enlarge -->
                                 <td>
                                     <img th:if="${meta != null and meta.hasImage}"
-                                         th:src="@{/products/{id}/image(id=${product.productId}, v=${meta.version})}"
+                                         th:src="@{/products/{id}/image(id=${product.productId},v=${meta.version})}"
                                          th:alt="${product.name}"
                                          th:data-product-name="${product.name}"
                                          th:data-product-id="${product.productId}"

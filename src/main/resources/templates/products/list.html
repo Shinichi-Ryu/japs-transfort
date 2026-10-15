@@ -164,7 +164,7 @@
                                 <!-- Thumbnail cell -->
                                 <td class="ps-3">
                                     <img th:if="${meta != null and meta.hasImage}"
-                                         th:src="@{/products/{id}/image(id=${product.productId}, v=${meta.version})}"
+                                         th:src="@{/products/{id}/image(id=${product.productId},v=${meta.version})}"
                                          alt="Product photo"
                                          class="product-thumb-sm"
                                          width="48" height="48">

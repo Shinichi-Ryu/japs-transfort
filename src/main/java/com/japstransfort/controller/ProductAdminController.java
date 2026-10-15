@@ -93,10 +93,7 @@ public class ProductAdminController {
         }
 
         try {
-            Product created = productService.create(dto);
-            if (photoFile != null && !photoFile.isEmpty()) {
-                productService.saveImage(created.getProductId(), photoFile);
-            }
+            Product created = productService.create(dto, photoFile);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Product '" + created.getName() + "' (SKU: " + created.getSku() + ") created successfully.");
             return "redirect:/admin/products";
@@ -157,13 +154,7 @@ public class ProductAdminController {
         }
 
         try {
-            Product updated = productService.update(id, dto);
-
-            if (Boolean.TRUE.equals(removePhoto)) {
-                productService.removeImage(id);
-            } else if (photoFile != null && !photoFile.isEmpty()) {
-                productService.saveImage(id, photoFile);
-            }
+            Product updated = productService.update(id, dto, photoFile, removePhoto);
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Product '" + updated.getName() + "' updated successfully.");

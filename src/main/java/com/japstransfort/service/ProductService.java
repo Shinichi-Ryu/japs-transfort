@@ -122,6 +122,15 @@ public class ProductService {
     }
 
     @Transactional
+    public Product create(ProductFormDto dto, MultipartFile photoFile) {
+        Product product = create(dto);
+        if (photoFile != null && !photoFile.isEmpty()) {
+            saveImage(product.getProductId(), photoFile);
+        }
+        return product;
+    }
+
+    @Transactional
     public Product update(Integer id, ProductFormDto dto) {
         Product product = findById(id);
 
@@ -148,6 +157,17 @@ public class ProductService {
         product.setReorderLevel(dto.getReorderLevel() != null ? dto.getReorderLevel() : 10);
 
         return productRepository.save(product);
+    }
+
+    @Transactional
+    public Product update(Integer id, ProductFormDto dto, MultipartFile photoFile, Boolean removePhoto) {
+        Product product = update(id, dto);
+        if (Boolean.TRUE.equals(removePhoto)) {
+            removeImage(id);
+        } else if (photoFile != null && !photoFile.isEmpty()) {
+            saveImage(id, photoFile);
+        }
+        return product;
     }
 
     /**
@@ -182,7 +202,7 @@ public class ProductService {
     /** Full image for the serving endpoint. */
     @Transactional(readOnly = true)
     public Optional<ProductImage> getImage(Integer productId) {
-        return productImageRepository.findByProductId(productId);
+        return productImageRepository.findById(productId);
     }
 
     /**
@@ -224,19 +244,25 @@ public class ProductService {
         // Flatten transparency onto white background and re-encode as JPEG
         byte[] jpegBytes = encodeJpeg(scaled, 0.85f);
 
-        Product product = findById(productId);
-        ProductImage img = productImageRepository.findByProductId(productId).orElse(new ProductImage());
-        img.setProductId(productId);
-        img.setProduct(product);
-        img.setContentType("image/jpeg");
-        img.setData(jpegBytes);
-        img.setUpdatedAt(LocalDateTime.now());
-        productImageRepository.save(img);
+        Optional<ProductImage> opt = productImageRepository.findById(productId);
+        if (opt.isPresent()) {
+            ProductImage img = opt.get();
+            img.setContentType("image/jpeg");
+            img.setData(jpegBytes);
+            img.setUpdatedAt(LocalDateTime.now());
+            productImageRepository.save(img);
+        } else {
+            ProductImage img = new ProductImage(productId, "image/jpeg", jpegBytes, LocalDateTime.now());
+            img.setNew(true);
+            productImageRepository.save(img);
+        }
     }
 
     @Transactional
     public void removeImage(Integer productId) {
-        productImageRepository.deleteByProductId(productId);
+        if (productImageRepository.existsById(productId)) {
+            productImageRepository.deleteById(productId);
+        }
     }
 
     // ── Private image utilities ───────────────────────────────────────────────

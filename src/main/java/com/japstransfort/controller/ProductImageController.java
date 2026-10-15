@@ -31,8 +31,10 @@ public class ProductImageController {
             return ResponseEntity.notFound().build();
         }
         ProductImage img = opt.get();
+        String ct = (img.getContentType() != null && !img.getContentType().isBlank())
+                ? img.getContentType().trim() : "image/jpeg";
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(img.getContentType()))
+                .contentType(MediaType.parseMediaType(ct))
                 .contentLength(img.getData().length)
                 .cacheControl(CacheControl.maxAge(86400, TimeUnit.SECONDS).cachePrivate())
                 .body(img.getData());

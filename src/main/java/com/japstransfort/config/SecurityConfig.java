@@ -98,7 +98,7 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
-                .requestMatchers("/products/*/image", "/products/{id}/image").authenticated()
+                .requestMatchers("/products/*/image", "/products/{id}/image", "/products/**").authenticated()
                 .requestMatchers("/portal", "/portal/**").hasRole("RESELLER")
                 .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                 .requestMatchers("/dashboard", "/dashboard/**").hasAnyRole("ADMIN", "STAFF")

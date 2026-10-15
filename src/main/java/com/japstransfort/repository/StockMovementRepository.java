@@ -1,5 +1,8 @@
 package com.japstransfort.repository;
 
+import com.japstransfort.dto.StockMovementSummaryProjection;
+import com.japstransfort.dto.StockRowProjection;
+import com.japstransfort.dto.StockSummaryProjection;
 import com.japstransfort.entity.StockMovement;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +33,7 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, In
      * Returns: product_id, sku, name, qty_in, qty_out, qty_adjust, qty_return
      */
     @Query(value =
-        "SELECT p.product_id, p.sku, p.name, " +
+        "SELECT p.product_id AS product_id, p.sku AS sku, p.name AS name, " +
         "  COALESCE(SUM(CASE WHEN m.type = 'in' THEN m.quantity ELSE 0 END), 0) AS qty_in, " +
         "  COALESCE(SUM(CASE WHEN m.type = 'out' THEN m.quantity ELSE 0 END), 0) AS qty_out, " +
         "  COALESCE(SUM(CASE WHEN m.type = 'adjust' THEN m.quantity ELSE 0 END), 0) AS qty_adjust, " +
@@ -43,7 +46,7 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, In
         "GROUP BY p.product_id, p.sku, p.name " +
         "ORDER BY p.name",
         nativeQuery = true)
-    List<Object[]> findMovementSummaryByProduct(
+    List<StockMovementSummaryProjection> findMovementSummaryByProduct(
             @Param("startDateTime") LocalDateTime startDateTime,
             @Param("endDateTime") LocalDateTime endDateTime,
             @Param("searchNull") boolean searchNull,
@@ -51,12 +54,18 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, In
 
     /**
      * Stock rows per product × warehouse with cost/SRP.
-     * Returns: product_id, sku, name, warehouse_id, warehouse_name, quantity, reorder_level, cost_price, srp
+     * Column aliases: sku, name, warehouse, quantity, reorder_level, status, cost_value, srp_value
      */
     @Query(value =
-        "SELECT p.product_id, p.sku, p.name, w.warehouse_id, w.name AS warehouse_name, " +
+        "SELECT p.sku AS sku, p.name AS name, w.name AS warehouse, " +
         "  COALESCE(i.quantity, 0) AS quantity, COALESCE(p.reorder_level, 0) AS reorder_level, " +
-        "  p.cost_price, p.srp " +
+        "  CASE " +
+        "    WHEN COALESCE(i.quantity, 0) = 0 THEN 'Out of stock' " +
+        "    WHEN COALESCE(i.quantity, 0) <= COALESCE(p.reorder_level, 0) THEN 'Low stock' " +
+        "    ELSE 'OK' " +
+        "  END AS status, " +
+        "  COALESCE(COALESCE(i.quantity, 0) * COALESCE(p.cost_price, 0), 0)::numeric AS cost_value, " +
+        "  COALESCE(COALESCE(i.quantity, 0) * COALESCE(p.srp, 0), 0)::numeric AS srp_value " +
         "FROM products p " +
         "CROSS JOIN warehouses w " +
         "LEFT JOIN inventory i ON i.product_id = p.product_id AND i.warehouse_id = w.warehouse_id " +
@@ -69,7 +78,7 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, In
         "       (:statusFilter = 'ok' AND COALESCE(i.quantity, 0) > COALESCE(p.reorder_level, 0))) " +
         "ORDER BY p.name, w.name",
         nativeQuery = true)
-    List<Object[]> findStockRows(
+    List<StockRowProjection> findStockRows(
             @Param("searchNull") boolean searchNull,
             @Param("search") String search,
             @Param("warehouseNull") boolean warehouseNull,
@@ -80,14 +89,14 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, In
      * Summary aggregates for stock report: total units, cost value, SRP value.
      */
     @Query(value =
-        "SELECT COALESCE(SUM(COALESCE(i.quantity, 0)), 0) AS total_units, " +
-        "       COALESCE(SUM(COALESCE(i.quantity, 0) * p.cost_price), 0) AS cost_value, " +
-        "       COALESCE(SUM(COALESCE(i.quantity, 0) * p.srp), 0) AS srp_value " +
+        "SELECT COALESCE(SUM(COALESCE(i.quantity, 0)), 0)::numeric AS total_units, " +
+        "       COALESCE(SUM(COALESCE(i.quantity, 0) * COALESCE(p.cost_price, 0)), 0)::numeric AS cost_value, " +
+        "       COALESCE(SUM(COALESCE(i.quantity, 0) * COALESCE(p.srp, 0)), 0)::numeric AS srp_value " +
         "FROM products p " +
         "CROSS JOIN warehouses w " +
         "LEFT JOIN inventory i ON i.product_id = p.product_id AND i.warehouse_id = w.warehouse_id",
         nativeQuery = true)
-    Object[] findStockSummary();
+    StockSummaryProjection findStockSummary();
 
     @Query(value =
         "SELECT COUNT(DISTINCT p.product_id) FROM products p " +

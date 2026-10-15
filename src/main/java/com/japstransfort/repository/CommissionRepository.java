@@ -1,5 +1,6 @@
 package com.japstransfort.repository;
 
+import com.japstransfort.dto.CommissionReportRowProjection;
 import com.japstransfort.entity.Commission;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
@@ -66,7 +67,7 @@ public interface CommissionRepository extends JpaRepository<Commission, Integer>
      * statusFilter: 'all' | 'pending' | 'paid'
      */
     @Query(value =
-        "SELECT r.reseller_id, r.business_name, " +
+        "SELECT r.reseller_id AS reseller_id, r.business_name AS business_name, " +
         "  COUNT(c.commission_id) AS commission_count, " +
         "  COALESCE(SUM(CASE WHEN LOWER(c.status)='pending' THEN c.amount ELSE 0 END), 0) AS pending_amount, " +
         "  COALESCE(SUM(CASE WHEN LOWER(c.status)='paid' THEN c.amount ELSE 0 END), 0) AS paid_amount, " +
@@ -78,7 +79,7 @@ public interface CommissionRepository extends JpaRepository<Commission, Integer>
         "GROUP BY r.reseller_id, r.business_name " +
         "ORDER BY total_amount DESC",
         nativeQuery = true)
-    List<Object[]> findCommissionReportByReseller(
+    List<CommissionReportRowProjection> findCommissionReportByReseller(
             @Param("startDateTime") java.time.LocalDateTime startDateTime,
             @Param("endDateTime") java.time.LocalDateTime endDateTime,
             @Param("statusFilter") String statusFilter);

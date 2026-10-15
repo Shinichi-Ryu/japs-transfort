@@ -204,23 +204,21 @@ public class SalesReportController {
         model.addAttribute("balanceOnly", balanceOnly);
 
         boolean searchNull = search == null || search.trim().isEmpty();
-        List<Object[]> rows = orderRepository.findReceivablesRows(searchNull, search == null ? "" : search.trim(), balanceOnly);
+        List<ReceivablesRowProjection> rows = orderRepository.findReceivablesRows(searchNull, search == null ? "" : search.trim(), balanceOnly);
 
-        List<ReceivablesRowDto> receivables = rows.stream().map(r -> {
-            Integer resellerId = ((Number) r[0]).intValue();
-            String businessName = String.valueOf(r[1]);
-            BigDecimal balance = r[2] instanceof BigDecimal b ? b : new BigDecimal(r[2].toString());
-            BigDecimal creditLimit = r[3] instanceof BigDecimal c ? c : new BigDecimal(r[3].toString());
-            long openOrderCount = ((Number) r[4]).longValue();
-            LocalDate oldestDate = r[5] != null ? (r[5] instanceof java.sql.Date sd ? sd.toLocalDate() : LocalDate.parse(r[5].toString())) : null;
-            BigDecimal b030 = toBD(r[6]);
-            BigDecimal b3160 = toBD(r[7]);
-            BigDecimal b6190 = toBD(r[8]);
-            BigDecimal bOver = toBD(r[9]);
-            BigDecimal total = toBD(r[10]);
-            return new ReceivablesRowDto(resellerId, businessName, balance, creditLimit,
-                    openOrderCount, oldestDate, b030, b3160, b6190, bOver, total);
-        }).toList();
+        List<ReceivablesRowDto> receivables = rows.stream().map(r -> new ReceivablesRowDto(
+                r.getResellerId(),
+                r.getBusinessName(),
+                r.getBalance(),
+                r.getCreditLimit(),
+                r.getOpenOrderCount() != null ? r.getOpenOrderCount() : 0L,
+                r.getOldestOrderDate(),
+                r.getBucket030(),
+                r.getBucket3160(),
+                r.getBucket6190(),
+                r.getBucketOver90(),
+                r.getTotalRemaining()
+        )).toList();
 
         BigDecimal totalOutstanding = receivables.stream()
                 .map(ReceivablesRowDto::getTotalRemaining).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -253,25 +251,25 @@ public class SalesReportController {
             HttpServletResponse response) throws IOException {
 
         boolean searchNull = search == null || search.trim().isEmpty();
-        List<Object[]> rows = orderRepository.findReceivablesRows(searchNull, search == null ? "" : search.trim(), balanceOnly);
+        List<ReceivablesRowProjection> rows = orderRepository.findReceivablesRows(searchNull, search == null ? "" : search.trim(), balanceOnly);
 
         setupCsvResponse(response, "receivables_report.csv");
         PrintWriter writer = response.getWriter();
         writer.write('\uFEFF');
         writer.println("\"Business Name\",\"Balance\",\"Credit Limit\",\"Available Credit\",\"Open Orders\",\"Oldest Order Date\",\"0-30 Days\",\"31-60 Days\",\"61-90 Days\",\"Over 90 Days\",\"Total Remaining\"");
 
-        for (Object[] r : rows) {
-            String businessName = esc(String.valueOf(r[1]));
-            BigDecimal balance = toBD(r[2]);
-            BigDecimal creditLimit = toBD(r[3]);
+        for (ReceivablesRowProjection r : rows) {
+            String businessName = esc(r.getBusinessName());
+            BigDecimal balance = coalesce(r.getBalance());
+            BigDecimal creditLimit = coalesce(r.getCreditLimit());
             BigDecimal available = creditLimit.subtract(balance);
-            long openCount = ((Number) r[4]).longValue();
-            String oldestDate = r[5] != null ? (r[5] instanceof java.sql.Date sd ? sd.toLocalDate().format(DATE_FMT) : r[5].toString()) : "";
-            BigDecimal b030 = toBD(r[6]);
-            BigDecimal b3160 = toBD(r[7]);
-            BigDecimal b6190 = toBD(r[8]);
-            BigDecimal bOver = toBD(r[9]);
-            BigDecimal total = toBD(r[10]);
+            long openCount = r.getOpenOrderCount() != null ? r.getOpenOrderCount() : 0L;
+            String oldestDate = r.getOldestOrderDate() != null ? r.getOldestOrderDate().format(DATE_FMT) : "";
+            BigDecimal b030 = coalesce(r.getBucket030());
+            BigDecimal b3160 = coalesce(r.getBucket3160());
+            BigDecimal b6190 = coalesce(r.getBucket6190());
+            BigDecimal bOver = coalesce(r.getBucketOver90());
+            BigDecimal total = coalesce(r.getTotalRemaining());
 
             writer.println(String.join(",",
                     businessName, esc(scale2(balance).toPlainString()), esc(scale2(creditLimit).toPlainString()),
@@ -306,22 +304,15 @@ public class SalesReportController {
 
         boolean searchNull = search == null || search.trim().isEmpty();
         String sf = (statusFilter == null || statusFilter.isBlank()) ? "all" : statusFilter;
-        List<Object[]> rawStock = stockMovementRepository.findStockRows(
+        List<StockRowProjection> stockRows = stockMovementRepository.findStockRows(
                 searchNull, searchNull ? "" : search.trim(),
                 warehouseId == null, warehouseId,
                 sf);
 
-        List<StockRowDto> stockRows = rawStock.stream().map(r -> new StockRowDto(
-                ((Number) r[0]).intValue(), String.valueOf(r[1]), String.valueOf(r[2]),
-                ((Number) r[3]).intValue(), String.valueOf(r[4]),
-                ((Number) r[5]).intValue(), ((Number) r[6]).intValue(),
-                toBD(r[7]), toBD(r[8])
-        )).toList();
-
         // Summary from full (unfiltered) stock
-        Object[] summary = stockMovementRepository.findStockSummary();
-        BigDecimal totalUnits = summary != null && summary[0] != null ? toBD(summary[0]) : BigDecimal.ZERO;
-        BigDecimal costValue = summary != null && summary[1] != null ? toBD(summary[1]) : BigDecimal.ZERO;
+        StockSummaryProjection summary = stockMovementRepository.findStockSummary();
+        BigDecimal totalUnits = summary != null && summary.getTotalUnits() != null ? summary.getTotalUnits() : BigDecimal.ZERO;
+        BigDecimal costValue = summary != null && summary.getCostValue() != null ? summary.getCostValue() : BigDecimal.ZERO;
         long outOfStockCount = stockMovementRepository.countOutOfStockItems();
         long lowStockCount = stockMovementRepository.countLowStockItemsCross();
 
@@ -338,13 +329,9 @@ public class SalesReportController {
         } else {
             LocalDateTime startDateTime = from.atStartOfDay();
             LocalDateTime endDateTime = to.plusDays(1).atStartOfDay();
-            List<Object[]> rawMov = stockMovementRepository.findMovementSummaryByProduct(
+            List<StockMovementSummaryProjection> rawMov = stockMovementRepository.findMovementSummaryByProduct(
                     startDateTime, endDateTime, searchNull, searchNull ? "" : search.trim());
-            model.addAttribute("movementSummary", rawMov.stream().map(r -> new StockMovementSummaryDto(
-                    ((Number) r[0]).intValue(), String.valueOf(r[1]), String.valueOf(r[2]),
-                    ((Number) r[3]).longValue(), ((Number) r[4]).longValue(),
-                    ((Number) r[5]).longValue(), ((Number) r[6]).longValue()
-            )).toList());
+            model.addAttribute("movementSummary", rawMov);
         }
 
         return "admin/reports/stock";
@@ -359,7 +346,7 @@ public class SalesReportController {
 
         boolean searchNull = search == null || search.trim().isEmpty();
         String sf = (statusFilter == null || statusFilter.isBlank()) ? "all" : statusFilter;
-        List<Object[]> rawStock = stockMovementRepository.findStockRows(
+        List<StockRowProjection> rawStock = stockMovementRepository.findStockRows(
                 searchNull, searchNull ? "" : search.trim(),
                 warehouseId == null, warehouseId, sf);
 
@@ -368,15 +355,11 @@ public class SalesReportController {
         writer.write('\uFEFF');
         writer.println("\"SKU\",\"Product Name\",\"Warehouse\",\"Quantity\",\"Reorder Level\",\"Status\",\"Stock Value (Cost)\",\"Stock Value (SRP)\"");
 
-        for (Object[] r : rawStock) {
-            StockRowDto row = new StockRowDto(
-                    ((Number) r[0]).intValue(), String.valueOf(r[1]), String.valueOf(r[2]),
-                    ((Number) r[3]).intValue(), String.valueOf(r[4]),
-                    ((Number) r[5]).intValue(), ((Number) r[6]).intValue(),
-                    toBD(r[7]), toBD(r[8]));
+        for (StockRowProjection row : rawStock) {
             writer.println(String.join(",",
                     esc(row.getSku()), esc(row.getName()), esc(row.getWarehouseName()),
-                    String.valueOf(row.getQuantity()), String.valueOf(row.getReorderLevel()),
+                    String.valueOf(row.getQuantity() != null ? row.getQuantity() : 0),
+                    String.valueOf(row.getReorderLevel() != null ? row.getReorderLevel() : 0),
                     esc(row.getStockStatus()),
                     scale2(row.getStockValueAtCost()).toPlainString(),
                     scale2(row.getStockValueAtSrp()).toPlainString()));
@@ -413,10 +396,11 @@ public class SalesReportController {
         LocalDateTime endDateTime = to.plusDays(1).atStartOfDay();
         String sf = (statusFilter == null || statusFilter.isBlank()) ? "all" : statusFilter.trim().toLowerCase();
 
-        List<Object[]> rawRows = commissionRepository.findCommissionReportByReseller(startDateTime, endDateTime, sf);
+        List<CommissionReportRowProjection> rawRows = commissionRepository.findCommissionReportByReseller(startDateTime, endDateTime, sf);
         List<CommissionReportRowDto> commissionRows = rawRows.stream().map(r -> new CommissionReportRowDto(
-                ((Number) r[0]).intValue(), String.valueOf(r[1]),
-                ((Number) r[2]).longValue(), toBD(r[3]), toBD(r[4]), toBD(r[5])
+                r.getResellerId(), r.getBusinessName(),
+                r.getCommissionCount() != null ? r.getCommissionCount() : 0L,
+                r.getPendingAmount(), r.getPaidAmount(), r.getTotalAmount()
         )).toList();
 
         BigDecimal totalAmount = coalesce(commissionRepository.sumTotalInRange(startDateTime, endDateTime));
@@ -441,7 +425,7 @@ public class SalesReportController {
         if (from == null) from = LocalDate.now().withDayOfMonth(1);
         if (to == null) to = LocalDate.now();
 
-        List<Object[]> rawRows = from.isAfter(to) ? Collections.emptyList() :
+        List<CommissionReportRowProjection> rawRows = from.isAfter(to) ? Collections.emptyList() :
                 commissionRepository.findCommissionReportByReseller(
                         from.atStartOfDay(), to.plusDays(1).atStartOfDay(),
                         (statusFilter == null || statusFilter.isBlank()) ? "all" : statusFilter.trim().toLowerCase());
@@ -451,13 +435,13 @@ public class SalesReportController {
         writer.write('\uFEFF');
         writer.println("\"Business Name\",\"Commissions\",\"Pending Amount\",\"Paid Amount\",\"Total Amount\"");
 
-        for (Object[] r : rawRows) {
+        for (CommissionReportRowProjection r : rawRows) {
             writer.println(String.join(",",
-                    esc(String.valueOf(r[1])),
-                    String.valueOf(((Number) r[2]).longValue()),
-                    scale2(toBD(r[3])).toPlainString(),
-                    scale2(toBD(r[4])).toPlainString(),
-                    scale2(toBD(r[5])).toPlainString()));
+                    esc(r.getBusinessName()),
+                    String.valueOf(r.getCommissionCount() != null ? r.getCommissionCount() : 0L),
+                    scale2(coalesce(r.getPendingAmount())).toPlainString(),
+                    scale2(coalesce(r.getPaidAmount())).toPlainString(),
+                    scale2(coalesce(r.getTotalAmount())).toPlainString()));
         }
         writer.flush();
     }
@@ -499,7 +483,13 @@ public class SalesReportController {
     private BigDecimal toBD(Object o) {
         if (o == null) return BigDecimal.ZERO;
         if (o instanceof BigDecimal bd) return bd;
-        return new BigDecimal(o.toString());
+        String s = o.toString().trim();
+        if (s.isEmpty()) return BigDecimal.ZERO;
+        try {
+            return new BigDecimal(s);
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("Cannot convert non-numeric value '" + o + "' to BigDecimal");
+        }
     }
 
     private BigDecimal scale2(BigDecimal v) {

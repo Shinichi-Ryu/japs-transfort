@@ -1,5 +1,6 @@
 package com.japstransfort.repository;
 
+import com.japstransfort.dto.ReceivablesRowProjection;
 import com.japstransfort.entity.Order;
 import com.japstransfort.entity.OrderStatus;
 import com.japstransfort.entity.PaymentMethod;
@@ -75,7 +76,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
                    "GROUP BY TO_CHAR(o.created_at, 'YYYY-MM-DD') " +
                    "ORDER BY saleDate DESC", nativeQuery = true)
     List<Object[]> findDailySales(@Param("startDateTime") LocalDateTime startDateTime,
-                                  @Param("endDateTime") LocalDateTime endDateTime);
+                                   @Param("endDateTime") LocalDateTime endDateTime);
 
     @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.reseller LEFT JOIN FETCH o.payments " +
            "WHERE o.status IN (:salesStatuses) AND o.createdAt >= :startDateTime AND o.createdAt < :endDateTime " +
@@ -89,15 +90,16 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
      * Receivables report: per reseller, sums remaining (total - paid) bucketed by age in days from order created_at.
      * Only open orders (approved/packed/shipped/delivered) with remaining > 0 are included.
      * Returns: reseller_id, business_name, balance, credit_limit, open_order_count, oldest_order_date,
-     *          bucket_0_30, bucket_31_60, bucket_61_90, bucket_over_90, total_remaining
+     *          bucket_030, bucket_3160, bucket_6190, bucket_over_90, total_remaining
      */
     @Query(value =
-        "SELECT r.reseller_id, r.business_name, r.balance, r.credit_limit, " +
+        "SELECT r.reseller_id AS reseller_id, r.business_name AS business_name, " +
+        "       COALESCE(r.balance, 0) AS balance, COALESCE(r.credit_limit, 0) AS credit_limit, " +
         "       COUNT(DISTINCT o.order_id) AS open_order_count, " +
         "       MIN(o.created_at::date) AS oldest_order_date, " +
-        "       COALESCE(SUM(CASE WHEN CURRENT_DATE - o.created_at::date BETWEEN 0 AND 30 THEN GREATEST(o.total - COALESCE(paid.paid_sum,0), 0) ELSE 0 END), 0) AS bucket_0_30, " +
-        "       COALESCE(SUM(CASE WHEN CURRENT_DATE - o.created_at::date BETWEEN 31 AND 60 THEN GREATEST(o.total - COALESCE(paid.paid_sum,0), 0) ELSE 0 END), 0) AS bucket_31_60, " +
-        "       COALESCE(SUM(CASE WHEN CURRENT_DATE - o.created_at::date BETWEEN 61 AND 90 THEN GREATEST(o.total - COALESCE(paid.paid_sum,0), 0) ELSE 0 END), 0) AS bucket_61_90, " +
+        "       COALESCE(SUM(CASE WHEN CURRENT_DATE - o.created_at::date BETWEEN 0 AND 30 THEN GREATEST(o.total - COALESCE(paid.paid_sum,0), 0) ELSE 0 END), 0) AS bucket_030, " +
+        "       COALESCE(SUM(CASE WHEN CURRENT_DATE - o.created_at::date BETWEEN 31 AND 60 THEN GREATEST(o.total - COALESCE(paid.paid_sum,0), 0) ELSE 0 END), 0) AS bucket_3160, " +
+        "       COALESCE(SUM(CASE WHEN CURRENT_DATE - o.created_at::date BETWEEN 61 AND 90 THEN GREATEST(o.total - COALESCE(paid.paid_sum,0), 0) ELSE 0 END), 0) AS bucket_6190, " +
         "       COALESCE(SUM(CASE WHEN CURRENT_DATE - o.created_at::date > 90 THEN GREATEST(o.total - COALESCE(paid.paid_sum,0), 0) ELSE 0 END), 0) AS bucket_over_90, " +
         "       COALESCE(SUM(GREATEST(o.total - COALESCE(paid.paid_sum,0), 0)), 0) AS total_remaining " +
         "FROM resellers r " +
@@ -109,7 +111,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
         "HAVING (:balanceOnly = false OR COALESCE(SUM(GREATEST(o.total - COALESCE(paid.paid_sum,0), 0)), 0) > 0) " +
         "ORDER BY total_remaining DESC",
         nativeQuery = true)
-    List<Object[]> findReceivablesRows(
+    List<ReceivablesRowProjection> findReceivablesRows(
             @Param("searchNull") boolean searchNull,
             @Param("search") String search,
             @Param("balanceOnly") boolean balanceOnly);

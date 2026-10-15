@@ -52,7 +52,9 @@ public class TemplateValidationTest {
             "categories/list",
             "categories/form",
             "products/list",
-            "products/form"
+            "products/form",
+            "print/invoice",
+            "print/receipt"
         };
 
         MockServletContext servletContext = new MockServletContext();
@@ -96,6 +98,34 @@ public class TemplateValidationTest {
                 RequestContext requestContext = new RequestContext(request, response, servletContext, model);
                 request.setAttribute(RequestContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
                 request.setAttribute("org.springframework.web.servlet.support.RequestContext", requestContext);
+                model.put("springRequestContext", requestContext);
+                model.put("thymeleafRequestContext", new org.thymeleaf.spring6.context.webmvc.SpringWebMvcThymeleafRequestContext(requestContext, request));
+
+                com.japstransfort.dto.CompanyDetailsDto company = new com.japstransfort.dto.CompanyDetailsDto("Japs Transfort", "", "", "", "", "");
+                model.put("company", company);
+
+                com.japstransfort.dto.InvoiceDto invoice = new com.japstransfort.dto.InvoiceDto();
+                invoice.setCompany(company);
+                invoice.setEligible(true);
+                invoice.setOrderNo("ORD-0001");
+                invoice.setOrderDate(java.time.LocalDateTime.now());
+                invoice.setListPriceTotal(java.math.BigDecimal.ZERO);
+                invoice.setDiscountAmount(java.math.BigDecimal.ZERO);
+                invoice.setTotal(java.math.BigDecimal.ZERO);
+                invoice.setAmountPaid(java.math.BigDecimal.ZERO);
+                invoice.setBalanceDue(java.math.BigDecimal.ZERO);
+                invoice.setDiscountLabel("Tier discount (0%)");
+                invoice.setPaymentStatusBadge("UNPAID");
+                model.put("invoice", invoice);
+
+                com.japstransfort.dto.PaymentReceiptDto receipt = new com.japstransfort.dto.PaymentReceiptDto();
+                receipt.setCompany(company);
+                receipt.setReceiptNo("RCT-000001");
+                receipt.setPaidAt(java.time.LocalDateTime.now());
+                receipt.setAmount(java.math.BigDecimal.ZERO);
+                receipt.setRemainingBalance(java.math.BigDecimal.ZERO);
+                model.put("receipt", receipt);
+                model.put("backUrl", "/admin/orders/1");
 
                 // Populate request attributes
                 model.forEach(request::setAttribute);
@@ -105,6 +135,30 @@ public class TemplateValidationTest {
 
                 engine.process(template, webContext);
                 System.out.println(">>> Verified valid template: " + template);
+
+                // For print templates, also verify with filled company details, payments present, and missing reference
+                if ("print/invoice".equals(template) || "print/receipt".equals(template)) {
+                    com.japstransfort.dto.CompanyDetailsDto filledCompany = new com.japstransfort.dto.CompanyDetailsDto(
+                            "Japs Transfort Inc.", "123 Main St, Manila", "+63 912 345 6789", "info@japs.com", "123-456-789-000", "Thank you for your business!");
+                    model.put("company", filledCompany);
+
+                    invoice.setCompany(filledCompany);
+                    invoice.setPayments(java.util.List.of(
+                            new com.japstransfort.dto.InvoicePaymentDto(java.time.LocalDateTime.now(), "Cash", null, java.math.BigDecimal.valueOf(100.50)),
+                            new com.japstransfort.dto.InvoicePaymentDto(java.time.LocalDateTime.now(), "GCash", "REF-999", java.math.BigDecimal.valueOf(200.00))
+                    ));
+                    invoice.setItems(java.util.List.of(
+                            new com.japstransfort.dto.InvoiceItemDto("SKU-1", "Product 1", "pc", 2, java.math.BigDecimal.valueOf(150), java.math.BigDecimal.valueOf(300))
+                    ));
+
+                    receipt.setCompany(filledCompany);
+                    receipt.setReferenceNo(null); // missing reference number
+
+                    model.forEach(request::setAttribute);
+                    IWebExchange filledExchange = application.buildExchange(request, response);
+                    WebContext filledContext = new WebContext(filledExchange, request.getLocale(), model);
+                    engine.process(template, filledContext);
+                }
             }, "Template failed parsing: " + template);
         }
     }

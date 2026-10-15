@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<div th:fragment="header" class="print-header mb-4 pb-3 border-bottom">
+    <div class="row align-items-start">
+        <div class="col-12 col-sm-7">
+            <h2 class="fw-bold mb-1 text-dark" th:text="${company != null and company.name != null and !#strings.isEmpty(company.name) ? company.name : 'Japs Transfort'}">Japs Transfort</h2>
+            <div class="small text-secondary">
+                <div th:if="${company != null and company.address != null and !#strings.isEmpty(company.address)}" th:text="${company.address}"></div>
+                <div th:if="${company != null and company.phone != null and !#strings.isEmpty(company.phone)}" th:text="'Phone: ' + ${company.phone}"></div>
+                <div th:if="${company != null and company.email != null and !#strings.isEmpty(company.email)}" th:text="'Email: ' + ${company.email}"></div>
+                <div th:if="${company != null and company.tin != null and !#strings.isEmpty(company.tin)}" th:text="'TIN: ' + ${company.tin}"></div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-5 text-sm-end mt-2 mt-sm-0" th:if="${invoice != null and invoice.eligible}">
+            <h2 class="fw-bold text-uppercase text-dark mb-1">INVOICE</h2>
+            <div class="small text-muted" th:if="${invoice.orderNo != null}">
+                <span class="text-secondary">Invoice No:</span>
+                <span class="font-monospace fw-bold text-dark ms-1" th:text="${invoice.orderNo}">ORD-0001</span>
+            </div>
+            <div class="small text-muted" th:if="${invoice.orderDate != null}">
+                <span class="text-secondary">Date:</span>
+                <span class="fw-medium text-dark ms-1" th:text="${#temporals.format(invoice.orderDate, 'yyyy-MM-dd HH:mm')}">2026-10-15</span>
+            </div>
+        </div>
+        <div class="col-12 col-sm-5 text-sm-end mt-2 mt-sm-0" th:if="${receipt != null}">
+            <h2 class="fw-bold text-uppercase text-dark mb-1">RECEIPT</h2>
+            <div class="small text-muted" th:if="${receipt.receiptNo != null}">
+                <span class="text-secondary">Receipt No:</span>
+                <span class="font-monospace fw-bold text-dark ms-1" th:text="${receipt.receiptNo}">RCT-000001</span>
+            </div>
+            <div class="small text-muted" th:if="${receipt.paidAt != null}">
+                <span class="text-secondary">Date:</span>
+                <span class="fw-medium text-dark ms-1" th:text="${#temporals.format(receipt.paidAt, 'yyyy-MM-dd HH:mm')}">2026-10-15</span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -49,7 +49,7 @@
 
                             <input type="hidden" th:field="*{productId}">
                             <!-- Explicit CSRF for multipart forms -->
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
                             <div class="row g-3">
                                 <!-- SKU -->

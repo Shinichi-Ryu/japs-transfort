@@ -1,0 +1,397 @@
+/* ===================================================================
+   Japs Transfort - Login Page Stylesheet
+   Prefixed with jt-login- to isolate completely from all other pages.
+   =================================================================== */
+
+body.jt-login {
+    --jt-login-navy: #0F5257;
+    --jt-login-sb: #0A3A40;
+    --jt-login-n2: #17666C;
+    --jt-login-amber: #F5A623;
+    --jt-login-bg: #F0F6F6;
+    --jt-login-card: #ffffff;
+    --jt-login-line: #E2E8F0;
+    --jt-login-soft: #EDF1F6;
+    --jt-login-tx: #13202E;
+    --jt-login-mu: #5A6B7D;
+    --jt-login-lk: #0F766E;
+    --jt-login-r: 16px;
+    --jt-login-sh: 0 1px 2px rgba(11, 34, 57, 0.04), 0 10px 30px rgba(11, 34, 57, 0.06);
+
+    margin: 0;
+    padding: 0;
+    background-color: var(--jt-login-bg);
+    color: var(--jt-login-tx);
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+body.jt-login *,
+body.jt-login *::before,
+body.jt-login *::after {
+    box-sizing: border-box;
+}
+
+.jt-login-container {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Left Banner Side */
+.jt-login-banner {
+    background-color: var(--jt-login-sb);
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+    padding: 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 28px;
+    z-index: 1;
+}
+
+.jt-login-route-bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: calc(100% + 480px);
+    height: calc(100% + 340px);
+    pointer-events: none;
+    z-index: 0;
+    animation: jt-login-rtm 45s linear infinite;
+}
+
+@keyframes jt-login-rtm {
+    to {
+        transform: translate(-480px, -340px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .jt-login-route-bg {
+        animation: none !important;
+    }
+}
+
+.jt-login-banner-content {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+}
+
+.jt-login-brand-top {
+    position: absolute;
+    top: 48px;
+    left: 56px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 1;
+}
+
+.jt-login-brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.jt-login-brand-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.jt-login-brand-sub {
+    font-size: 13px;
+    color: #9FB6C4;
+    font-weight: 500;
+}
+
+.jt-login-headline {
+    font-size: clamp(28px, 3.2vw, 42px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: #ffffff;
+    margin: 0 0 28px 0;
+    max-width: 480px;
+}
+
+.jt-login-features {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.jt-login-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #E2E8F0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.jt-login-feature-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--jt-login-amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+}
+
+.jt-login-feature-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Right Form Side */
+.jt-login-form-side {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    background-color: var(--jt-login-bg);
+    min-height: 100vh;
+}
+
+.jt-login-card {
+    width: 100%;
+    max-width: 430px;
+    background-color: var(--jt-login-card);
+    border: 1px solid var(--jt-login-line);
+    border-radius: var(--jt-login-r);
+    box-shadow: var(--jt-login-sh);
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.jt-login-card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.jt-login-card-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--jt-login-tx);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.jt-login-card-subtitle {
+    font-size: 14px;
+    color: var(--jt-login-mu);
+    margin: 0;
+}
+
+.jt-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0;
+    width: 100%;
+}
+
+.jt-login-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.jt-login-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--jt-login-tx);
+    margin: 0;
+}
+
+.jt-login-input {
+    min-height: 44px;
+    border: 1px solid var(--jt-login-line);
+    border-radius: 12px !important;
+    padding: 0 14px;
+    background-color: var(--jt-login-card);
+    color: var(--jt-login-tx);
+    font-family: inherit;
+    font-size: 14px;
+    width: 100%;
+    box-shadow: none;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.jt-login-input:focus {
+    outline: 0;
+    border-color: var(--jt-login-lk);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.2) !important;
+    background-color: var(--jt-login-card);
+    color: var(--jt-login-tx);
+}
+
+.jt-login-input-group.input-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+}
+
+.jt-login-input-group .jt-login-input {
+    flex: 1 1 auto;
+    border-radius: 12px !important;
+}
+
+.jt-login-eye-btn {
+    flex: 0 0 46px;
+    width: 46px;
+    min-width: 46px;
+    height: 44px;
+    border-radius: 12px !important;
+    border: 1px solid var(--jt-login-line) !important;
+    background-color: var(--jt-login-card) !important;
+    color: var(--jt-login-tx) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color .15s, border-color .15s, transform .12s;
+}
+
+.jt-login-eye-btn:hover {
+    background-color: var(--jt-login-soft) !important;
+    border-color: var(--jt-login-line) !important;
+    color: var(--jt-login-tx) !important;
+}
+
+.jt-login-eye-btn:focus-visible {
+    outline: 3px solid var(--jt-login-amber);
+    outline-offset: 2px;
+}
+
+.jt-login-extra-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    margin-top: -2px;
+}
+
+.jt-login-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--jt-login-tx);
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+
+.jt-login-checkbox {
+    width: 16px;
+    height: 16px;
+    min-height: auto;
+    accent-color: var(--jt-login-navy);
+    cursor: pointer;
+}
+
+.jt-login-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 46px;
+    padding: 0 20px;
+    border-radius: 12px;
+    border: 1px solid var(--jt-login-navy);
+    background-color: var(--jt-login-navy);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(15, 82, 87, 0.28);
+    transition: transform .12s, filter .12s, box-shadow .12s;
+    text-decoration: none;
+}
+
+.jt-login-btn-primary:hover {
+    filter: brightness(0.95);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.jt-login-btn-primary:active {
+    transform: scale(0.98);
+}
+
+.jt-login-btn-primary:focus-visible {
+    outline: 3px solid var(--jt-login-amber);
+    outline-offset: 2px;
+}
+
+.jt-login-alert {
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 4px;
+}
+
+.jt-login-footer {
+    text-align: center;
+    font-size: 13px;
+    color: var(--jt-login-mu);
+    margin-top: 4px;
+}
+
+.jt-login-link {
+    color: var(--jt-login-lk);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.jt-login-link:hover {
+    text-decoration: underline;
+    color: var(--jt-login-navy);
+}
+
+.jt-login-dev-note {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--jt-login-mu);
+    opacity: 0.8;
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--jt-login-line);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .jt-login-container {
+        grid-template-columns: 1fr;
+    }
+    .jt-login-banner {
+        display: none;
+    }
+    .jt-login-form-side {
+        padding: 24px 16px;
+    }
+    .jt-login-card {
+        padding: 28px 20px;
+    }
+}

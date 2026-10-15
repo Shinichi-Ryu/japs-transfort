@@ -2,7 +2,12 @@ package com.japstransfort.service;
 
 import com.japstransfort.dto.CartItem;
 import com.japstransfort.dto.CartRow;
+import com.japstransfort.dto.CompanyDetailsDto;
+import com.japstransfort.dto.InvoiceDto;
+import com.japstransfort.dto.InvoiceItemDto;
+import com.japstransfort.dto.InvoicePaymentDto;
 import com.japstransfort.dto.OrderDetailDto;
+import com.japstransfort.dto.PaymentReceiptDto;
 import com.japstransfort.entity.*;
 import com.japstransfort.repository.InventoryRepository;
 import com.japstransfort.repository.OrderRepository;
@@ -11,6 +16,7 @@ import com.japstransfort.repository.ProductRepository;
 import com.japstransfort.repository.ResellerRepository;
 import com.japstransfort.repository.ShipmentRepository;
 import com.japstransfort.repository.StockMovementRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,14 +26,34 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Service for reseller cart and order placement.
  */
 @Service
 public class OrderService {
+
+    @Value("${app.company.name:Japs Transfort}")
+    private String companyName;
+
+    @Value("${app.company.address:}")
+    private String companyAddress;
+
+    @Value("${app.company.phone:}")
+    private String companyPhone;
+
+    @Value("${app.company.email:}")
+    private String companyEmail;
+
+    @Value("${app.company.tin:}")
+    private String companyTin;
+
+    @Value("${app.invoice.footer:}")
+    private String invoiceFooter;
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
@@ -496,6 +522,221 @@ public class OrderService {
         commissionService.createCommissionIfEligible(order);
 
         return savedPayment;
+    }
+
+    public CompanyDetailsDto getCompanyDetails() {
+        return new CompanyDetailsDto(
+                companyName != null && !companyName.trim().isEmpty() ? companyName : "Japs Transfort",
+                companyAddress,
+                companyPhone,
+                companyEmail,
+                companyTin,
+                invoiceFooter
+        );
+    }
+
+    /**
+     * Loads invoice data for an order (admin view).
+     */
+    @Transactional(readOnly = true)
+    public Optional<InvoiceDto> getInvoiceForAdmin(Integer orderId) {
+        return buildInvoiceDto(orderId, null);
+    }
+
+    /**
+     * Loads invoice data for an order (reseller view, enforcing ownership).
+     */
+    @Transactional(readOnly = true)
+    public Optional<InvoiceDto> getInvoiceForReseller(Integer orderId, Integer resellerId) {
+        if (resellerId == null) return Optional.empty();
+        return buildInvoiceDto(orderId, resellerId);
+    }
+
+    private Optional<InvoiceDto> buildInvoiceDto(Integer orderId, Integer resellerId) {
+        if (orderId == null) return Optional.empty();
+
+        Optional<Order> orderOpt = orderRepository.findWithItemsById(orderId);
+        if (orderOpt.isEmpty()) return Optional.empty();
+
+        Order order = orderOpt.get();
+
+        if (resellerId != null) {
+            if (order.getReseller() == null || !order.getReseller().getResellerId().equals(resellerId)) {
+                return Optional.empty();
+            }
+        }
+
+        InvoiceDto dto = new InvoiceDto();
+        dto.setCompany(getCompanyDetails());
+        dto.setOrderId(order.getOrderId());
+        dto.setOrderNo(order.getOrderNo());
+        dto.setOrderDate(order.getCreatedAt());
+        dto.setStatus(order.getStatus() != null ? order.getStatus().name() : "");
+
+        boolean eligible = order.getStatus() == OrderStatus.approved
+                || order.getStatus() == OrderStatus.packed
+                || order.getStatus() == OrderStatus.shipped
+                || order.getStatus() == OrderStatus.delivered;
+        dto.setEligible(eligible);
+
+        Reseller reseller = order.getReseller();
+        if (reseller != null) {
+            dto.setBusinessName(reseller.getBusinessName());
+            if (reseller.getUser() != null) {
+                dto.setContactPerson(reseller.getUser().getFullName());
+            }
+            dto.setAddress(reseller.getAddress());
+            dto.setCityLocation(reseller.getTerritory());
+            dto.setContactNumber(reseller.getContactNo());
+        }
+
+        if (order.getPaymentMethod() != null) {
+            switch (order.getPaymentMethod()) {
+                case COD -> dto.setPaymentMethod("Cash on delivery (COD)");
+                case CREDIT -> dto.setPaymentMethod("On account (Credit)");
+                case ONLINE -> dto.setPaymentMethod("Online");
+                default -> dto.setPaymentMethod(order.getPaymentMethod().name());
+            }
+        } else {
+            dto.setPaymentMethod("On account");
+        }
+
+        List<InvoiceItemDto> itemDtos = new ArrayList<>();
+        if (order.getItems() != null) {
+            for (OrderItem item : order.getItems()) {
+                String sku = item.getProduct() != null ? item.getProduct().getSku() : "N/A";
+                String description = item.getProduct() != null ? item.getProduct().getName() : "Unknown Product";
+                String unit = (item.getProduct() != null && item.getProduct().getUnit() != null) ? item.getProduct().getUnit() : "pc";
+                Integer qty = item.getQuantity() != null ? item.getQuantity() : 0;
+                BigDecimal unitPrice = item.getUnitPrice() != null ? item.getUnitPrice().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+                BigDecimal lineTotal = item.getLineTotal() != null ? item.getLineTotal().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+
+                itemDtos.add(new InvoiceItemDto(sku, description, unit, qty, unitPrice, lineTotal));
+            }
+        }
+        dto.setItems(itemDtos);
+
+        BigDecimal total = order.getTotal() != null ? order.getTotal().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal discount = order.getDiscount() != null ? order.getDiscount().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal listPriceTotal = total.add(discount).setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal discountPct = BigDecimal.ZERO;
+        if (reseller != null && reseller.getTier() != null && reseller.getTier().getDiscountPct() != null) {
+            discountPct = reseller.getTier().getDiscountPct();
+        }
+        String pctStr = discountPct.stripTrailingZeros().toPlainString() + "%";
+        dto.setDiscountLabel("Tier discount (" + pctStr + ")");
+        dto.setDiscountPct(discountPct);
+
+        dto.setListPriceTotal(listPriceTotal);
+        dto.setDiscountAmount(discount);
+        dto.setTotal(total);
+
+        BigDecimal amountPaid = paymentRepository.sumAmountByOrderId(order.getOrderId());
+        if (amountPaid == null) {
+            amountPaid = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        } else {
+            amountPaid = amountPaid.setScale(2, RoundingMode.HALF_UP);
+        }
+        dto.setAmountPaid(amountPaid);
+
+        BigDecimal balanceDue = total.subtract(amountPaid).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+        dto.setBalanceDue(balanceDue);
+
+        if (balanceDue.compareTo(BigDecimal.ZERO) == 0 && amountPaid.compareTo(BigDecimal.ZERO) > 0) {
+            dto.setPaymentStatusBadge("PAID");
+        } else if (amountPaid.compareTo(BigDecimal.ZERO) > 0 && balanceDue.compareTo(BigDecimal.ZERO) > 0) {
+            dto.setPaymentStatusBadge("PARTIAL");
+        } else {
+            dto.setPaymentStatusBadge("UNPAID");
+        }
+
+        List<Payment> payments = paymentRepository.findByOrderIdWithReceivedBy(order.getOrderId());
+        List<InvoicePaymentDto> paymentDtos = new ArrayList<>();
+        if (payments != null) {
+            List<Payment> sortedPayments = new ArrayList<>(payments);
+            sortedPayments.sort(Comparator.comparing(Payment::getPaymentId));
+            for (Payment p : sortedPayments) {
+                paymentDtos.add(new InvoicePaymentDto(
+                        p.getPaidAt(),
+                        p.getMethod() != null ? p.getMethod() : "Cash",
+                        p.getReferenceNo(),
+                        p.getAmount() != null ? p.getAmount().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP)
+                ));
+            }
+        }
+        dto.setPayments(paymentDtos);
+
+        return Optional.of(dto);
+    }
+
+    /**
+     * Loads payment receipt data (admin view).
+     */
+    @Transactional(readOnly = true)
+    public Optional<PaymentReceiptDto> getReceiptForAdmin(Integer paymentId) {
+        return buildReceiptDto(paymentId, null);
+    }
+
+    /**
+     * Loads payment receipt data (reseller view, enforcing ownership).
+     */
+    @Transactional(readOnly = true)
+    public Optional<PaymentReceiptDto> getReceiptForReseller(Integer paymentId, Integer resellerId) {
+        if (resellerId == null) return Optional.empty();
+        return buildReceiptDto(paymentId, resellerId);
+    }
+
+    private Optional<PaymentReceiptDto> buildReceiptDto(Integer paymentId, Integer resellerId) {
+        if (paymentId == null) return Optional.empty();
+
+        Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
+        if (paymentOpt.isEmpty()) return Optional.empty();
+
+        Payment payment = paymentOpt.get();
+        Order order = payment.getOrder();
+        if (order == null) return Optional.empty();
+
+        Reseller reseller = order.getReseller();
+        if (resellerId != null) {
+            if (reseller == null || !reseller.getResellerId().equals(resellerId)) {
+                return Optional.empty();
+            }
+        }
+
+        String receiptNo = String.format("RCT-%06d", payment.getPaymentId());
+
+        List<Payment> allOrderPayments = paymentRepository.findByOrderIdWithReceivedBy(order.getOrderId());
+        List<Payment> sortedPayments = new ArrayList<>(allOrderPayments);
+        sortedPayments.sort(Comparator.comparing(Payment::getPaymentId));
+
+        BigDecimal cumulativePaid = BigDecimal.ZERO;
+        for (Payment p : sortedPayments) {
+            if (p.getAmount() != null) {
+                cumulativePaid = cumulativePaid.add(p.getAmount());
+            }
+            if (p.getPaymentId().equals(payment.getPaymentId())) {
+                break;
+            }
+        }
+
+        BigDecimal orderTotal = order.getTotal() != null ? order.getTotal() : BigDecimal.ZERO;
+        BigDecimal remainingAfterThisPayment = orderTotal.subtract(cumulativePaid).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+
+        PaymentReceiptDto dto = new PaymentReceiptDto();
+        dto.setCompany(getCompanyDetails());
+        dto.setPaymentId(payment.getPaymentId());
+        dto.setReceiptNo(receiptNo);
+        dto.setPaidAt(payment.getPaidAt());
+        dto.setBusinessName(reseller != null ? reseller.getBusinessName() : "N/A");
+        dto.setAmount(payment.getAmount() != null ? payment.getAmount().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+        dto.setMethod(payment.getMethod() != null ? payment.getMethod() : "Cash");
+        dto.setReferenceNo(payment.getReferenceNo());
+        dto.setOrderNo(order.getOrderNo());
+        dto.setRemainingBalance(remainingAfterThisPayment);
+        dto.setOrderId(order.getOrderId());
+
+        return Optional.of(dto);
     }
 
     private String generateOrderNo() {

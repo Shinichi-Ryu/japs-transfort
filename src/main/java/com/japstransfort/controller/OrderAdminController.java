@@ -10,7 +10,9 @@ import com.japstransfort.entity.User;
 import com.japstransfort.service.CommissionService;
 import com.japstransfort.service.OrderAdminService;
 import com.japstransfort.service.OrderService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -112,6 +114,28 @@ public class OrderAdminController {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/admin/orders";
         }
+    }
+
+    /**
+     * Displays printable invoice for an order.
+     */
+    @GetMapping("/{id}/invoice")
+    public String orderInvoice(
+            @PathVariable("id") Integer id,
+            Model model,
+            HttpServletResponse response) {
+
+        return orderService.getInvoiceForAdmin(id)
+                .map(invoice -> {
+                    model.addAttribute("invoice", invoice);
+                    model.addAttribute("company", invoice.getCompany());
+                    model.addAttribute("backUrl", "/admin/orders/" + id);
+                    return "print/invoice";
+                })
+                .orElseGet(() -> {
+                    response.setStatus(HttpStatus.NOT_FOUND.value());
+                    return "portal/order-not-found";
+                });
     }
 
     /**

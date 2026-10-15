@@ -35,6 +35,11 @@
                     pending
                 </span>
             </div>
+            <div th:if="${order.status != null and (order.status.name() == 'approved' or order.status.name() == 'packed' or order.status.name() == 'shipped' or order.status.name() == 'delivered')}">
+                <a th:href="@{'/portal/orders/' + ${order.orderId} + '/invoice'}" target="_blank" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-printer me-1"></i> Print invoice
+                </a>
+            </div>
         </div>
 
         <!-- Flash Messages -->
@@ -342,12 +347,13 @@
                                 <th scope="col" class="text-end">Amount</th>
                                 <th scope="col">Method</th>
                                 <th scope="col">Reference</th>
-                                <th scope="col" class="pe-3">Received By</th>
+                                <th scope="col">Received By</th>
+                                <th scope="col" class="text-end pe-3">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:if="${order.payments == null or order.payments.empty}">
-                                <td colspan="5" class="text-center text-muted py-3">No payments recorded yet for this order.</td>
+                                <td colspan="6" class="text-center text-muted py-3">No payments recorded yet for this order.</td>
                             </tr>
                             <tr th:each="p : ${order.payments}">
                                 <td class="ps-3 text-muted small"
@@ -358,7 +364,12 @@
                                     <span class="badge bg-light text-dark border" th:text="${p.method}">Cash</span>
                                 </td>
                                 <td class="font-monospace small" th:text="${p.referenceNo != null && !p.referenceNo.empty ? p.referenceNo : '-'}">-</td>
-                                <td class="pe-3 text-dark small" th:text="${p.receivedByName != null ? p.receivedByName : 'System'}">Admin Name</td>
+                                <td class="text-dark small" th:text="${p.receivedByName != null ? p.receivedByName : 'System'}">Admin Name</td>
+                                <td class="text-end pe-3">
+                                    <a th:href="@{'/portal/payments/' + ${p.paymentId} + '/receipt'}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-printer me-1"></i> Print receipt
+                                    </a>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Receipt ' + ${receipt.receiptNo} + ' - ' + ${company.name}">Receipt - Japs Transfort</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+</head>
+<body class="bg-white">
+
+    <!-- Top Action Bar (hidden on print) -->
+    <div class="no-print bg-light border-bottom py-3 mb-4">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a th:href="${backUrl}" class="btn btn-outline-secondary btn-sm">
+                &larr; Back
+            </a>
+            <button type="button" onclick="window.print()" class="btn btn-primary btn-sm">
+                Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Printable Receipt -->
+    <div class="container print-container pb-5">
+
+        <!-- Company & Document Header -->
+        <div th:replace="~{fragments/print-header :: printHeader('RECEIPT', receipt.receiptNo, receipt.paidAt)}"></div>
+
+        <div class="card border mb-4">
+            <div class="card-body p-4">
+                <div class="row g-4 align-items-center mb-4">
+                    <div class="col-12 col-md-6">
+                        <label class="text-muted small text-uppercase fw-semibold d-block">Received From</label>
+                        <div class="fs-4 fw-bold text-dark" th:text="${receipt.businessName}">Business Name</div>
+                    </div>
+                    <div class="col-12 col-md-6 text-md-end">
+                        <label class="text-muted small text-uppercase fw-semibold d-block">Amount Received</label>
+                        <div class="fs-3 fw-bold text-success font-monospace"
+                             th:text="'₱' + ${#numbers.formatDecimal(receipt.amount, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                    </div>
+                </div>
+
+                <div class="row g-3 py-3 border-top border-bottom bg-light rounded">
+                    <div class="col-6 col-md-3">
+                        <label class="text-muted small d-block">Payment Date</label>
+                        <div class="fw-semibold text-dark" th:text="${receipt.paidAt != null ? #temporals.format(receipt.paidAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-10-15</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="text-muted small d-block">Payment Method</label>
+                        <div class="fw-semibold text-dark" th:text="${receipt.method}">Cash</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="text-muted small d-block">Reference Number</label>
+                        <div class="font-monospace text-dark" th:text="${receipt.referenceNo != null and !receipt.referenceNo.trim().isEmpty() ? receipt.referenceNo : '-'}">-</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="text-muted small d-block">Order Number</label>
+                        <div class="font-monospace fw-semibold text-dark" th:text="${receipt.orderNo}">ORD-0001</div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-4">
+                    <span class="fw-bold text-dark">Remaining Balance After This Payment:</span>
+                    <span class="fs-5 fw-bold font-monospace text-dark"
+                          th:text="'₱' + ${#numbers.formatDecimal(receipt.remainingBalance, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Receipt Footer (if not blank) -->
+        <div class="invoice-footer mt-5 pt-3 border-top text-center text-muted small"
+             th:if="${company.footer != null and !company.footer.trim().isEmpty()}"
+             th:text="${company.footer}">
+        </div>
+
+    </div>
+
+</body>
+</html>

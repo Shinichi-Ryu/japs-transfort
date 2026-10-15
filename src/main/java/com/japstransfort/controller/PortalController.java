@@ -441,6 +441,62 @@ public class PortalController {
         return "portal/order-detail";
     }
 
+    // ─── Order Invoice ────────────────────────────────────────────────────────
+
+    @GetMapping({"/orders/{id}/invoice", "/orders/invoice"})
+    public String orderInvoice(
+            @PathVariable(value = "id", required = false) Integer orderId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
+            HttpServletResponse response) {
+
+        Reseller reseller = loadReseller(userDetails);
+        if (reseller == null || orderId == null) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return "portal/order-not-found";
+        }
+
+        return orderService.getInvoiceForReseller(orderId, reseller.getResellerId())
+                .map(invoice -> {
+                    model.addAttribute("invoice", invoice);
+                    model.addAttribute("company", invoice.getCompany());
+                    model.addAttribute("backUrl", "/portal/orders/" + orderId);
+                    return "print/invoice";
+                })
+                .orElseGet(() -> {
+                    response.setStatus(HttpStatus.NOT_FOUND.value());
+                    return "portal/order-not-found";
+                });
+    }
+
+    // ─── Payment Receipt ──────────────────────────────────────────────────────
+
+    @GetMapping({"/payments/{id}/receipt", "/payments/receipt"})
+    public String paymentReceipt(
+            @PathVariable(value = "id", required = false) Integer paymentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
+            HttpServletResponse response) {
+
+        Reseller reseller = loadReseller(userDetails);
+        if (reseller == null || paymentId == null) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return "portal/order-not-found";
+        }
+
+        return orderService.getReceiptForReseller(paymentId, reseller.getResellerId())
+                .map(receipt -> {
+                    model.addAttribute("receipt", receipt);
+                    model.addAttribute("company", receipt.getCompany());
+                    model.addAttribute("backUrl", "/portal/orders/" + receipt.getOrderId());
+                    return "print/receipt";
+                })
+                .orElseGet(() -> {
+                    response.setStatus(HttpStatus.NOT_FOUND.value());
+                    return "portal/order-not-found";
+                });
+    }
+
     // ─── Cancel Order ─────────────────────────────────────────────────────────
 
     @PostMapping("/orders/{id}/cancel")

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<div th:fragment="printHeader(docTitle, docNumber, docDate)" class="print-header mb-4 pb-3 border-bottom">
+    <div class="d-flex justify-content-between align-items-start flex-wrap">
+        <div>
+            <h2 class="fw-bold mb-1 text-dark" th:text="${company.name}">Japs Transfort</h2>
+            <div class="small text-secondary">
+                <div th:if="${company.address != null and !company.address.trim().isEmpty()}" th:text="${company.address}"></div>
+                <div th:if="${company.phone != null and !company.phone.trim().isEmpty()}" th:text="'Phone: ' + ${company.phone}"></div>
+                <div th:if="${company.email != null and !company.email.trim().isEmpty()}" th:text="'Email: ' + ${company.email}"></div>
+                <div th:if="${company.tin != null and !company.tin.trim().isEmpty()}" th:text="'TIN: ' + ${company.tin}"></div>
+            </div>
+        </div>
+        <div class="text-end mt-2 mt-sm-0">
+            <h2 class="fw-bold text-uppercase text-dark mb-1" th:text="${docTitle}">INVOICE</h2>
+            <div class="small text-muted" th:if="${docNumber != null}">
+                <span class="text-secondary" th:text="${docTitle == 'INVOICE' ? 'Invoice No:' : 'Receipt No:'}"></span>
+                <span class="font-monospace fw-bold text-dark ms-1" th:text="${docNumber}">ORD-0001</span>
+            </div>
+            <div class="small text-muted" th:if="${docDate != null}">
+                <span class="text-secondary">Date:</span>
+                <span class="fw-medium text-dark ms-1" th:text="${#temporals.format(docDate, 'yyyy-MM-dd HH:mm')}">2026-10-15</span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -205,6 +205,12 @@
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
+                                        <a th:href="@{'/admin/resellers/' + ${reseller.resellerId} + '/statement'}"
+                                           class="btn btn-outline-info btn-sm"
+                                           title="Statement of Account">
+                                            <i class="bi bi-file-earmark-text me-1"></i> Statement
+                                        </a>
+
                                         <!-- Deactivate action for active resellers -->
                                         <form th:if="${reseller.status == 'active'}"
                                               th:action="@{'/admin/resellers/delete/' + ${reseller.resellerId}}"

@@ -185,4 +185,31 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Modifying
     @Query(value = "UPDATE orders SET updated_at = NOW() WHERE order_id = :id", nativeQuery = true)
     void touchUpdatedAt(@Param("id") Integer id);
+
+    /**
+     * Sum of order totals (charges) for a reseller with approved/packed/shipped/delivered status
+     * strictly before the given cutoff (used for opening balance).
+     */
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o " +
+           "WHERE o.reseller.resellerId = :resellerId " +
+           "AND o.status IN :statuses " +
+           "AND o.createdAt < :before")
+    BigDecimal sumChargesBeforeDate(@Param("resellerId") Integer resellerId,
+                                    @Param("statuses") List<OrderStatus> statuses,
+                                    @Param("before") LocalDateTime before);
+
+    /**
+     * Fetch invoiceable orders for a reseller within [from, toExclusive).
+     * Returns orderId, orderNo, createdAt, total – no lazy associations.
+     */
+    @Query("SELECT o FROM Order o " +
+           "WHERE o.reseller.resellerId = :resellerId " +
+           "AND o.status IN :statuses " +
+           "AND o.createdAt >= :from " +
+           "AND o.createdAt < :toExclusive " +
+           "ORDER BY o.createdAt ASC, o.orderId ASC")
+    List<Order> findStatementOrders(@Param("resellerId") Integer resellerId,
+                                    @Param("statuses") List<OrderStatus> statuses,
+                                    @Param("from") LocalDateTime from,
+                                    @Param("toExclusive") LocalDateTime toExclusive);
 }

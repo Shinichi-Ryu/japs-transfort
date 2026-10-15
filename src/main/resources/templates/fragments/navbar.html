@@ -118,6 +118,11 @@
                         <i class="bi bi-cash-stack me-1"></i> Commissions
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${activeTab == 'statement' ? 'active fw-semibold' : ''}" th:href="@{/portal/statement}">
+                        <i class="bi bi-file-earmark-text me-1"></i> Statement
+                    </a>
+                </li>
             </ul>
 
             <div class="d-flex align-items-center gap-3">

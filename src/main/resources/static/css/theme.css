@@ -193,36 +193,21 @@ a {
    Bootstrap Component Skinning
    =================================================================== */
 
-/* Cards & Glass-Effect */
+/* Cards & Glass-Effect - Solid / high-opacity backgrounds for 60fps window resize */
 .card,
 .stat-card,
 .table-card {
-    background-color: var(--card); /* Solid fallback */
-    background-color: color-mix(in srgb, var(--card) 85%, transparent);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    background-color: var(--card);
+    border: 1px solid var(--line);
     border-radius: var(--r);
     box-shadow: var(--sh);
     color: var(--tx);
 }
 
-@supports not (backdrop-filter: blur(1px)) {
-    .card,
-    .stat-card,
-    .table-card,
-    .glass-card {
-        background-color: var(--card) !important;
-    }
-}
-
 .card.glass,
 .glass-card {
-    background-color: var(--card); /* Solid fallback */
-    background-color: color-mix(in srgb, var(--card) 78%, transparent);
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
-    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    background-color: var(--card);
+    border: 1px solid var(--line);
     border-radius: var(--r);
     box-shadow: var(--sh);
 }
@@ -603,11 +588,8 @@ textarea:focus {
 /* KPI Cards */
 .kpi {
     padding: 18px 20px;
-    background-color: var(--card); /* Fallback */
-    background-color: color-mix(in srgb, var(--card) 85%, transparent);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    background-color: var(--card);
+    border: 1px solid var(--line);
     border-radius: var(--r);
     box-shadow: var(--sh);
     display: flex;
@@ -1168,15 +1150,13 @@ html.mini .sbf,
     padding: 10px 16px 10px 22px;
     margin: 12px 26px 0;
     border-radius: 20px;
-    background-color: var(--card); /* Fallback */
-    background-color: color-mix(in srgb, var(--card) 92%, transparent);
-    backdrop-filter: blur(16px) saturate(150%);
-    -webkit-backdrop-filter: blur(16px) saturate(150%);
-    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    background-color: var(--card);
+    border: 1px solid var(--line);
     box-shadow: var(--sh);
     position: sticky;
     top: 12px;
     z-index: 40;
+    contain: layout style;
 }
 
 /* Fill the gap above the topbar so content can't scroll up above it */
@@ -1190,12 +1170,6 @@ html.mini .sbf,
     z-index: 39;
     margin: 0;
     flex: none;
-}
-
-@supports not (backdrop-filter: blur(1px)) {
-    .tb {
-        background-color: var(--card);
-    }
 }
 
 .tb-menu-btn {
@@ -1454,6 +1428,16 @@ html.still .sbt svg,
     transition: none !important;
 }
 
+/* ===================================================================
+   WINDOW RESIZE PERFORMANCE: Suppress transitions while resizing
+   =================================================================== */
+html.resizing,
+html.resizing *,
+html.resizing *::before,
+html.resizing *::after {
+    transition: none !important;
+}
+
 /* Command Palette (.cp) */
 .cp {
     position: fixed;
@@ -1523,46 +1507,46 @@ html.still .sbt svg,
     flex: none;
 }
 
-/* Background Effects */
+/* Background Effects - Single isolated fixed GPU layer, no heavy full-screen blur filters */
 .bgfx {
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
     overflow: hidden;
+    contain: strict;
+    transform: translateZ(0);
 }
 
 .orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(70px);
+    will-change: transform;
+    pointer-events: none;
 }
 
 .o1 {
-    width: 460px;
-    height: 460px;
-    background-color: var(--amber);
-    opacity: 0.38;
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--amber) 40%, transparent) 0%, transparent 70%);
     top: -140px;
     right: -60px;
     animation: d1 22s ease-in-out infinite alternate;
 }
 
 .o2 {
-    width: 540px;
-    height: 540px;
-    background-color: var(--lk);
-    opacity: 0.26;
+    width: 560px;
+    height: 560px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--lk) 30%, transparent) 0%, transparent 70%);
     bottom: -200px;
     left: 12%;
     animation: d2 28s ease-in-out infinite alternate;
 }
 
 .o3 {
-    width: 380px;
-    height: 380px;
-    background-color: var(--c-p);
-    opacity: 0.18;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--c-p) 22%, transparent) 0%, transparent 70%);
     top: 38%;
     left: 58%;
     animation: d3 34s ease-in-out infinite alternate;

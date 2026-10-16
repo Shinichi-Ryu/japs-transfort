@@ -468,6 +468,19 @@
                             }
                         });
                     }
+
+                    // Passive debounced resize handler: suppress layout transitions during drag
+                    var resizeTimer = null;
+                    window.addEventListener('resize', function() {
+                        if (!document.documentElement.classList.contains('resizing')) {
+                            document.documentElement.classList.add('resizing');
+                        }
+                        if (resizeTimer) clearTimeout(resizeTimer);
+                        resizeTimer = setTimeout(function() {
+                            document.documentElement.classList.remove('resizing');
+                            resizeTimer = null;
+                        }, 150);
+                    }, { passive: true });
                 });
             })();
         </script>

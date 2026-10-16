@@ -37,43 +37,28 @@
     flex-wrap: wrap;
 }
 
-/* Base Card */
+/* Base Card - Fast rendering without backdrop-filter */
 .jt-card {
-    background-color: var(--card); /* Fallback */
-    background-color: color-mix(in srgb, var(--card) 85%, transparent);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    background-color: var(--card);
+    border: 1px solid var(--line);
     border-radius: var(--r);
     box-shadow: var(--sh);
     color: var(--tx);
     margin-bottom: 20px;
 }
 
-@supports not (backdrop-filter: blur(1px)) {
-    .jt-card,
-    .jt-table-wrap,
-    .jt-filter,
-    .jt-kpi {
-        background-color: var(--card) !important;
-    }
-}
-
 [data-theme="dark"] .jt-card,
 [data-theme="dark"] .jt-table-wrap,
 [data-theme="dark"] .jt-filter,
 [data-theme="dark"] .jt-kpi {
-    background-color: color-mix(in srgb, var(--card) 92%, transparent);
+    background-color: var(--card);
     border-color: var(--line);
 }
 
-/* Filter Card — CSS-Grid layout (no height/min-height fighting) */
+/* Filter Card — CSS-Grid layout */
 .jt-filter {
     background-color: var(--card);
-    background-color: color-mix(in srgb, var(--card) 85%, transparent);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    border: 1px solid var(--line);
     border-radius: var(--r);
     box-shadow: var(--sh);
     padding: 12px 16px;
@@ -154,14 +139,12 @@
 /* Table Card & Responsive Table Wrap */
 .jt-table-wrap {
     background-color: var(--card);
-    background-color: color-mix(in srgb, var(--card) 85%, transparent);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    border: 1px solid var(--line);
     border-radius: var(--r);
     box-shadow: var(--sh);
     overflow: hidden;
     margin-bottom: 20px;
+    contain: layout style;
 }
 
 .jt-table-scroll {
@@ -458,10 +441,7 @@ td .jt-thumb {
     padding: 18px 20px;
     border-radius: var(--r);
     background-color: var(--card);
-    background-color: color-mix(in srgb, var(--card) 85%, transparent);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    border: 1px solid var(--line);
     box-shadow: var(--sh);
     display: flex;
     flex-direction: column;

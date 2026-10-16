@@ -40,7 +40,7 @@
     --bs-body-font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --bs-body-bg: var(--bg);
     --bs-body-color: var(--tx);
-    --bs-card-bg: color-mix(in srgb, var(--surface) 78%, transparent);
+    --bs-card-bg: color-mix(in srgb, var(--surface) 85%, transparent);
     --bs-card-color: var(--tx);
     --bs-card-cap-bg: transparent;
     --bs-card-border-color: var(--line);
@@ -130,7 +130,7 @@
 
     --bs-body-bg: var(--bg);
     --bs-body-color: var(--tx);
-    --bs-card-bg: color-mix(in srgb, var(--surface) 78%, transparent);
+    --bs-card-bg: color-mix(in srgb, var(--surface) 85%, transparent);
     --bs-card-color: var(--tx);
     --bs-card-cap-bg: transparent;
     --bs-card-border-color: var(--line);
@@ -229,7 +229,7 @@ a {
 .card,
 .stat-card,
 .table-card {
-    background-color: color-mix(in srgb, var(--surface, var(--card)) 78%, transparent);
+    background-color: color-mix(in srgb, var(--surface, var(--card)) 85%, transparent);
     border: 1px solid var(--line);
     border-radius: 14px;
     box-shadow: 0 1px 3px rgba(11, 34, 57, 0.08);
@@ -238,7 +238,7 @@ a {
 
 .card.glass,
 .glass-card {
-    background-color: color-mix(in srgb, var(--surface, var(--card)) 78%, transparent);
+    background-color: color-mix(in srgb, var(--surface, var(--card)) 85%, transparent);
     border: 1px solid var(--line);
     border-radius: 14px;
     box-shadow: 0 1px 3px rgba(11, 34, 57, 0.08);
@@ -655,7 +655,7 @@ textarea:focus {
 /* KPI Cards */
 .kpi {
     padding: 18px 20px;
-    background-color: color-mix(in srgb, var(--surface, var(--card)) 78%, transparent);
+    background-color: color-mix(in srgb, var(--surface, var(--card)) 85%, transparent);
     border: 1px solid var(--line);
     border-radius: 14px;
     box-shadow: 0 1px 3px rgba(11, 34, 57, 0.08);
@@ -1714,9 +1714,9 @@ html.still .map-node::after,
     pointer-events: none;
 }
 
-.map-node.n1 { top: 62vh; left: 25vw; }
-.map-node.n2 { top: 40vh; left: 55vw; }
-.map-node.n3 { top: 45vh; left: 75vw; }
+.map-node.n1 { top: 68vh; left: 18vw; }
+.map-node.n2 { top: 78vh; left: 72vw; }
+.map-node.n3 { top: 12vh; left: 82vw; }
 
 .map-node::after {
     content: '';
@@ -1766,41 +1766,41 @@ html.still .map-node::after,
 
 @keyframes truckDot1 {
     0%   { transform: translate3d(5vw, 70vh, 0); opacity: 0; }
-    5%   { transform: translate3d(5vw, 70vh, 0); opacity: 1; }
+    5%   { transform: translate3d(5vw, 70vh, 0); opacity: 0.55; }
     25%  { transform: translate3d(25vw, 62vh, 0); }
     50%  { transform: translate3d(50vw, 78vh, 0); }
     75%  { transform: translate3d(75vw, 45vh, 0); }
-    95%  { transform: translate3d(95vw, 30vh, 0); opacity: 1; }
+    95%  { transform: translate3d(95vw, 30vh, 0); opacity: 0.55; }
     100% { transform: translate3d(95vw, 30vh, 0); opacity: 0; }
 }
 
 @keyframes truckDot2 {
     0%   { transform: translate3d(15vw, 10vh, 0); opacity: 0; }
-    5%   { transform: translate3d(15vw, 10vh, 0); opacity: 1; }
+    5%   { transform: translate3d(15vw, 10vh, 0); opacity: 0.55; }
     28%  { transform: translate3d(30vw, 35vh, 0); }
     52%  { transform: translate3d(55vw, 40vh, 0); }
     76%  { transform: translate3d(70vw, 75vh, 0); }
-    95%  { transform: translate3d(85vw, 90vh, 0); opacity: 1; }
+    95%  { transform: translate3d(85vw, 90vh, 0); opacity: 0.55; }
     100% { transform: translate3d(85vw, 90vh, 0); opacity: 0; }
 }
 
 @keyframes truckDot3 {
     0%   { transform: translate3d(90vw, 15vh, 0); opacity: 0; }
-    5%   { transform: translate3d(90vw, 15vh, 0); opacity: 1; }
+    5%   { transform: translate3d(90vw, 15vh, 0); opacity: 0.55; }
     22%  { transform: translate3d(80vw, 25vh, 0); }
     50%  { transform: translate3d(60vw, 60vh, 0); }
     74%  { transform: translate3d(35vw, 65vh, 0); }
-    95%  { transform: translate3d(10vw, 85vh, 0); opacity: 1; }
+    95%  { transform: translate3d(10vw, 85vh, 0); opacity: 0.55; }
     100% { transform: translate3d(10vw, 85vh, 0); opacity: 0; }
 }
 
 @keyframes truckDot4 {
     0%   { transform: translate3d(5vw, 30vh, 0); opacity: 0; }
-    5%   { transform: translate3d(5vw, 30vh, 0); opacity: 1; }
+    5%   { transform: translate3d(5vw, 30vh, 0); opacity: 0.55; }
     30%  { transform: translate3d(40vw, 25vh, 0); }
     58%  { transform: translate3d(65vw, 50vh, 0); }
     80%  { transform: translate3d(85vw, 65vh, 0); }
-    95%  { transform: translate3d(95vw, 85vh, 0); opacity: 1; }
+    95%  { transform: translate3d(95vw, 85vh, 0); opacity: 0.55; }
     100% { transform: translate3d(95vw, 85vh, 0); opacity: 0; }
 }
 

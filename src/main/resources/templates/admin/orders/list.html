@@ -5,218 +5,263 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orders Management - Japs Transfort</title>
-    <!-- Bootstrap 5 CSS -->
+    <!-- Google Fonts: Plus Jakarta Sans with system-ui fallback -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Theme CSS -->
+    <link rel="stylesheet" th:href="@{/css/theme.css}" href="/css/theme.css">
+    <!-- Lists CSS (linked after theme.css) -->
+    <link rel="stylesheet" th:href="@{/css/lists.css}" href="/css/lists.css">
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <!-- Inline appearance script before first paint to prevent flash -->
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('jt.theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                var pal = localStorage.getItem('jt.pal') || 'teal';
+                var bg = localStorage.getItem('jt.bg') || 'none';
+                var motion = localStorage.getItem('jt.motion') || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'still' : 'animated');
+                var sidebar = localStorage.getItem('jt.sidebar') || 'full';
+                var doc = document.documentElement;
+                doc.setAttribute('data-theme', theme);
+                doc.setAttribute('data-bs-theme', theme);
+                doc.setAttribute('data-pal', pal);
+                doc.setAttribute('data-bg', bg);
+                doc.setAttribute('data-motion', motion);
+                doc.setAttribute('data-sidebar', sidebar);
+                if (sidebar === 'mini') doc.classList.add('mini');
+                if (motion === 'still') doc.classList.add('still');
+            } catch (e) {}
+        })();
+    </script>
 </head>
 <body>
-    <!-- Navbar Fragment -->
-    <div th:replace="~{fragments/navbar :: headerNav('orders')}"></div>
+    <div class="app">
+        <!-- Drawer backdrop for mobile screens -->
+        <div class="sb-backdrop" onclick="window.jtToggleDrawer(false)" aria-hidden="true"></div>
 
-    <div class="container-fluid px-4 py-4">
-        <!-- Page Header -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-            <div>
-                <h3 class="fw-bold mb-0">Orders Management</h3>
-                <p class="text-muted small mb-0">Review reseller orders, verify warehouse inventory, and approve or cancel wholesale orders</p>
-            </div>
-        </div>
+        <!-- Sidebar -->
+        <aside th:replace="~{fragments/layout :: sidebar('orders', 'admin')}"></aside>
 
-        <!-- Feedback Alert Messages -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <span th:text="${successMessage}">Operation successful</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <!-- Main Content Area -->
+        <div class="mw">
+            <!-- Background effects -->
+            <div th:replace="~{fragments/layout :: bgfx}"></div>
 
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <span th:text="${errorMessage}">An error occurred</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+            <!-- Sticky Topbar -->
+            <header th:replace="~{fragments/layout :: topbar('Orders', 'admin')}"></header>
 
-        <!-- Filter & Search Card -->
-        <div class="card table-card mb-4">
-            <div class="card-body p-3">
-                <form th:action="@{/admin/orders}" method="get" class="row g-2 align-items-center">
-                    <!-- Search Input -->
-                    <div class="col-12 col-md-3">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <main class="container-fluid px-4 py-4">
+                <link rel="stylesheet" th:href="@{/css/lists.css}" href="/css/lists.css">
+                <!-- Page Header -->
+                <div class="jt-ph">
+                    <div>
+                        <h1>Orders</h1>
+                        <div class="jt-sub">Review, approve, pack and ship wholesale orders</div>
+                    </div>
+                </div>
+
+                <!-- Feedback Alert Messages -->
+                <div th:if="${successMessage}" class="jt-alert jt-alert-success alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <span th:text="${successMessage}">Operation successful</span>
+                    </div>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div th:if="${errorMessage}" class="jt-alert jt-alert-danger alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span th:text="${errorMessage}">An error occurred</span>
+                    </div>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Filter & Search Card -->
+                <div class="jt-filter">
+                    <form th:action="@{/admin/orders}" method="get">
+                        <!-- Search Input -->
+                        <div class="jt-filter-search">
+                            <span class="jt-search-icon"><i class="bi bi-search"></i></span>
                             <input type="text"
-                                   class="form-control"
                                    name="search"
                                    th:value="${search}"
-                                   placeholder="Search by order no. or reseller name...">
+                                   placeholder="Order no. or reseller"
+                                   aria-label="Search by order no. or reseller name">
                         </div>
+
+                        <!-- Status Filter Dropdown -->
+                        <div class="jt-filter-select">
+                            <select name="status" aria-label="Order status filter">
+                                <option value="" th:selected="${selectedStatus == null or selectedStatus == '' or selectedStatus == 'all'}">All statuses</option>
+                                <option th:each="st : ${allStatuses}"
+                                        th:value="${st.name()}"
+                                        th:text="${st.name()}"
+                                        th:selected="${selectedStatus != null and selectedStatus.equalsIgnoreCase(st.name())}">Status</option>
+                            </select>
+                        </div>
+
+                        <!-- Payment Status Filter Dropdown -->
+                        <div class="jt-filter-select">
+                            <select name="paymentStatus" aria-label="Payment status filter">
+                                <option value="" th:selected="${selectedPaymentStatus == null or selectedPaymentStatus == '' or selectedPaymentStatus == 'all'}">All payments</option>
+                                <option value="unpaid" th:selected="${selectedPaymentStatus != null and selectedPaymentStatus.equalsIgnoreCase('unpaid')}">Unpaid</option>
+                                <option value="partial" th:selected="${selectedPaymentStatus != null and selectedPaymentStatus.equalsIgnoreCase('partial')}">Partial</option>
+                                <option value="paid" th:selected="${selectedPaymentStatus != null and selectedPaymentStatus.equalsIgnoreCase('paid')}">Paid</option>
+                            </select>
+                        </div>
+
+                        <!-- Payment Method Filter Dropdown -->
+                        <div class="jt-filter-select">
+                            <select name="paymentMethod" aria-label="Payment method filter">
+                                <option value="" th:selected="${selectedPaymentMethod == null or selectedPaymentMethod == '' or selectedPaymentMethod == 'all'}">All methods</option>
+                                <option value="COD" th:selected="${selectedPaymentMethod != null and selectedPaymentMethod.equalsIgnoreCase('COD')}">Cash on delivery</option>
+                                <option value="CREDIT" th:selected="${selectedPaymentMethod != null and selectedPaymentMethod.equalsIgnoreCase('CREDIT')}">On account</option>
+                                <option value="ONLINE" th:selected="${selectedPaymentMethod != null and selectedPaymentMethod.equalsIgnoreCase('ONLINE')}">Online</option>
+                            </select>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="jt-filter-actions">
+                            <button type="submit" class="jt-btn jt-btn-s">
+                                <i class="bi bi-funnel me-1"></i> Filter
+                            </button>
+                            <a th:href="@{/admin/orders}" class="jt-btn jt-btn-s jt-btn-ghost" title="Clear Filters">
+                                Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Orders Table Card -->
+                <div class="jt-table-wrap">
+                    <div class="jt-table-header">
+                        <h6><i class="bi bi-receipt me-1"></i> Orders List</h6>
+                        <span class="jt-pill b" th:text="${ordersPage.totalElements} + ' total'">0 total</span>
+                    </div>
+                    <div class="jt-table-scroll">
+                        <table class="jt-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Order No</th>
+                                    <th scope="col">Reseller</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col" class="n">Total</th>
+                                    <th scope="col" style="text-align: center;">Status</th>
+                                    <th scope="col" style="text-align: center;">Payment Status</th>
+                                    <th scope="col" style="text-align: center;">Payment Method</th>
+                                    <th scope="col" class="n">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${ordersPage.empty}">
+                                    <td colspan="8" style="text-align: center; color: var(--mu); padding: 32px 16px;">
+                                        No orders found matching the criteria.
+                                    </td>
+                                </tr>
+                                <tr th:each="ord : ${ordersPage.content}">
+                                    <td>
+                                        <a th:href="@{'/admin/orders/' + ${ord.orderId}}"
+                                           style="font-family: monospace; font-size: 13px; font-weight: 700; color: var(--lk);"
+                                           th:text="${ord.orderNo}">
+                                            ORD-20261013-0001
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <b th:text="${ord.reseller != null ? ord.reseller.businessName : 'N/A'}">Reseller Name</b>
+                                        <div style="font-size: 12px; color: var(--mu);" th:if="${ord.reseller != null and ord.reseller.territory != null}" th:text="${ord.reseller.territory}">Territory</div>
+                                    </td>
+                                    <td style="color: var(--mu);" th:text="${ord.createdAt != null ? #temporals.format(ord.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-10-13 10:00</td>
+                                    <td class="n" style="font-weight: 700;" th:text="'₱' + ${#numbers.formatDecimal(ord.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td style="text-align: center;">
+                                        <span class="jt-pill"
+                                              th:classappend="${ord.status != null and ord.status.name() == 'pending' ? 'y' :
+                                                               (ord.status != null and ord.status.name() == 'approved' ? 'b' :
+                                                               (ord.status != null and ord.status.name() == 'packed' ? 'v' :
+                                                               (ord.status != null and ord.status.name() == 'shipped' ? 't' :
+                                                               (ord.status != null and ord.status.name() == 'delivered' ? 'g' : 'x'))))}"
+                                              th:text="${ord.status}">
+                                            pending
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="jt-pill"
+                                              th:classappend="${ord.paymentStatus != null and ord.paymentStatus.name() == 'unpaid' ? 'r' :
+                                                               (ord.paymentStatus != null and ord.paymentStatus.name() == 'partial' ? 'y' :
+                                                               (ord.paymentStatus != null and ord.paymentStatus.name() == 'paid' ? 'g' : 'x'))}"
+                                              th:text="${ord.paymentStatus}">
+                                            unpaid
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="jt-pill"
+                                              th:classappend="${ord.paymentMethod != null and ord.paymentMethod.name() == 'COD' ? 'b' :
+                                                               (ord.paymentMethod != null and ord.paymentMethod.name() == 'ONLINE' ? 't' : 'v')}"
+                                              th:text="${ord.paymentMethod != null ? (ord.paymentMethod.name() == 'COD' ? 'Cash on delivery' : (ord.paymentMethod.name() == 'ONLINE' ? 'Online' : 'On account')) : 'On account'}">
+                                            On account
+                                        </span>
+                                    </td>
+                                    <td class="n">
+                                        <a th:href="@{'/admin/orders/' + ${ord.orderId}}"
+                                           class="jt-btn jt-btn-s"
+                                           title="View Order Details">
+                                           <i class="bi bi-eye me-1"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
 
-                    <!-- Status Filter Dropdown -->
-                    <div class="col-12 col-sm-6 col-md-2">
-                        <select name="status" class="form-select form-select-sm">
-                            <option value="" th:selected="${selectedStatus == null or selectedStatus == '' or selectedStatus == 'all'}">All Order Statuses</option>
-                            <option th:each="st : ${allStatuses}"
-                                    th:value="${st.name()}"
-                                    th:text="${st.name()}"
-                                    th:selected="${selectedStatus != null and selectedStatus.equalsIgnoreCase(st.name())}">Status</option>
-                        </select>
-                    </div>
+                    <!-- Pagination Footer -->
+                    <div class="jt-pager" th:if="${ordersPage.totalPages > 0}">
+                        <div>
+                            Showing <span style="font-weight: 700; color: var(--tx);" th:text="${ordersPage.empty ? 0 : ordersPage.number * ordersPage.size + 1}">1</span>
+                            to <span style="font-weight: 700; color: var(--tx);" th:text="${ordersPage.number * ordersPage.size + ordersPage.numberOfElements}">10</span>
+                            of <span style="font-weight: 700; color: var(--tx);" th:text="${ordersPage.totalElements}">25</span> orders
+                        </div>
 
-                    <!-- Payment Status Filter Dropdown -->
-                    <div class="col-12 col-sm-6 col-md-2">
-                        <select name="paymentStatus" class="form-select form-select-sm">
-                            <option value="" th:selected="${selectedPaymentStatus == null or selectedPaymentStatus == '' or selectedPaymentStatus == 'all'}">All Payment Statuses</option>
-                            <option value="unpaid" th:selected="${selectedPaymentStatus != null and selectedPaymentStatus.equalsIgnoreCase('unpaid')}">unpaid</option>
-                            <option value="partial" th:selected="${selectedPaymentStatus != null and selectedPaymentStatus.equalsIgnoreCase('partial')}">partial</option>
-                            <option value="paid" th:selected="${selectedPaymentStatus != null and selectedPaymentStatus.equalsIgnoreCase('paid')}">paid</option>
-                        </select>
-                    </div>
-
-                    <!-- Payment Method Filter Dropdown -->
-                    <div class="col-12 col-sm-6 col-md-3">
-                        <select name="paymentMethod" class="form-select form-select-sm">
-                            <option value="" th:selected="${selectedPaymentMethod == null or selectedPaymentMethod == '' or selectedPaymentMethod == 'all'}">All Payment Methods</option>
-                            <option value="COD" th:selected="${selectedPaymentMethod != null and selectedPaymentMethod.equalsIgnoreCase('COD')}">Cash on delivery</option>
-                            <option value="CREDIT" th:selected="${selectedPaymentMethod != null and selectedPaymentMethod.equalsIgnoreCase('CREDIT')}">On account</option>
-                            <option value="ONLINE" th:selected="${selectedPaymentMethod != null and selectedPaymentMethod.equalsIgnoreCase('ONLINE')}">Online</option>
-                        </select>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="col-12 col-md-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-secondary btn-sm flex-grow-1">
-                            <i class="bi bi-funnel me-1"></i> Filter
-                        </button>
-                        <a th:href="@{/admin/orders}" class="btn btn-outline-secondary btn-sm" title="Clear Filters">
-                            Reset
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Orders Table Card -->
-        <div class="card table-card">
-            <div class="card-header table-header d-flex justify-content-between align-items-center">
-                <h6 class="fw-bold mb-0"><i class="bi bi-receipt me-1"></i> Orders List</h6>
-                <span class="badge bg-secondary" th:text="${ordersPage.totalElements} + ' total'">0 total</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col" class="ps-3">Order No</th>
-                                <th scope="col">Reseller</th>
-                                <th scope="col">Date</th>
-                                <th scope="col" class="text-end">Total</th>
-                                <th scope="col" class="text-center">Status</th>
-                                <th scope="col" class="text-center">Payment Status</th>
-                                <th scope="col" class="text-center">Payment Method</th>
-                                <th scope="col" class="text-end pe-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:if="${ordersPage.empty}">
-                                <td colspan="8" class="text-center text-muted py-4">
-                                    No orders found matching the criteria.
-                                </td>
-                            </tr>
-                            <tr th:each="ord : ${ordersPage.content}">
-                                <td class="ps-3 fw-mono small fw-semibold text-primary" th:text="${ord.orderNo}">ORD-20261013-0001</td>
-                                <td>
-                                    <div class="fw-medium text-dark" th:text="${ord.reseller != null ? ord.reseller.businessName : 'N/A'}">Reseller Name</div>
-                                    <div class="small text-muted" th:if="${ord.reseller != null and ord.reseller.territory != null}" th:text="${ord.reseller.territory}">Territory</div>
-                                </td>
-                                <td class="small text-muted" th:text="${ord.createdAt != null ? #temporals.format(ord.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-10-13 10:00</td>
-                                <td class="text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(ord.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                <td class="text-center">
-                                    <span class="badge text-uppercase"
-                                          th:classappend="${ord.status != null and ord.status.name() == 'pending' ? 'bg-warning text-dark' :
-                                                           (ord.status != null and ord.status.name() == 'approved' ? 'bg-info text-dark' :
-                                                           (ord.status != null and (ord.status.name() == 'packed' or ord.status.name() == 'shipped') ? 'bg-primary' :
-                                                           (ord.status != null and ord.status.name() == 'delivered' ? 'bg-success' :
-                                                           (ord.status != null and ord.status.name() == 'cancelled' ? 'bg-danger' : 'bg-secondary'))))}"
-                                          th:text="${ord.status}">
-                                        pending
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge text-uppercase"
-                                          th:classappend="${ord.paymentStatus != null and ord.paymentStatus.name() == 'unpaid' ? 'bg-secondary' :
-                                                           (ord.paymentStatus != null and ord.paymentStatus.name() == 'partial' ? 'bg-info text-dark' :
-                                                           (ord.paymentStatus != null and ord.paymentStatus.name() == 'paid' ? 'bg-success' :
-                                                           (ord.paymentStatus != null and ord.paymentStatus.name() == 'refunded' ? 'bg-dark' : 'bg-secondary')))}"
-                                          th:text="${ord.paymentStatus}">
-                                        unpaid
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge"
-                                          th:classappend="${ord.paymentMethod != null and ord.paymentMethod.name() == 'COD' ? 'bg-primary-subtle text-primary border border-primary-subtle' :
-                                                           (ord.paymentMethod != null and ord.paymentMethod.name() == 'ONLINE' ? 'bg-info-subtle text-info border border-info-subtle' :
-                                                           'bg-secondary-subtle text-secondary border border-secondary-subtle')}"
-                                          th:text="${ord.paymentMethod != null ? (ord.paymentMethod.name() == 'COD' ? 'Cash on delivery' : (ord.paymentMethod.name() == 'ONLINE' ? 'Online' : 'On account')) : 'On account'}">
-                                        On account
-                                    </span>
-                                </td>
-                                <td class="text-end pe-3">
-                                    <a th:href="@{'/admin/orders/' + ${ord.orderId}}"
-                                       class="btn btn-outline-primary btn-sm"
-                                       title="View Order Details">
-                                       <i class="bi bi-eye me-1"></i> View
+                        <!-- Page navigation -->
+                        <nav th:if="${ordersPage.totalPages > 1}" aria-label="Orders list pagination">
+                            <ul class="jt-pager-links">
+                                <!-- Previous button -->
+                                <li th:classappend="${ordersPage.first ? 'disabled' : ''}">
+                                    <a th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, paymentMethod=${selectedPaymentMethod}, page=${ordersPage.number - 1})}" aria-label="Previous">
+                                        &laquo;
                                     </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                </li>
+
+                                <!-- Page numbers -->
+                                <li th:each="i : ${#numbers.sequence(0, ordersPage.totalPages - 1)}"
+                                    th:classappend="${i == ordersPage.number ? 'active' : ''}">
+                                    <a th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, paymentMethod=${selectedPaymentMethod}, page=${i})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+
+                                <!-- Next button -->
+                                <li th:classappend="${ordersPage.last ? 'disabled' : ''}">
+                                    <a th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, paymentMethod=${selectedPaymentMethod}, page=${ordersPage.number + 1})}" aria-label="Next">
+                                        &raquo;
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Pagination Footer -->
-            <div class="card-footer bg-white border-top d-flex flex-wrap justify-content-between align-items-center py-2"
-                 th:if="${ordersPage.totalPages > 0}">
-                <div class="small text-muted mb-2 mb-sm-0">
-                    Showing <span class="fw-semibold" th:text="${ordersPage.empty ? 0 : ordersPage.number * ordersPage.size + 1}">1</span>
-                    to <span class="fw-semibold" th:text="${ordersPage.number * ordersPage.size + ordersPage.numberOfElements}">10</span>
-                    of <span class="fw-semibold" th:text="${ordersPage.totalElements}">25</span> orders
-                </div>
-
-                <!-- Page navigation -->
-                <nav th:if="${ordersPage.totalPages > 1}" aria-label="Orders list pagination">
-                    <ul class="pagination pagination-sm mb-0">
-                        <!-- Previous button -->
-                        <li class="page-item" th:classappend="${ordersPage.first ? 'disabled' : ''}">
-                            <a class="page-link"
-                               th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, paymentMethod=${selectedPaymentMethod}, page=${ordersPage.number - 1})}">
-                                &laquo;
-                            </a>
-                        </li>
-
-                        <!-- Page numbers -->
-                        <li class="page-item"
-                            th:each="i : ${#numbers.sequence(0, ordersPage.totalPages - 1)}"
-                            th:classappend="${i == ordersPage.number ? 'active' : ''}">
-                            <a class="page-link"
-                               th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, paymentMethod=${selectedPaymentMethod}, page=${i})}"
-                               th:text="${i + 1}">1</a>
-                        </li>
-
-                        <!-- Next button -->
-                        <li class="page-item" th:classappend="${ordersPage.last ? 'disabled' : ''}">
-                            <a class="page-link"
-                               th:href="@{/admin/orders(search=${search}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, paymentMethod=${selectedPaymentMethod}, page=${ordersPage.number + 1})}">
-                                &raquo;
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
+            </main>
         </div>
+
+        <!-- Command Palette -->
+        <div th:replace="~{fragments/layout :: commandPalette('admin')}"></div>
     </div>
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>
 </html>

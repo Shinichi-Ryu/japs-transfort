@@ -1,0 +1,681 @@
+/* ===================================================================
+   Japs Transfort - Admin List Pages Stylesheet (lists.css)
+   Scoped with .jt- prefix to prevent style leaking to other views.
+   =================================================================== */
+
+/* Page Header */
+.jt-ph {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.jt-ph h1,
+.jt-ph h3 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--tx);
+    line-height: 1.2;
+}
+
+.jt-ph .jt-sub {
+    color: var(--mu);
+    font-size: 13.5px;
+    margin-top: 4px;
+    font-weight: 400;
+}
+
+.jt-ph-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Base Card */
+.jt-card {
+    background-color: var(--card); /* Fallback */
+    background-color: color-mix(in srgb, var(--card) 85%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    border-radius: var(--r);
+    box-shadow: var(--sh);
+    color: var(--tx);
+    margin-bottom: 20px;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .jt-card,
+    .jt-table-wrap,
+    .jt-filter,
+    .jt-kpi {
+        background-color: var(--card) !important;
+    }
+}
+
+[data-theme="dark"] .jt-card,
+[data-theme="dark"] .jt-table-wrap,
+[data-theme="dark"] .jt-filter,
+[data-theme="dark"] .jt-kpi {
+    background-color: color-mix(in srgb, var(--card) 92%, transparent);
+    border-color: var(--line);
+}
+
+/* Filter Card */
+.jt-filter {
+    background-color: var(--card);
+    background-color: color-mix(in srgb, var(--card) 85%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    border-radius: var(--r);
+    box-shadow: var(--sh);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+}
+
+.jt-filter form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 0;
+}
+
+.jt-filter input[type="text"],
+.jt-filter select,
+.jt-filter .form-control,
+.jt-filter .form-select {
+    min-height: 38px;
+    height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0 12px;
+    background-color: var(--card);
+    color: var(--tx);
+    font-family: inherit;
+    font-size: 13.5px;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.jt-filter input[type="text"]:focus,
+.jt-filter select:focus,
+.jt-filter .form-control:focus,
+.jt-filter .form-select:focus {
+    outline: 0;
+    border-color: var(--lk);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--lk) 25%, transparent);
+}
+
+.jt-filter-search {
+    flex: 1 1 200px;
+    min-width: 180px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.jt-filter-search input[type="text"],
+.jt-filter-search .form-control {
+    width: 100%;
+    padding-left: 36px;
+}
+
+.jt-filter-search .jt-search-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--mu);
+    pointer-events: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    z-index: 2;
+}
+
+.jt-filter-select {
+    flex: 0 1 auto;
+    min-width: 140px;
+}
+
+.jt-filter-select select,
+.jt-filter-select .form-select {
+    width: 100%;
+}
+
+.jt-filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+/* Table Card & Responsive Table Wrap */
+.jt-table-wrap {
+    background-color: var(--card);
+    background-color: color-mix(in srgb, var(--card) 85%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    border-radius: var(--r);
+    box-shadow: var(--sh);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.jt-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.jt-table-header,
+.jt-card-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: transparent;
+}
+
+.jt-table-header h2,
+.jt-table-header h6,
+.jt-card-header h2,
+.jt-card-header h6 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--tx);
+}
+
+table.jt-table,
+.jt-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+    font-size: 13.5px;
+    margin: 0;
+    background-color: transparent;
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: color-mix(in srgb, var(--soft) 60%, transparent);
+}
+
+table.jt-table thead th,
+.jt-table thead th {
+    background-color: var(--soft) !important;
+    color: var(--mu) !important;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--line);
+    border-top: 0;
+    text-align: left;
+    white-space: nowrap;
+}
+
+table.jt-table tbody td,
+.jt-table tbody td {
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+    border-bottom: 0;
+    color: var(--tx);
+    vertical-align: middle;
+    background-color: transparent;
+}
+
+table.jt-table tbody tr:hover,
+.jt-table tbody tr:hover {
+    background-color: color-mix(in srgb, var(--soft) 60%, transparent);
+}
+
+.jt-table .n,
+.jt-table th.n,
+.jt-table td.n {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.jt-table th a {
+    color: var(--mu);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 700;
+}
+
+.jt-table th a:hover {
+    color: var(--tx);
+}
+
+.jt-table th a:focus-visible {
+    outline: 2px solid var(--amber) !important;
+    outline-offset: 2px;
+}
+
+/* Status Pills */
+.jt-pill,
+.badge.jt-pill {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    background-color: var(--pb);
+    color: var(--pt);
+    white-space: nowrap;
+    line-height: 1.4;
+    border: 0;
+}
+
+.jt-pill::before,
+.badge.jt-pill::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+}
+
+.jt-pill.y, .badge.jt-pill.y { --pb: var(--yb); --pt: var(--yt); }
+.jt-pill.b, .badge.jt-pill.b { --pb: var(--bb); --pt: var(--bt); }
+.jt-pill.v, .badge.jt-pill.v { --pb: var(--vb); --pt: var(--vt); }
+.jt-pill.t, .badge.jt-pill.t { --pb: var(--tb); --pt: var(--tt); }
+.jt-pill.g, .badge.jt-pill.g { --pb: var(--gb); --pt: var(--gt); }
+.jt-pill.x, .badge.jt-pill.x { --pb: var(--xb); --pt: var(--xt); }
+.jt-pill.r, .badge.jt-pill.r { --pb: var(--rb); --pt: var(--rt); }
+
+/* Buttons */
+.jt-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 38px;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background-color: var(--card);
+    color: var(--tx);
+    font-weight: 600;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform .12s, filter .12s, box-shadow .12s, background-color .12s;
+    line-height: 1;
+}
+
+.jt-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(.97);
+    color: var(--tx);
+}
+
+.jt-btn:active {
+    transform: scale(.98);
+}
+
+.jt-btn:focus-visible {
+    outline: 3px solid var(--amber) !important;
+    outline-offset: 2px !important;
+}
+
+.jt-btn-s {
+    min-height: 30px;
+    height: 30px;
+    padding: 0 10px;
+    font-size: 12.5px;
+    border-radius: 8px;
+}
+
+.jt-btn-p {
+    background-color: var(--navy);
+    border-color: var(--navy);
+    color: #fff !important;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--navy) 25%, transparent);
+}
+
+.jt-btn-p:hover {
+    background-color: var(--n2);
+    border-color: var(--n2);
+    color: #fff !important;
+}
+
+[data-theme="dark"] .jt-btn-p {
+    background-color: var(--amber);
+    border-color: var(--amber);
+    color: #2F2100 !important;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--amber) 30%, transparent);
+}
+
+[data-theme="dark"] .jt-btn-p:hover {
+    background-color: var(--amber);
+    border-color: var(--amber);
+    filter: brightness(1.06);
+    color: #2F2100 !important;
+}
+
+.jt-btn-d {
+    color: var(--rt) !important;
+    border-color: var(--rt);
+    background-color: transparent;
+}
+
+.jt-btn-d:hover {
+    background-color: var(--rb);
+    color: var(--rt) !important;
+    border-color: var(--rt);
+}
+
+.jt-btn-ghost {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--mu);
+}
+
+.jt-btn-ghost:hover {
+    background-color: var(--soft);
+    color: var(--tx);
+}
+
+.jt-btn-icon {
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    padding: 0;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.jt-action-group {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/* KPI Cards */
+.jt-kpi {
+    padding: 18px 20px;
+    border-radius: var(--r);
+    background-color: var(--card);
+    background-color: color-mix(in srgb, var(--card) 85%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
+    box-shadow: var(--sh);
+    display: flex;
+    flex-direction: column;
+}
+
+.jt-kpi-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.jt-kpi-k {
+    color: var(--mu);
+    font-weight: 600;
+    font-size: 12.5px;
+}
+
+.jt-kpi-v {
+    font-size: 28px;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+    margin: 4px 0 6px;
+    color: var(--tx);
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+
+.jt-kpi-chip {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex: none;
+}
+
+/* Image Thumbnail & Placeholder */
+.jt-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid var(--line);
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--soft);
+    color: var(--mu);
+    overflow: hidden;
+}
+
+/* Pagination Footer */
+.jt-pager {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--mu);
+    background-color: transparent;
+}
+
+.jt-pager-links,
+.jt-pager .pagination {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.jt-pager-links li,
+.jt-pager .pagination .page-item {
+    display: inline-flex;
+}
+
+.jt-pager-links a,
+.jt-pager-links span,
+.jt-pager .pagination .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background-color: var(--card);
+    color: var(--tx);
+    font-weight: 600;
+    font-size: 12.5px;
+    text-decoration: none;
+    transition: background-color .12s, color .12s, border-color .12s;
+}
+
+.jt-pager-links a:hover,
+.jt-pager .pagination .page-link:hover {
+    background-color: var(--soft);
+    color: var(--lk);
+    border-color: var(--line);
+}
+
+.jt-pager-links .active a,
+.jt-pager-links .active span,
+.jt-pager .pagination .page-item.active .page-link {
+    background-color: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+}
+
+[data-theme="dark"] .jt-pager-links .active a,
+[data-theme="dark"] .jt-pager-links .active span,
+[data-theme="dark"] .jt-pager .pagination .page-item.active .page-link {
+    background-color: var(--amber);
+    border-color: var(--amber);
+    color: #2F2100;
+}
+
+.jt-pager-links .disabled a,
+.jt-pager-links .disabled span,
+.jt-pager .pagination .page-item.disabled .page-link {
+    opacity: 0.45;
+    pointer-events: none;
+    background-color: transparent;
+}
+
+/* Feedback Alerts */
+.jt-alert {
+    padding: 12px 16px;
+    border-radius: var(--r);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-weight: 500;
+    font-size: 13.5px;
+}
+
+.jt-alert-success {
+    background-color: var(--gb);
+    color: var(--gt);
+    border: 1px solid color-mix(in srgb, var(--c-g) 25%, transparent);
+}
+
+.jt-alert-danger {
+    background-color: var(--rb);
+    color: var(--rt);
+    border: 1px solid color-mix(in srgb, var(--c-r) 25%, transparent);
+}
+
+.jt-alert-close {
+    background: transparent;
+    border: 0;
+    color: currentColor;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+    opacity: 0.6;
+    transition: opacity .15s;
+}
+
+.jt-alert-close:hover {
+    opacity: 1;
+}
+
+/* Modals Restyle */
+.modal-content.jt-modal {
+    background-color: var(--card);
+    color: var(--tx);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+.modal-content.jt-modal .modal-header {
+    border-bottom: 1px solid var(--line);
+    padding: 18px 24px;
+}
+
+.modal-content.jt-modal .modal-body {
+    padding: 20px 24px;
+}
+
+.modal-content.jt-modal .modal-footer {
+    border-top: 1px solid var(--line);
+    padding: 16px 24px;
+}
+
+/* Tom Select Theming */
+.ts-wrapper.form-select,
+.ts-control {
+    border-radius: 10px !important;
+    border: 1px solid var(--line) !important;
+    background-color: var(--card) !important;
+    color: var(--tx) !important;
+    font-family: inherit !important;
+    font-size: 13.5px !important;
+    min-height: 38px !important;
+}
+
+.ts-dropdown {
+    border-radius: 12px !important;
+    border: 1px solid var(--line) !important;
+    background-color: var(--card) !important;
+    color: var(--tx) !important;
+    box-shadow: var(--sh) !important;
+    z-index: 2000 !important;
+}
+
+.ts-dropdown .option {
+    color: var(--tx) !important;
+    padding: 8px 12px !important;
+}
+
+.ts-dropdown .active {
+    background-color: var(--soft) !important;
+    color: var(--lk) !important;
+}
+
+/* Mobile adjustments (<= 768px / 360px) */
+@media (max-width: 768px) {
+    .jt-ph {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .jt-ph-actions {
+        width: 100%;
+    }
+
+    .jt-filter form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .jt-filter-search {
+        width: 100%;
+    }
+
+    .jt-filter-select {
+        width: 100%;
+    }
+
+    .jt-filter-actions {
+        width: 100%;
+    }
+
+    .jt-filter-actions .jt-btn {
+        flex: 1;
+    }
+}

@@ -5,335 +5,370 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resellers - Japs Transfort</title>
+    <!-- Google Fonts: Plus Jakarta Sans with system-ui fallback -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Theme CSS -->
+    <link rel="stylesheet" th:href="@{/css/theme.css}" href="/css/theme.css">
+    <!-- Lists CSS (linked after theme.css) -->
+    <link rel="stylesheet" th:href="@{/css/lists.css}" href="/css/lists.css">
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <!-- Inline appearance script before first paint to prevent flash -->
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('jt.theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                var pal = localStorage.getItem('jt.pal') || 'teal';
+                var bg = localStorage.getItem('jt.bg') || 'none';
+                var motion = localStorage.getItem('jt.motion') || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'still' : 'animated');
+                var sidebar = localStorage.getItem('jt.sidebar') || 'full';
+                var doc = document.documentElement;
+                doc.setAttribute('data-theme', theme);
+                doc.setAttribute('data-bs-theme', theme);
+                doc.setAttribute('data-pal', pal);
+                doc.setAttribute('data-bg', bg);
+                doc.setAttribute('data-motion', motion);
+                doc.setAttribute('data-sidebar', sidebar);
+                if (sidebar === 'mini') doc.classList.add('mini');
+                if (motion === 'still') doc.classList.add('still');
+            } catch (e) {}
+        })();
+    </script>
 </head>
 <body>
-    <!-- Navbar Fragment -->
-    <div th:replace="~{fragments/navbar :: headerNav('resellers')}"></div>
+    <div class="app">
+        <!-- Drawer backdrop for mobile screens -->
+        <div class="sb-backdrop" onclick="window.jtToggleDrawer(false)" aria-hidden="true"></div>
 
-    <div class="container-fluid px-4 py-4">
-        <!-- Page Header -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-            <div>
-                <h3 class="fw-bold mb-0">Resellers Directory</h3>
-                <p class="text-muted small mb-0">Manage authorized resellers, login credentials, tiers, and credit lines</p>
-            </div>
-            <div>
-                <a th:href="@{/admin/resellers/create}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus-lg me-1"></i> Add Reseller
-                </a>
-            </div>
-        </div>
+        <!-- Sidebar -->
+        <aside th:replace="~{fragments/layout :: sidebar('resellers', 'admin')}"></aside>
 
-        <!-- Feedback Alert Messages -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <span th:text="${successMessage}">Operation successful</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <!-- Main Content Area -->
+        <div class="mw">
+            <!-- Background effects -->
+            <div th:replace="~{fragments/layout :: bgfx}"></div>
 
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <span th:text="${errorMessage}">An error occurred</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+            <!-- Sticky Topbar -->
+            <header th:replace="~{fragments/layout :: topbar('Resellers', 'admin')}"></header>
 
-        <!-- Filter & Search Card -->
-        <div class="card table-card mb-4">
-            <div class="card-body p-3">
-                <form th:action="@{/admin/resellers}" method="get" class="row g-2 align-items-center">
-                    <!-- Search Input -->
-                    <div class="col-12 col-md-4">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text"
-                                   class="form-control"
-                                   name="search"
-                                   th:value="${search}"
-                                   placeholder="Search by business name...">
-                        </div>
+            <main class="container-fluid px-4 py-4">
+                <!-- Page Header -->
+                <div class="jt-ph">
+                    <div>
+                        <h1>Resellers</h1>
+                        <div class="jt-sub">Accounts, tiers and credit</div>
                     </div>
-
-                    <!-- Tier Filter Dropdown -->
-                    <div class="col-12 col-sm-6 col-md-3">
-                        <select name="tierId" class="form-select form-select-sm">
-                            <option value="">All Tiers</option>
-                            <option th:each="tier : ${tiers}"
-                                    th:value="${tier.tierId}"
-                                    th:text="${tier.tierName}"
-                                    th:selected="${tierId != null && tierId == tier.tierId}">Tier</option>
-                        </select>
-                    </div>
-
-                    <!-- Status Filter Dropdown -->
-                    <div class="col-12 col-sm-6 col-md-2">
-                        <select name="status" class="form-select form-select-sm">
-                            <option value="all" th:selected="${status == 'all'}">All Statuses</option>
-                            <option value="active" th:selected="${status == 'active'}">Active Only</option>
-                            <option value="pending" th:selected="${status == 'pending'}">Pending Only</option>
-                            <option value="rejected" th:selected="${status == 'rejected'}">Rejected Only</option>
-                            <option value="inactive" th:selected="${status == 'inactive'}">Inactive Only</option>
-                        </select>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="col-12 col-md-3 d-flex gap-2">
-                        <button type="submit" class="btn btn-secondary btn-sm flex-grow-1">
-                            <i class="bi bi-funnel me-1"></i> Filter
-                        </button>
-                        <a th:href="@{/admin/resellers}" class="btn btn-outline-secondary btn-sm" title="Clear Filters">
-                            Reset
+                    <div class="jt-ph-actions">
+                        <a th:href="@{/admin/resellers/create}" class="jt-btn jt-btn-p">
+                            <i class="bi bi-plus-lg me-1"></i> Add reseller
                         </a>
                     </div>
+                </div>
 
-                    <!-- Preserve current sort parameters -->
-                    <input type="hidden" name="sort" th:value="${sort}">
-                    <input type="hidden" name="dir" th:value="${dir}">
-                </form>
-            </div>
-        </div>
+                <!-- Feedback Alert Messages -->
+                <div th:if="${successMessage}" class="jt-alert jt-alert-success alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <span th:text="${successMessage}">Operation successful</span>
+                    </div>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
 
-        <!-- Resellers Table Card -->
-        <div class="card table-card">
-            <div class="card-header table-header d-flex justify-content-between align-items-center">
-                <h6 class="fw-bold mb-0"><i class="bi bi-people me-1"></i> Resellers List</h6>
-                <span class="badge bg-secondary" th:text="${resellersPage.totalElements} + ' total'">0 total</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="ps-3">
-                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
-                                       th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='businessName', dir=${sort == 'businessName' ? reverseDir : 'asc'})}">
-                                        Business Name
-                                        <i class="bi ms-1" th:classappend="${sort == 'businessName' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
-                                    </a>
-                                </th>
-                                <th scope="col">Contact Person</th>
-                                <th scope="col">Email (Login)</th>
-                                <th scope="col">Contact No</th>
-                                <th scope="col">
-                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
-                                       th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='territory', dir=${sort == 'territory' ? reverseDir : 'asc'})}">
-                                        City/Location
-                                        <i class="bi ms-1" th:classappend="${sort == 'territory' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
-                                    </a>
-                                </th>
-                                <th scope="col">Tier</th>
-                                <th scope="col" class="text-end">
-                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
-                                       th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='creditLimit', dir=${sort == 'creditLimit' ? reverseDir : 'asc'})}">
-                                        Credit Limit
-                                        <i class="bi ms-1" th:classappend="${sort == 'creditLimit' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
-                                    </a>
-                                </th>
-                                <th scope="col" class="text-end">
-                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
-                                       th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='balance', dir=${sort == 'balance' ? reverseDir : 'asc'})}">
-                                        Balance
-                                        <i class="bi ms-1" th:classappend="${sort == 'balance' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
-                                    </a>
-                                </th>
-                                <th scope="col" class="text-center">
-                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
-                                       th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='status', dir=${sort == 'status' ? reverseDir : 'asc'})}">
-                                        Status
-                                        <i class="bi ms-1" th:classappend="${sort == 'status' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
-                                    </a>
-                                </th>
-                                <th scope="col" class="text-end pe-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:if="${resellersPage.empty}">
-                                <td colspan="10" class="text-center text-muted py-4">
-                                    No resellers found matching the criteria.
-                                </td>
-                            </tr>
-                            <tr th:each="reseller : ${resellersPage.content}">
-                                <td class="ps-3 fw-semibold text-dark" th:text="${reseller.businessName}">Business Name</td>
-                                <td th:text="${reseller.user != null ? reseller.user.fullName : '-'}">Contact Person</td>
-                                <td class="small text-muted font-monospace" th:text="${reseller.user != null ? reseller.user.email : '-'}">email@example.com</td>
-                                <td class="small text-secondary" th:text="${reseller.contactNo != null && !reseller.contactNo.isEmpty() ? reseller.contactNo : '-'}">-</td>
-                                <td>
-                                    <span class="small" th:text="${reseller.territory != null && !reseller.territory.isEmpty() ? reseller.territory : '-'}">-</span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-light text-dark border"
-                                           th:text="${reseller.tier != null ? reseller.tier.tierName : 'Unassigned'}">
-                                        Tier
-                                    </span>
-                                </td>
-                                <td class="text-end font-monospace" th:text="'₱' + ${#numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                <td class="text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                <td class="text-center">
-                                    <span th:if="${reseller.status == 'active'}" class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
-                                    <span th:if="${reseller.status == 'pending'}" class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending</span>
-                                    <span th:if="${reseller.status == 'rejected'}" class="badge bg-danger-subtle text-danger border border-danger-subtle">Rejected</span>
-                                    <span th:if="${reseller.status == 'inactive'}" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inactive</span>
-                                </td>
-                                <td class="text-end pe-3">
-                                    <div class="action-buttons d-inline-flex gap-1 align-items-center">
-                                        <!-- Actions for Pending Applications -->
-                                        <th:block th:if="${reseller.status == 'pending'}">
-                                            <button type="button"
-                                                    class="btn btn-outline-success btn-sm"
-                                                    data-bs-toggle="modal"
-                                                    th:data-bs-target="'#approveModal-' + ${reseller.resellerId}"
-                                                    title="Approve Reseller">
-                                                <i class="bi bi-check-lg me-1"></i> Approve
-                                            </button>
+                <div th:if="${errorMessage}" class="jt-alert jt-alert-danger alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span th:text="${errorMessage}">An error occurred</span>
+                    </div>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
 
-                                            <form th:action="@{'/admin/resellers/reject/' + ${reseller.resellerId}}"
+                <!-- Filter & Search Card -->
+                <div class="jt-filter">
+                    <form th:action="@{/admin/resellers}" method="get">
+                        <!-- Search Input -->
+                        <div class="jt-filter-search">
+                            <span class="jt-search-icon"><i class="bi bi-search"></i></span>
+                            <input type="text"
+                                   name="search"
+                                   th:value="${search}"
+                                   placeholder="Search business or name"
+                                   aria-label="Search business or name">
+                        </div>
+
+                        <!-- Tier Filter Dropdown -->
+                        <div class="jt-filter-select">
+                            <select name="tierId" aria-label="Tier filter">
+                                <option value="">All Tiers</option>
+                                <option th:each="tier : ${tiers}"
+                                        th:value="${tier.tierId}"
+                                        th:text="${tier.tierName}"
+                                        th:selected="${tierId != null && tierId == tier.tierId}">Tier</option>
+                            </select>
+                        </div>
+
+                        <!-- Status Filter Dropdown -->
+                        <div class="jt-filter-select">
+                            <select name="status" aria-label="Status filter">
+                                <option value="all" th:selected="${status == 'all'}">All status</option>
+                                <option value="active" th:selected="${status == 'active'}">Active</option>
+                                <option value="pending" th:selected="${status == 'pending'}">Pending</option>
+                                <option value="rejected" th:selected="${status == 'rejected'}">Rejected</option>
+                                <option value="inactive" th:selected="${status == 'inactive'}">Inactive</option>
+                            </select>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="jt-filter-actions">
+                            <button type="submit" class="jt-btn jt-btn-s">
+                                <i class="bi bi-funnel me-1"></i> Filter
+                            </button>
+                            <a th:href="@{/admin/resellers}" class="jt-btn jt-btn-s jt-btn-ghost" title="Clear Filters">
+                                Reset
+                            </a>
+                        </div>
+
+                        <!-- Preserve current sort parameters -->
+                        <input type="hidden" name="sort" th:value="${sort}">
+                        <input type="hidden" name="dir" th:value="${dir}">
+                    </form>
+                </div>
+
+                <!-- Resellers Table Card -->
+                <div class="jt-table-wrap">
+                    <div class="jt-table-header">
+                        <h6><i class="bi bi-people me-1"></i> Resellers List</h6>
+                        <span class="jt-pill b" th:text="${resellersPage.totalElements} + ' total'">0 total</span>
+                    </div>
+                    <div class="jt-table-scroll">
+                        <table class="jt-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">
+                                        <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='businessName', dir=${sort == 'businessName' ? reverseDir : 'asc'})}">
+                                            Business Name
+                                            <i class="bi ms-1" th:classappend="${sort == 'businessName' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
+                                        </a>
+                                    </th>
+                                    <th scope="col">Contact Person</th>
+                                    <th scope="col">Email (Login)</th>
+                                    <th scope="col">Contact No</th>
+                                    <th scope="col">
+                                        <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='territory', dir=${sort == 'territory' ? reverseDir : 'asc'})}">
+                                            City/Location
+                                            <i class="bi ms-1" th:classappend="${sort == 'territory' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
+                                        </a>
+                                    </th>
+                                    <th scope="col">Tier</th>
+                                    <th scope="col" class="n">
+                                        <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='creditLimit', dir=${sort == 'creditLimit' ? reverseDir : 'asc'})}">
+                                            Credit Limit
+                                            <i class="bi ms-1" th:classappend="${sort == 'creditLimit' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="n">
+                                        <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='balance', dir=${sort == 'balance' ? reverseDir : 'asc'})}">
+                                            Balance
+                                            <i class="bi ms-1" th:classappend="${sort == 'balance' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
+                                        </a>
+                                    </th>
+                                    <th scope="col" style="text-align: center;">
+                                        <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='status', dir=${sort == 'status' ? reverseDir : 'asc'})}">
+                                            Status
+                                            <i class="bi ms-1" th:classappend="${sort == 'status' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="n" style="min-width: 140px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${resellersPage.empty}">
+                                    <td colspan="10" style="text-align: center; color: var(--mu); padding: 32px 16px;">
+                                        No resellers found matching the criteria.
+                                    </td>
+                                </tr>
+                                <tr th:each="reseller : ${resellersPage.content}">
+                                    <td><b th:text="${reseller.businessName}">Business Name</b></td>
+                                    <td th:text="${reseller.user != null ? reseller.user.fullName : '-'}">Contact Person</td>
+                                    <td style="font-family: monospace; font-size: 13px; color: var(--mu);" th:text="${reseller.user != null ? reseller.user.email : '-'}">email@example.com</td>
+                                    <td style="color: var(--mu);" th:text="${reseller.contactNo != null && !reseller.contactNo.isEmpty() ? reseller.contactNo : '-'}">-</td>
+                                    <td th:text="${reseller.territory != null && !reseller.territory.isEmpty() ? reseller.territory : '-'}">-</td>
+                                    <td>
+                                        <span class="jt-pill b"
+                                               th:text="${reseller.tier != null ? reseller.tier.tierName : 'Unassigned'}">
+                                            Tier
+                                        </span>
+                                    </td>
+                                    <td class="n" th:text="'₱' + ${#numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td class="n" style="font-weight: 700;" th:text="'₱' + ${#numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td style="text-align: center;">
+                                        <span th:if="${reseller.status == 'active'}" class="jt-pill g">Active</span>
+                                        <span th:if="${reseller.status == 'pending'}" class="jt-pill y">Pending</span>
+                                        <span th:if="${reseller.status == 'rejected'}" class="jt-pill x">Rejected</span>
+                                        <span th:if="${reseller.status == 'inactive'}" class="jt-pill x">Inactive</span>
+                                    </td>
+                                    <td class="n">
+                                        <div class="jt-action-group justify-content-end">
+                                            <!-- Actions for Pending Applications -->
+                                            <th:block th:if="${reseller.status == 'pending'}">
+                                                <button type="button"
+                                                        class="jt-btn jt-btn-s jt-btn-p"
+                                                        data-bs-toggle="modal"
+                                                        th:data-bs-target="'#approveModal-' + ${reseller.resellerId}"
+                                                        title="Approve Reseller">
+                                                    <i class="bi bi-check-lg me-1"></i> Approve
+                                                </button>
+
+                                                <form th:action="@{'/admin/resellers/reject/' + ${reseller.resellerId}}"
+                                                      method="post"
+                                                      class="d-inline m-0 p-0"
+                                                      onsubmit="return confirm('Reject this reseller application?');">
+                                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                                    <button type="submit" class="jt-btn jt-btn-s jt-btn-d" title="Reject Reseller">
+                                                        <i class="bi bi-x-lg me-1"></i> Reject
+                                                    </button>
+                                                </form>
+                                            </th:block>
+
+                                            <a th:href="@{'/admin/resellers/edit/' + ${reseller.resellerId}}"
+                                               class="jt-btn jt-btn-s jt-btn-icon"
+                                               title="Edit Reseller">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                            <a th:href="@{'/admin/resellers/' + ${reseller.resellerId} + '/statement'}"
+                                               class="jt-btn jt-btn-s"
+                                               title="Statement of Account">
+                                                <i class="bi bi-file-earmark-text me-1"></i> Statement
+                                            </a>
+
+                                            <!-- Deactivate action for active resellers -->
+                                            <form th:if="${reseller.status == 'active'}"
+                                                  th:action="@{'/admin/resellers/delete/' + ${reseller.resellerId}}"
                                                   method="post"
-                                                  class="d-inline"
-                                                  onsubmit="return confirm('Reject this reseller application?');">
+                                                  class="d-inline m-0 p-0"
+                                                  onsubmit="return confirm('Deactivate this reseller? It will be marked inactive.');">
                                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Reject Reseller">
-                                                    <i class="bi bi-x-lg me-1"></i> Reject
+                                                <button type="submit" class="jt-btn jt-btn-s jt-btn-icon jt-btn-d" title="Deactivate Reseller">
+                                                    <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
-                                        </th:block>
 
-                                        <a th:href="@{'/admin/resellers/edit/' + ${reseller.resellerId}}"
-                                           class="btn btn-outline-primary btn-sm"
-                                           title="Edit Reseller">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
+                                            <!-- Restore action for inactive resellers -->
+                                            <form th:if="${reseller.status == 'inactive'}"
+                                                  th:action="@{'/admin/resellers/restore/' + ${reseller.resellerId}}"
+                                                  method="post"
+                                                  class="d-inline m-0 p-0"
+                                                  onsubmit="return confirm('Restore this reseller to active status?');">
+                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                                <button type="submit" class="jt-btn jt-btn-s jt-btn-icon" style="color: var(--gt); border-color: var(--gt);" title="Restore Reseller">
+                                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                                </button>
+                                            </form>
+                                        </div>
 
-                                        <a th:href="@{'/admin/resellers/' + ${reseller.resellerId} + '/statement'}"
-                                           class="btn btn-outline-info btn-sm"
-                                           title="Statement of Account">
-                                            <i class="bi bi-file-earmark-text me-1"></i> Statement
-                                        </a>
-
-                                        <!-- Deactivate action for active resellers -->
-                                        <form th:if="${reseller.status == 'active'}"
-                                              th:action="@{'/admin/resellers/delete/' + ${reseller.resellerId}}"
-                                              method="post"
-                                              class="d-inline"
-                                              onsubmit="return confirm('Deactivate this reseller? It will be marked inactive.');">
-                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Deactivate Reseller">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-
-                                        <!-- Restore action for inactive resellers -->
-                                        <form th:if="${reseller.status == 'inactive'}"
-                                              th:action="@{'/admin/resellers/restore/' + ${reseller.resellerId}}"
-                                              method="post"
-                                              class="d-inline"
-                                              onsubmit="return confirm('Restore this reseller to active status?');">
-                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                            <button type="submit" class="btn btn-outline-success btn-sm" title="Restore Reseller">
-                                                <i class="bi bi-arrow-counterclockwise"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-
-                                    <!-- Approve Modal for Pending Reseller -->
-                                    <div th:if="${reseller.status == 'pending'}"
-                                         class="modal fade text-start"
-                                         th:id="'approveModal-' + ${reseller.resellerId}"
-                                         tabindex="-1"
-                                         aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <form th:action="@{'/admin/resellers/approve/' + ${reseller.resellerId}}" method="post">
-                                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title fw-bold">
-                                                            Approve Reseller: <span class="text-primary" th:text="${reseller.businessName}">Business</span>
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="mb-3">
-                                                            <label class="form-label small fw-medium">Assigned Tier <span class="text-danger">*</span></label>
-                                                            <select name="tierId" class="form-select" required>
-                                                                <option th:each="t : ${tiers}"
-                                                                        th:value="${t.tierId}"
-                                                                        th:text="${t.tierName} + ' (' + ${t.discountPct} + '% discount)'"
-                                                                        th:selected="${reseller.tier != null && reseller.tier.tierId == t.tierId}">
-                                                                </option>
-                                                            </select>
+                                        <!-- Approve Modal for Pending Reseller -->
+                                        <div th:if="${reseller.status == 'pending'}"
+                                             class="modal fade text-start"
+                                             th:id="'approveModal-' + ${reseller.resellerId}"
+                                             tabindex="-1"
+                                             aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content jt-modal">
+                                                    <form th:action="@{'/admin/resellers/approve/' + ${reseller.resellerId}}" method="post">
+                                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title fw-bold" style="color: var(--tx);">
+                                                                Approve Reseller: <span style="color: var(--lk);" th:text="${reseller.businessName}">Business</span>
+                                                            </h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label small fw-medium">Credit Limit (₱) <span class="text-danger">*</span></label>
-                                                            <input type="number"
-                                                                   name="creditLimit"
-                                                                   class="form-control"
-                                                                   step="0.01"
-                                                                   min="0"
-                                                                   th:value="${reseller.creditLimit != null ? reseller.creditLimit : '0.00'}"
-                                                                   required>
-                                                            <div class="form-text small text-muted">Initial approved credit line.</div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label class="form-label" style="font-size: 13px; font-weight: 600; color: var(--tx);">Assigned Tier <span class="text-danger">*</span></label>
+                                                                <select name="tierId" class="form-select" required>
+                                                                    <option th:each="t : ${tiers}"
+                                                                            th:value="${t.tierId}"
+                                                                            th:text="${t.tierName} + ' (' + ${t.discountPct} + '% discount)'"
+                                                                            th:selected="${reseller.tier != null && reseller.tier.tierId == t.tierId}">
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label" style="font-size: 13px; font-weight: 600; color: var(--tx);">Credit Limit (₱) <span class="text-danger">*</span></label>
+                                                                <input type="number"
+                                                                       name="creditLimit"
+                                                                       class="form-control"
+                                                                       step="0.01"
+                                                                       min="0"
+                                                                       th:value="${reseller.creditLimit != null ? reseller.creditLimit : '0.00'}"
+                                                                       required>
+                                                                <div class="form-text small" style="color: var(--mu);">Initial approved credit line.</div>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                                                        <button type="submit" class="btn btn-success btn-sm">
-                                                            <i class="bi bi-check-circle me-1"></i> Confirm Approval
-                                                        </button>
-                                                    </div>
-                                                </form>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="jt-btn jt-btn-s jt-btn-ghost" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="jt-btn jt-btn-s jt-btn-p">
+                                                                <i class="bi bi-check-circle me-1"></i> Confirm Approval
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination Footer -->
+                    <div class="jt-pager" th:if="${resellersPage.totalPages > 0}">
+                        <div>
+                            Showing <span style="font-weight: 700; color: var(--tx);" th:text="${resellersPage.empty ? 0 : resellersPage.number * resellersPage.size + 1}">1</span>
+                            to <span style="font-weight: 700; color: var(--tx);" th:text="${resellersPage.number * resellersPage.size + resellersPage.numberOfElements}">10</span>
+                            of <span style="font-weight: 700; color: var(--tx);" th:text="${resellersPage.totalElements}">25</span> resellers
+                        </div>
+
+                        <!-- Page navigation -->
+                        <nav th:if="${resellersPage.totalPages > 1}" aria-label="Reseller list pagination">
+                            <ul class="jt-pager-links">
+                                <!-- Previous button -->
+                                <li th:classappend="${resellersPage.first ? 'disabled' : ''}">
+                                    <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort=${sort}, dir=${dir}, page=${resellersPage.number - 1})}" aria-label="Previous">
+                                        &laquo;
+                                    </a>
+                                </li>
+
+                                <!-- Page number items -->
+                                <li th:each="i : ${#numbers.sequence(0, resellersPage.totalPages - 1)}"
+                                    th:classappend="${i == resellersPage.number ? 'active' : ''}">
+                                    <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort=${sort}, dir=${dir}, page=${i})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+
+                                <!-- Next button -->
+                                <li th:classappend="${resellersPage.last ? 'disabled' : ''}">
+                                    <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort=${sort}, dir=${dir}, page=${resellersPage.number + 1})}" aria-label="Next">
+                                        &raquo;
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Pagination Footer -->
-            <div class="card-footer bg-white border-top d-flex flex-wrap justify-content-between align-items-center py-2"
-                 th:if="${resellersPage.totalPages > 0}">
-                <div class="small text-muted mb-2 mb-sm-0">
-                    Showing <span class="fw-semibold" th:text="${resellersPage.empty ? 0 : resellersPage.number * resellersPage.size + 1}">1</span>
-                    to <span class="fw-semibold" th:text="${resellersPage.number * resellersPage.size + resellersPage.numberOfElements}">10</span>
-                    of <span class="fw-semibold" th:text="${resellersPage.totalElements}">25</span> resellers
-                </div>
-
-                <!-- Page navigation -->
-                <nav th:if="${resellersPage.totalPages > 1}" aria-label="Reseller list pagination">
-                    <ul class="pagination pagination-sm mb-0">
-                        <!-- Previous button -->
-                        <li class="page-item" th:classappend="${resellersPage.first ? 'disabled' : ''}">
-                            <a class="page-link"
-                                th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort=${sort}, dir=${dir}, page=${resellersPage.number - 1})}">
-                                &laquo;
-                            </a>
-                        </li>
-
-                        <!-- Page number items -->
-                        <li class="page-item"
-                            th:each="i : ${#numbers.sequence(0, resellersPage.totalPages - 1)}"
-                            th:classappend="${i == resellersPage.number ? 'active' : ''}">
-                            <a class="page-link"
-                                th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort=${sort}, dir=${dir}, page=${i})}"
-                                th:text="${i + 1}">1</a>
-                        </li>
-
-                        <!-- Next button -->
-                        <li class="page-item" th:classappend="${resellersPage.last ? 'disabled' : ''}">
-                            <a class="page-link"
-                                th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort=${sort}, dir=${dir}, page=${resellersPage.number + 1})}">
-                                &raquo;
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
+            </main>
         </div>
+
+        <!-- Command Palette -->
+        <div th:replace="~{fragments/layout :: commandPalette('admin')}"></div>
     </div>
 
+    <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>
 </html>

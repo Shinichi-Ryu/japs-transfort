@@ -67,7 +67,7 @@
     border-color: var(--line);
 }
 
-/* Filter Card */
+/* Filter Card — CSS-Grid layout (no height/min-height fighting) */
 .jt-filter {
     background-color: var(--card);
     background-color: color-mix(in srgb, var(--card) 85%, transparent);
@@ -80,20 +80,21 @@
     margin-bottom: 20px;
 }
 
+/* Default (≥992px): one row, search grows, selects+actions auto */
 .jt-filter form {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr repeat(auto-fill, minmax(140px, auto)) auto;
     gap: 10px;
     align-items: center;
-    flex-wrap: wrap;
     margin: 0;
 }
 
+/* Controls: consistent height, no min-height fighting */
 .jt-filter input[type="text"],
 .jt-filter select,
 .jt-filter .form-control,
 .jt-filter .form-select {
-    min-height: 38px;
-    height: 38px;
+    height: 44px;
     border: 1px solid var(--line);
     border-radius: 10px;
     padding: 0 12px;
@@ -102,6 +103,8 @@
     font-family: inherit;
     font-size: 13.5px;
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .jt-filter input[type="text"]:focus,
@@ -114,17 +117,15 @@
 }
 
 .jt-filter-search {
-    flex: 1 1 200px;
-    min-width: 180px;
     position: relative;
     display: flex;
     align-items: center;
+    min-width: 0;  /* allow shrink in grid */
 }
 
 .jt-filter-search input[type="text"],
 .jt-filter-search .form-control {
-    width: 100%;
-    padding-left: 36px;
+    padding-left: 38px;
 }
 
 .jt-filter-search .jt-search-icon {
@@ -139,13 +140,7 @@
 }
 
 .jt-filter-select {
-    flex: 0 1 auto;
-    min-width: 140px;
-}
-
-.jt-filter-select select,
-.jt-filter-select .form-select {
-    width: 100%;
+    min-width: 0;
 }
 
 .jt-filter-actions {
@@ -153,6 +148,7 @@
     gap: 8px;
     align-items: center;
     flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 /* Table Card & Responsive Table Wrap */
@@ -172,6 +168,8 @@
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    /* scrollbar inside the card, never the page */
+    overflow-y: visible;
 }
 
 .jt-table-header,
@@ -181,6 +179,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
     background: transparent;
 }
 
@@ -198,13 +198,23 @@ table.jt-table,
 .jt-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px;
+    min-width: 760px;  /* default; see page-specific overrides below */
     font-size: 13.5px;
     margin: 0;
     background-color: transparent;
     --bs-table-bg: transparent;
     --bs-table-hover-bg: color-mix(in srgb, var(--soft) 60%, transparent);
 }
+
+/* Page-specific min-widths based on column count */
+.jt-table.jt-table-products { min-width: 860px; }
+.jt-table.jt-table-categories { min-width: 500px; }
+.jt-table.jt-table-tiers { min-width: 500px; }
+.jt-table.jt-table-resellers { min-width: 820px; }
+.jt-table.jt-table-orders { min-width: 860px; }
+.jt-table.jt-table-commissions { min-width: 760px; }
+.jt-table.jt-table-inventory { min-width: 900px; }
+.jt-table.jt-table-movements { min-width: 800px; }
 
 table.jt-table thead th,
 .jt-table thead th {
@@ -236,11 +246,37 @@ table.jt-table tbody tr:hover,
     background-color: color-mix(in srgb, var(--soft) 60%, transparent);
 }
 
+/* Compact (nowrap) columns: SKU, unit, qty, date, price, status, actions */
+.jt-table td.jt-nowrap,
+.jt-table th.jt-nowrap,
+.jt-sku-cell {
+    white-space: nowrap;
+    color: var(--mu);
+    padding-left: 20px;
+}
+
+/* Name column: allow wrap, minimum readable width */
+.jt-table td.jt-name,
+.jt-table th.jt-name {
+    min-width: 160px;
+}
+
+/* Thumbnail: fixed size, never shrink */
+.jt-thumb,
+td .jt-thumb {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+}
+
+/* Align numbers right */
 .jt-table .n,
 .jt-table th.n,
 .jt-table td.n {
     text-align: right;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
 
 .jt-table th a {
@@ -250,6 +286,7 @@ table.jt-table tbody tr:hover,
     align-items: center;
     gap: 4px;
     font-weight: 700;
+    white-space: nowrap;
 }
 
 .jt-table th a:hover {
@@ -259,6 +296,14 @@ table.jt-table tbody tr:hover,
 .jt-table th a:focus-visible {
     outline: 2px solid var(--amber) !important;
     outline-offset: 2px;
+}
+
+/* Action buttons: always one line */
+.jt-action-group {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    white-space: nowrap;
 }
 
 /* Status Pills */
@@ -646,8 +691,59 @@ table.jt-table tbody tr:hover,
     color: var(--lk) !important;
 }
 
-/* Mobile adjustments (<= 768px / 360px) */
-@media (max-width: 768px) {
+/* ===================================================================
+   Responsive Breakpoints
+   =================================================================== */
+
+/* — 600px–991px: 2-column grid (search spans both cols, actions span both) — */
+@media (max-width: 991.98px) {
+    .jt-filter form {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .jt-filter-search {
+        grid-column: 1 / -1;  /* full width */
+    }
+
+    .jt-filter-search input[type="text"],
+    .jt-filter-search .form-control {
+        width: 100%;
+    }
+
+    .jt-filter-select {
+        /* stays in the grid cells, one per column */
+    }
+
+    .jt-filter-actions {
+        grid-column: 1 / -1;  /* full width */
+        justify-content: flex-start;
+    }
+
+    .jt-filter-actions .jt-btn {
+        flex: 1 1 auto;
+    }
+
+    /* Page header: title left, actions drop below at ≥768 */
+}
+
+/* — Under 600px: single column — */
+@media (max-width: 599.98px) {
+    .jt-filter form {
+        grid-template-columns: 1fr;
+    }
+
+    .jt-filter-search,
+    .jt-filter-select,
+    .jt-filter-actions {
+        grid-column: 1;
+    }
+
+    .jt-filter-actions .jt-btn {
+        flex: 1;
+    }
+
+    /* Page header stacks */
     .jt-ph {
         flex-direction: column;
         align-items: flex-start;
@@ -658,24 +754,29 @@ table.jt-table tbody tr:hover,
         width: 100%;
     }
 
-    .jt-filter form {
+    /* Pager */
+    .jt-pager {
         flex-direction: column;
-        align-items: stretch;
+        align-items: flex-start;
     }
 
-    .jt-filter-search {
-        width: 100%;
+    .jt-table-header,
+    .jt-card-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
+}
 
-    .jt-filter-select {
-        width: 100%;
-    }
+/* — Categories / Tiers: 2-col layout (form card + table card) stacks under 992px — */
+.jt-split {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
+    align-items: start;
+}
 
-    .jt-filter-actions {
-        width: 100%;
-    }
-
-    .jt-filter-actions .jt-btn {
-        flex: 1;
+@media (max-width: 991.98px) {
+    .jt-split {
+        grid-template-columns: 1fr;
     }
 }

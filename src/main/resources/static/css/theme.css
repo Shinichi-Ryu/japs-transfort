@@ -747,9 +747,14 @@ textarea:focus {
     flex: 1;
 }
 
-/* Sidebar */
+/* ===================================================================
+   SIDEBAR – Desktop Rail
+   Expanded: 250px (icon + label)
+   Collapsed: 76px (icon only, centered)
+   Animate: width + label opacity, 220ms ease
+   =================================================================== */
 .sb {
-    width: 256px;
+    width: 250px;
     flex: none;
     background-color: var(--sb);
     color: #C9D6E3;
@@ -758,28 +763,142 @@ textarea:focus {
     height: calc(100vh - 24px);
     margin: 12px 0 12px 12px;
     border-radius: 24px;
+    border: 1px solid color-mix(in srgb, var(--n2) 35%, transparent);
     box-shadow: 0 20px 50px rgba(5, 15, 25, 0.28);
     z-index: 100;
     display: flex;
     flex-direction: column;
     padding: 14px 12px;
-    gap: 2px;
-    overflow-y: auto;
-    transition: width 0.18s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    gap: 0;
+    overflow: hidden;
+    /* Smooth width transition – no jump */
+    transition: width 220ms ease;
+    will-change: width;
+    box-sizing: border-box;
 }
 
+/* Sidebar Top Block (Logo + Toggle) */
+.sbh {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 4px 14px 8px;
+    flex: none;
+    box-sizing: border-box;
+    transition: padding 220ms ease;
+}
+
+.sbh .brand {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 17px;
+    text-decoration: none;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0;
+    min-height: 0;
+    border-radius: 0;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+}
+
+.sbh .brand:hover {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    color: #fff;
+}
+
+.sb svg.lgo {
+    width: 36px;
+    height: 36px;
+    flex: none;
+    display: block;
+    fill: none;
+    stroke: none;
+    transition: width 220ms ease, height 220ms ease;
+}
+
+.sbt {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: 1px solid var(--n2);
+    background: 0;
+    color: #C9D6E3;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    flex: none;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.sbt:hover {
+    background-color: var(--n2);
+    color: #fff;
+}
+
+.sbt svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 220ms ease;
+}
+
+/* Scrollable Navigation Middle Section (silently scrolls when constrained) */
+.sb-nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sb-nav::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* Labels fade with opacity so they don't pop */
+.sb .lb2,
+.sb .sg span {
+    opacity: 1;
+    transition: opacity 180ms ease;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Nav & bottom item links */
 .sb a {
     display: flex;
     align-items: center;
     gap: 12px;
     color: #C9D6E3;
     text-decoration: none;
-    padding: 10px 12px;
-    border-radius: 10px;
+    padding: 0 12px;
+    border-radius: 12px;
     font-weight: 500;
     font-size: 14px;
-    min-height: 42px;
-    transition: background 0.15s, color 0.15s;
+    min-height: 44px;
+    height: 44px;
+    box-sizing: border-box;
+    transition: background 0.15s, color 0.15s, min-height 220ms ease, height 220ms ease, padding 220ms ease;
+    overflow: hidden;
+    flex: none;
 }
 
 .sb a:hover {
@@ -787,14 +906,16 @@ textarea:focus {
     color: #fff;
 }
 
-.sb a.on {
-    background-color: var(--amber);
-    color: #2F2100;
+/* Active item: amber rounded pill with soft amber glow - ONLY inside .sb-nav */
+.sb-nav a.on,
+.sb-nav a[aria-current="page"] {
+    background-color: var(--amber) !important;
+    color: #2F2100 !important;
     font-weight: 700;
     box-shadow: 0 8px 20px color-mix(in srgb, var(--amber) 40%, transparent);
 }
 
-.sb svg,
+.sb svg:not(.lgo),
 .tb svg {
     width: 20px;
     height: 20px;
@@ -806,65 +927,28 @@ textarea:focus {
     stroke-linejoin: round;
 }
 
+/* Group labels: small ~12px, muted, sentence case with extra space above */
 .sg {
-    font-size: 11px;
+    font-size: 12px;
     color: #8FA6B8;
-    padding: 14px 12px 4px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
-
-.sbh {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 6px 4px 14px 8px;
-}
-
-.sbh .brand {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    color: #fff;
-    font-weight: 800;
-    font-size: 17px;
-    text-decoration: none;
-    padding: 0;
-    min-height: 0;
-    border-radius: 0;
-}
-
-.sbh .brand:hover {
-    background: none;
-    color: #fff;
-}
-
-.sbt {
-    width: 30px;
-    height: 30px;
-    border-radius: 10px;
-    border: 1px solid var(--n2);
-    background: 0;
-    color: #C9D6E3;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    padding: 0;
+    padding: 16px 12px 6px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+    transition: padding 220ms ease, margin 220ms ease;
     flex: none;
-    transition: background 0.15s, color 0.15s;
 }
 
-.sbt:hover {
-    background-color: var(--n2);
-    color: #fff;
-}
-
-.sbt svg {
-    width: 16px;
-    height: 16px;
-    transition: transform 0.2s ease;
+/* Sidebar Footer Block (Settings + Logout pinned at bottom) */
+.sbf {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 10px;
+    margin-top: auto;
+    border-top: 1px solid var(--n2);
+    box-sizing: border-box;
 }
 
 .sb .sb-logout-btn {
@@ -876,14 +960,18 @@ textarea:focus {
     border: 0;
     width: 100%;
     text-align: left;
-    padding: 10px 12px;
-    border-radius: 10px;
+    padding: 0 12px;
+    border-radius: 12px;
     font-weight: 500;
     font-size: 14px;
     font-family: inherit;
-    min-height: 42px;
+    min-height: 44px;
+    height: 44px;
+    box-sizing: border-box;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, min-height 220ms ease, height 220ms ease, padding 220ms ease;
+    overflow: hidden;
+    flex: none;
 }
 
 .sb .sb-logout-btn:hover {
@@ -891,32 +979,64 @@ textarea:focus {
     color: #fff;
 }
 
-/* Collapsed Mini Sidebar */
+/* ===================================================================
+   COLLAPSED MINI RAIL (html.mini or .app.mini)
+   Width → 76px, labels fade out, icons center
+   =================================================================== */
 html.mini .sb,
 .app.mini .sb {
-    width: 72px;
+    width: 76px;
+    padding: 14px 8px;
+    align-items: center;
 }
 
 html.mini .lb2,
 html.mini .sg span,
 .app.mini .lb2,
 .app.mini .sg span {
+    opacity: 0;
+    pointer-events: none;
     display: none;
-}
-
-html.mini .sg,
-.app.mini .sg {
-    border-top: 1px solid var(--n2);
-    margin: 8px 8px 0;
+    width: 0;
+    margin: 0;
     padding: 0;
 }
 
-html.mini .sb a,
-.app.mini .sb a,
-html.mini .sb .sb-logout-btn,
-.app.mini .sb .sb-logout-btn {
+html.mini .sb-nav {
+    width: 100%;
+    align-items: center;
+}
+
+html.mini .sbh,
+.app.mini .sbh {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 4px 0 16px;
+    gap: 12px;
+    width: 100%;
+}
+
+html.mini .sbh .brand,
+.app.mini .sbh .brand {
     justify-content: center;
-    padding: 10px 0;
+    align-items: center;
+    width: 100%;
+    flex: none;
+    gap: 0;
+}
+
+html.mini .sbh .brand .lgo,
+.app.mini .sbh .brand .lgo {
+    display: block !important;
+    width: 36px;
+    height: 36px;
+    margin: 0 auto;
+}
+
+html.mini .sbt,
+.app.mini .sbt {
+    margin: 0 auto;
 }
 
 html.mini .sbt svg,
@@ -924,14 +1044,123 @@ html.mini .sbt svg,
     transform: rotate(180deg);
 }
 
-html.mini .sbh,
-.app.mini .sbh {
-    flex-direction: column;
-    padding: 6px 0 14px;
-    gap: 12px;
+html.mini .sg,
+.app.mini .sg {
+    border-top: 1px solid var(--n2);
+    margin: 6px auto;
+    padding: 0;
+    height: 1px;
+    width: 36px;
+    font-size: 0;
+    line-height: 0;
+    box-sizing: border-box;
 }
 
-/* Sticky Topbar */
+html.mini .sb a,
+.app.mini .sb a,
+html.mini .sb .sb-logout-btn,
+.app.mini .sb .sb-logout-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    padding: 0;
+    margin: 0 auto;
+    min-height: 44px;
+    height: 44px;
+    width: 44px;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+html.mini .sb svg:not(.lgo),
+.app.mini .sb svg:not(.lgo) {
+    margin: 0 auto;
+}
+
+html.mini .sbf,
+.app.mini .sbf {
+    width: 100%;
+    align-items: center;
+    padding-top: 10px;
+    margin-top: auto;
+    border-top: 1px solid var(--n2);
+}
+
+/* ===================================================================
+   SHORT SCREENS (height < 700px): Compact sidebar spacing
+   Tighten item hit areas and dividers so nav fits without scrolling
+   =================================================================== */
+@media (max-height: 700px) {
+    .sb {
+        top: 8px;
+        height: calc(100vh - 16px);
+        margin-top: 8px;
+        margin-bottom: 8px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .sbh {
+        padding-bottom: 8px;
+        gap: 6px;
+    }
+
+    html.mini .sbh,
+    .app.mini .sbh {
+        padding-bottom: 8px;
+        gap: 6px;
+    }
+
+    .sb svg.lgo {
+        width: 32px;
+        height: 32px;
+    }
+
+    html.mini .sbh .brand .lgo,
+    .app.mini .sbh .brand .lgo {
+        width: 32px;
+        height: 32px;
+    }
+
+    .sb a,
+    .sb .sb-logout-btn {
+        min-height: 38px;
+        height: 38px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+
+    html.mini .sb a,
+    .app.mini .sb a,
+    html.mini .sb .sb-logout-btn,
+    .app.mini .sb .sb-logout-btn {
+        min-height: 38px;
+        height: 38px;
+        width: 38px;
+        padding: 0;
+        margin: 0 auto;
+    }
+
+    .sg {
+        padding: 8px 12px 2px;
+    }
+
+    html.mini .sg,
+    .app.mini .sg {
+        margin: 4px auto;
+        width: 30px;
+    }
+
+    .sbf {
+        padding-top: 4px;
+    }
+}
+
+/* ===================================================================
+   STICKY TOPBAR
+   Solid enough background, gap above it filled by page bg.
+   =================================================================== */
 .tb {
     display: flex;
     align-items: center;
@@ -940,7 +1169,7 @@ html.mini .sbh,
     margin: 12px 26px 0;
     border-radius: 20px;
     background-color: var(--card); /* Fallback */
-    background-color: color-mix(in srgb, var(--card) 75%, transparent);
+    background-color: color-mix(in srgb, var(--card) 92%, transparent);
     backdrop-filter: blur(16px) saturate(150%);
     -webkit-backdrop-filter: blur(16px) saturate(150%);
     border: 1px solid color-mix(in srgb, var(--line) 60%, rgba(255, 255, 255, 0.4));
@@ -948,6 +1177,19 @@ html.mini .sbh,
     position: sticky;
     top: 12px;
     z-index: 40;
+}
+
+/* Fill the gap above the topbar so content can't scroll up above it */
+.mw::before {
+    content: '';
+    display: block;
+    height: 12px;
+    background-color: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 39;
+    margin: 0;
+    flex: none;
 }
 
 @supports not (backdrop-filter: blur(1px)) {
@@ -1026,45 +1268,190 @@ html.mini .sbh,
     font-weight: 800;
 }
 
-/* Mobile Slide-in Drawer */
+/* ===================================================================
+   NARROW SCREENS (< 992px): Off-canvas Drawer
+   Always shows icons + labels (ignore collapsed preference).
+   Width: min(300px, 85vw). Slides in with translateX.
+   Backdrop: dim only (45% dark), no heavy blur.
+   =================================================================== */
 .sb-backdrop {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(5, 15, 25, 0.5);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    background: rgba(5, 15, 25, 0.45);
+    /* Light blur only – not heavy */
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
     z-index: 1040;
+    transition: opacity 220ms ease;
 }
 
 @media (max-width: 991.98px) {
     .tb-menu-btn {
         display: inline-flex !important;
     }
+
     .sb {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
         bottom: 0 !important;
-        height: 100vh !important;
+        height: 100dvh !important;
         margin: 0 !important;
         border-radius: 0 24px 24px 0 !important;
         z-index: 1050 !important;
-        transform: translateX(-105%) !important;
-        width: 260px !important;
+        width: min(300px, 85vw) !important;
+        transform: translateX(-105%);
+        transition: transform 220ms ease !important;
+        /* Always show labels in drawer regardless of mini state */
+        overflow-x: hidden;
     }
+
+    /* Override mini-mode inside the drawer: restore labels */
+    html.mini .sb,
+    .app.mini .sb {
+        width: min(300px, 85vw) !important;
+        padding: 14px 12px !important;
+        align-items: stretch !important;
+    }
+
+    html.mini .sb-nav,
+    .app.mini .sb-nav {
+        width: 100% !important;
+        align-items: stretch !important;
+    }
+
+    html.mini .sb .lb2,
+    .app.mini .sb .lb2,
+    html.mini .sb .sg span,
+    .app.mini .sb .sg span {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        display: inline !important;
+        width: auto !important;
+    }
+
+    html.mini .sb a,
+    .app.mini .sb a,
+    html.mini .sb .sb-logout-btn,
+    .app.mini .sb .sb-logout-btn {
+        justify-content: flex-start !important;
+        padding: 0 12px !important;
+        width: 100% !important;
+        gap: 12px !important;
+        margin: 0 !important;
+    }
+
+    html.mini .sb svg:not(.lgo),
+    .app.mini .sb svg:not(.lgo) {
+        margin: 0 !important;
+    }
+
+    html.mini .sbf,
+    .app.mini .sbf {
+        align-items: stretch !important;
+    }
+
+    html.mini .sg,
+    .app.mini .sg {
+        border-top: none !important;
+        margin: 0 !important;
+        padding: 14px 12px 4px !important;
+        text-align: left !important;
+        height: auto !important;
+        font-size: 11px !important;
+        line-height: normal !important;
+    }
+
+    html.mini .sbh,
+    .app.mini .sbh {
+        flex-direction: row !important;
+        padding: 6px 4px 14px 8px !important;
+        justify-content: space-between !important;
+        gap: 8px !important;
+    }
+
+    html.mini .sbh .brand,
+    .app.mini .sbh .brand {
+        justify-content: flex-start !important;
+        width: auto !important;
+        flex: 1 !important;
+    }
+
+    html.mini .sbh .brand .lgo,
+    .app.mini .sbh .brand .lgo {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    html.mini .sbt,
+    .app.mini .sbt {
+        margin: 0 !important;
+    }
+
+    html.mini .sbt svg,
+    .app.mini .sbt svg {
+        transform: none !important;
+    }
+
+    html.mini .sbf,
+    .app.mini .sbf {
+        padding-top: 8px !important;
+        margin-top: auto !important;
+        border-top: 1px solid var(--n2) !important;
+    }
+
     .app.sb-open .sb {
         transform: translateX(0) !important;
     }
+
     .app.sb-open .sb-backdrop {
         display: block !important;
     }
+
+    /* Lock body scroll when drawer is open */
+    .app.sb-open body,
+    body:has(.app.sb-open) {
+        overflow: hidden;
+    }
+
     .tb {
         margin: 12px 14px 0 !important;
     }
+
     main {
         padding: 16px 14px !important;
     }
+
+    /* The topbar gap fill also applies narrow */
+    .mw::before {
+        position: sticky;
+        top: 0;
+        z-index: 39;
+    }
+}
+
+/* ===================================================================
+   REDUCED MOTION
+   =================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    .sb,
+    .sb .lb2,
+    .sb .sg span,
+    .sbt svg {
+        transition: none !important;
+    }
+}
+
+html.still .sb,
+html.still .sb .lb2,
+html.still .sb .sg span,
+html.still .sbt svg,
+.app.still .sb,
+.app.still .sb .lb2,
+.app.still .sb .sg span,
+.app.still .sbt svg {
+    transition: none !important;
 }
 
 /* Command Palette (.cp) */

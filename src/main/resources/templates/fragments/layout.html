@@ -40,10 +40,10 @@
 <body>
 
     <!-- Sidebar Fragment -->
-    <aside th:fragment="sidebar(activeItem, roleName)" class="sb" aria-label="Main navigation">
+    <aside th:fragment="sidebar(activeItem, roleName)" id="main-sidebar" class="sb" aria-label="Main navigation">
         <div class="sbh">
-            <a class="brand" th:href="${roleName == 'reseller' ? '/portal' : '/dashboard'}">
-                <svg class="lgo" width="30" height="30" viewBox="0 0 64 64" role="img" aria-label="Japs Transfort logo" style="flex:none">
+            <a class="brand" th:href="${roleName == 'reseller' ? '/portal' : '/dashboard'}" title="Japs Transfort" aria-label="Japs Transfort">
+                <svg class="lgo" width="36" height="36" viewBox="0 0 64 64" role="img" aria-label="Japs Transfort logo" style="flex:none">
                     <rect width="64" height="64" rx="17" fill="var(--amber, #F5A623)"/>
                     <path d="M32 12l18 10-18 10-18-10z" fill="#fff" fill-opacity=".55"/>
                     <path fill="none" stroke="var(--sb, #0A3A40)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" d="M32 12l18 10v20L32 52 14 42V22zM14 22l18 10 18-10M32 32v20"/>
@@ -55,110 +55,113 @@
             </button>
         </div>
 
-        <!-- ADMIN Navigation -->
-        <th:block th:if="${roleName != 'reseller'}">
-            <!-- Dashboard -->
-            <a th:href="@{/dashboard}" th:classappend="${activeItem == 'dashboard' ? 'on' : ''}" title="Dashboard">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-                <span class="lb2">Dashboard</span>
+        <!-- Dedicated Scrollable Navigation Area (silently scrolls if height is constrained) -->
+        <nav class="sb-nav" aria-label="Sidebar navigation">
+            <!-- ADMIN Navigation -->
+            <th:block th:if="${roleName != 'reseller'}">
+                <!-- Dashboard -->
+                <a th:href="@{/dashboard}" th:classappend="${activeItem == 'dashboard' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'dashboard' ? 'page' : null}" title="Dashboard" aria-label="Dashboard">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+                    <span class="lb2">Dashboard</span>
+                </a>
+
+                <!-- Sales Group -->
+                <div class="sg"><span>Sales</span></div>
+                <a th:href="@{/admin/orders}" th:classappend="${activeItem == 'orders' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'orders' ? 'page' : null}" title="Orders" aria-label="Orders">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
+                    <span class="lb2">Orders</span>
+                </a>
+                <a th:href="@{/admin/resellers}" th:classappend="${activeItem == 'resellers' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'resellers' ? 'page' : null}" title="Resellers" aria-label="Resellers">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M17 4.5a3.5 3.5 0 010 7M21.5 20c0-2.5-1.5-4.5-4-5.5"/></svg>
+                    <span class="lb2">Resellers</span>
+                </a>
+                <a th:href="@{/admin/commissions}" th:classappend="${activeItem == 'commissions' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'commissions' ? 'page' : null}" title="Commissions" aria-label="Commissions">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2 0 00-5 0c0 2.5 5 1.5 5 4a2.5 2 0 01-5 0M12 6.5v11"/></svg>
+                    <span class="lb2">Commissions</span>
+                </a>
+
+                <!-- Catalog Group -->
+                <div class="sg"><span>Catalog</span></div>
+                <a th:href="@{/admin/products}" th:classappend="${activeItem == 'products' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'products' ? 'page' : null}" title="Products" aria-label="Products">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>
+                    <span class="lb2">Products</span>
+                </a>
+                <a th:href="@{/admin/categories}" th:classappend="${activeItem == 'categories' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'categories' ? 'page' : null}" title="Categories" aria-label="Categories">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg>
+                    <span class="lb2">Categories</span>
+                </a>
+                <a th:href="@{/admin/tiers}" th:classappend="${activeItem == 'tiers' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'tiers' ? 'page' : null}" title="Reseller tiers" aria-label="Reseller tiers">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/></svg>
+                    <span class="lb2">Reseller tiers</span>
+                </a>
+                <a th:href="@{/admin/inventory}" th:classappend="${activeItem == 'inventory' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'inventory' ? 'page' : null}" title="Inventory" aria-label="Inventory">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10l8-6 8 6v10zM9 20v-6h6v6"/></svg>
+                    <span class="lb2">Inventory</span>
+                </a>
+
+                <!-- Insights Group -->
+                <div class="sg"><span>Insights</span></div>
+                <a th:href="@{/admin/reports}" th:classappend="${activeItem == 'reports' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'reports' ? 'page' : null}" title="Reports" aria-label="Reports">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V4M4 20h16M8 16v-5M13 16V8M18 16v-3"/></svg>
+                    <span class="lb2">Reports</span>
+                </a>
+            </th:block>
+
+            <!-- RESELLER Navigation -->
+            <th:block th:if="${roleName == 'reseller'}">
+                <!-- Shop Group -->
+                <div class="sg"><span>Shop</span></div>
+                <a th:href="@{/portal}" th:classappend="${activeItem == 'home' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'home' ? 'page' : null}" title="Home" aria-label="Home">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>
+                    <span class="lb2">Home</span>
+                </a>
+                <a th:href="@{/portal/catalog}" th:classappend="${activeItem == 'catalog' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'catalog' ? 'page' : null}" title="Catalog" aria-label="Catalog">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                    <span class="lb2">Catalog</span>
+                </a>
+                <a th:href="@{/portal/cart}" th:classappend="${activeItem == 'cart' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'cart' ? 'page' : null}" title="Cart" aria-label="Cart">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11l2-8H6"/></svg>
+                    <span class="lb2">Cart</span>
+                    <span class="badge lb2" th:if="${session.RESELLER_CART != null and !session.RESELLER_CART.isEmpty()}" th:text="${session.RESELLER_CART.size()}">0</span>
+                </a>
+
+                <!-- My account Group -->
+                <div class="sg"><span>My account</span></div>
+                <a th:href="@{/portal/orders}" th:classappend="${activeItem == 'orders' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'orders' ? 'page' : null}" title="My orders" aria-label="My orders">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
+                    <span class="lb2">My orders</span>
+                </a>
+                <a th:href="@{/portal/commissions}" th:classappend="${activeItem == 'commissions' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'commissions' ? 'page' : null}" title="Commissions" aria-label="Commissions">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2 0 00-5 0c0 2.5 5 1.5 5 4a2.5 2 0 01-5 0M12 6.5v11"/></svg>
+                    <span class="lb2">Commissions</span>
+                </a>
+                <a th:href="@{/portal/statement}" th:classappend="${activeItem == 'statement' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'statement' ? 'page' : null}" title="Statement" aria-label="Statement">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>
+                    <span class="lb2">Statement</span>
+                </a>
+            </th:block>
+        </nav>
+
+        <!-- Common bottom links pinned to footer -->
+        <div class="sbf">
+            <a th:href="@{/account}" th:classappend="${activeItem == 'account' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'account' ? 'page' : null}" title="Settings" aria-label="Settings">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                <span class="lb2">Settings</span>
             </a>
 
-            <!-- Sales Group -->
-            <div class="sg"><span>Sales</span></div>
-            <a th:href="@{/admin/orders}" th:classappend="${activeItem == 'orders' ? 'on' : ''}" title="Orders">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
-                <span class="lb2">Orders</span>
-            </a>
-            <a th:href="@{/admin/resellers}" th:classappend="${activeItem == 'resellers' ? 'on' : ''}" title="Resellers">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M17 4.5a3.5 3.5 0 010 7M21.5 20c0-2.5-1.5-4.5-4-5.5"/></svg>
-                <span class="lb2">Resellers</span>
-            </a>
-            <a th:href="@{/admin/commissions}" th:classappend="${activeItem == 'commissions' ? 'on' : ''}" title="Commissions">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2 0 00-5 0c0 2.5 5 1.5 5 4a2.5 2 0 01-5 0M12 6.5v11"/></svg>
-                <span class="lb2">Commissions</span>
-            </a>
-
-            <!-- Catalog Group -->
-            <div class="sg"><span>Catalog</span></div>
-            <a th:href="@{/admin/products}" th:classappend="${activeItem == 'products' ? 'on' : ''}" title="Products">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>
-                <span class="lb2">Products</span>
-            </a>
-            <a th:href="@{/admin/categories}" th:classappend="${activeItem == 'categories' ? 'on' : ''}" title="Categories">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg>
-                <span class="lb2">Categories</span>
-            </a>
-            <a th:href="@{/admin/tiers}" th:classappend="${activeItem == 'tiers' ? 'on' : ''}" title="Reseller tiers">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/></svg>
-                <span class="lb2">Reseller tiers</span>
-            </a>
-            <a th:href="@{/admin/inventory}" th:classappend="${activeItem == 'inventory' ? 'on' : ''}" title="Inventory">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10l8-6 8 6v10zM9 20v-6h6v6"/></svg>
-                <span class="lb2">Inventory</span>
-            </a>
-
-            <!-- Insights Group -->
-            <div class="sg"><span>Insights</span></div>
-            <a th:href="@{/admin/reports}" th:classappend="${activeItem == 'reports' ? 'on' : ''}" title="Reports">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V4M4 20h16M8 16v-5M13 16V8M18 16v-3"/></svg>
-                <span class="lb2">Reports</span>
-            </a>
-        </th:block>
-
-        <!-- RESELLER Navigation -->
-        <th:block th:if="${roleName == 'reseller'}">
-            <!-- Shop Group -->
-            <div class="sg"><span>Shop</span></div>
-            <a th:href="@{/portal}" th:classappend="${activeItem == 'home' ? 'on' : ''}" title="Home">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>
-                <span class="lb2">Home</span>
-            </a>
-            <a th:href="@{/portal/catalog}" th:classappend="${activeItem == 'catalog' ? 'on' : ''}" title="Catalog">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-                <span class="lb2">Catalog</span>
-            </a>
-            <a th:href="@{/portal/cart}" th:classappend="${activeItem == 'cart' ? 'on' : ''}" title="Cart">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11l2-8H6"/></svg>
-                <span class="lb2">Cart</span>
-                <span class="badge lb2" th:if="${session.RESELLER_CART != null and !session.RESELLER_CART.isEmpty()}" th:text="${session.RESELLER_CART.size()}">0</span>
-            </a>
-
-            <!-- My account Group -->
-            <div class="sg"><span>My account</span></div>
-            <a th:href="@{/portal/orders}" th:classappend="${activeItem == 'orders' ? 'on' : ''}" title="My orders">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
-                <span class="lb2">My orders</span>
-            </a>
-            <a th:href="@{/portal/commissions}" th:classappend="${activeItem == 'commissions' ? 'on' : ''}" title="Commissions">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2 0 00-5 0c0 2.5 5 1.5 5 4a2.5 2 0 01-5 0M12 6.5v11"/></svg>
-                <span class="lb2">Commissions</span>
-            </a>
-            <a th:href="@{/portal/statement}" th:classappend="${activeItem == 'statement' ? 'on' : ''}" title="Statement">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>
-                <span class="lb2">Statement</span>
-            </a>
-        </th:block>
-
-        <div class="sp"></div>
-
-        <!-- Common bottom links -->
-        <a th:href="@{/account}" th:classappend="${activeItem == 'account' ? 'on' : ''}" title="Account">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
-            <span class="lb2">Account</span>
-        </a>
-
-        <!-- Log out form (POST with CSRF) -->
-        <form th:action="@{/logout}" method="post" class="m-0 p-0" id="sbLogoutForm">
-            <button type="submit" class="sb-logout-btn" title="Log out" aria-label="Log out">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9"/></svg>
-                <span class="lb2">Log out</span>
-            </button>
-        </form>
+            <!-- Log out form (POST with CSRF) -->
+            <form th:action="@{/logout}" method="post" class="m-0 p-0" id="sbLogoutForm">
+                <button type="submit" class="sb-logout-btn" title="Log out" aria-label="Log out">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    <span class="lb2">Log out</span>
+                </button>
+            </form>
+        </div>
     </aside>
 
     <!-- Topbar Fragment -->
     <header th:fragment="topbar(pageTitle, roleName)" class="tb">
-        <button type="button" class="tb-menu-btn" onclick="window.jtToggleDrawer(true)" aria-label="Open navigation drawer">
+        <button type="button" class="tb-menu-btn" onclick="window.jtToggleDrawer(true)" aria-label="Open navigation drawer" aria-expanded="false" aria-controls="main-sidebar">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <b class="tb-title" th:text="${pageTitle}">Dashboard</b>
@@ -293,17 +296,34 @@
                 window.jtToggleDrawer = function(open) {
                     var app = document.querySelector('.app');
                     if (!app) return;
-                    if (typeof open === 'boolean') {
-                        app.classList.toggle('sb-open', open);
+                    var btn = document.querySelector('.tb-menu-btn');
+                    var sidebar = document.getElementById('main-sidebar');
+                    var willOpen = typeof open === 'boolean' ? open : !app.classList.contains('sb-open');
+
+                    if (willOpen) {
+                        window.__jtLastFocus = document.activeElement;
+                        app.classList.add('sb-open');
+                        if (btn) btn.setAttribute('aria-expanded', 'true');
+                        if (sidebar) {
+                            var firstLink = sidebar.querySelector('.sb-nav a, .sbh a');
+                            if (firstLink) firstLink.focus();
+                        }
                     } else {
-                        app.classList.toggle('sb-open');
+                        app.classList.remove('sb-open');
+                        if (btn) btn.setAttribute('aria-expanded', 'false');
+                        if (window.__jtLastFocus && typeof window.__jtLastFocus.focus === 'function') {
+                            window.__jtLastFocus.focus();
+                            window.__jtLastFocus = null;
+                        } else if (btn) {
+                            btn.focus();
+                        }
                     }
                 };
 
-                // Highlight active item from current request path
+                // Highlight active item from current request path (only inside .sb-nav)
                 function highlightActiveNav() {
                     var currentPath = window.location.pathname.replace(/\/$/, '') || '/';
-                    var links = document.querySelectorAll('.sb a[href]');
+                    var links = document.querySelectorAll('.sb-nav a[href]');
                     var matched = false;
                     links.forEach(function(link) {
                         var href = link.getAttribute('href');
@@ -311,6 +331,7 @@
                             var normHref = href.replace(/\/$/, '') || '/';
                             if (normHref === currentPath) {
                                 link.classList.add('on');
+                                link.setAttribute('aria-current', 'page');
                                 matched = true;
                             }
                         }
@@ -436,6 +457,17 @@
                 document.addEventListener('DOMContentLoaded', function() {
                     highlightActiveNav();
                     window.jtApplyBg(localStorage.getItem('jt.bg') || 'none');
+
+                    // Close mobile drawer on navigation link click
+                    var sidebar = document.getElementById('main-sidebar');
+                    if (sidebar) {
+                        sidebar.addEventListener('click', function(e) {
+                            var link = e.target.closest('a');
+                            if (link && window.innerWidth < 992) {
+                                window.jtToggleDrawer(false);
+                            }
+                        });
+                    }
                 });
             })();
         </script>

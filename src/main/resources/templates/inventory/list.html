@@ -145,7 +145,7 @@
                         <span class="jt-pill x" th:text="${inventoryPage.totalElements} + ' total'">0 total</span>
                     </div>
                     <div class="jt-table-scroll">
-                        <table class="jt-table">
+                        <table class="jt-table jt-table-inventory">
                             <thead>
                                 <tr>
                                     <th scope="col" style="padding-left: 20px;">
@@ -186,7 +186,7 @@
                                     </td>
                                 </tr>
                                 <tr th:each="row : ${inventoryPage.content}">
-                                    <td style="padding-left: 20px;" class="fw-semibold font-monospace small" style="color: var(--mu);" th:text="${row.product.sku}">SKU-001</td>
+                                    <td class="fw-semibold font-monospace small jt-sku-cell" th:text="${row.product.sku}">SKU-001</td>
                                     <td>
                                         <div class="fw-bold" style="color: var(--tx);" th:text="${row.product.name}">Product Name</div>
                                         <div class="small" style="color: var(--mu);" th:text="${row.product.unit != null ? row.product.unit : 'pc'}">pc</div>

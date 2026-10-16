@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head th:fragment="htmlHead(pageTitle)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle != null ? pageTitle + ' - Japs Transfort' : 'Japs Transfort'}">Japs Transfort</title>
+    <!-- Google Fonts: Plus Jakarta Sans with system-ui fallback -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Theme CSS -->
+    <link rel="stylesheet" th:href="@{/css/theme.css}" href="/css/theme.css">
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <!-- Inline appearance script before first paint to prevent flash -->
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('jt.theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                var pal = localStorage.getItem('jt.pal') || 'teal';
+                var bg = localStorage.getItem('jt.bg') || 'none';
+                var motion = localStorage.getItem('jt.motion') || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'still' : 'animated');
+                var sidebar = localStorage.getItem('jt.sidebar') || 'full';
+                var doc = document.documentElement;
+                doc.setAttribute('data-theme', theme);
+                doc.setAttribute('data-bs-theme', theme);
+                doc.setAttribute('data-pal', pal);
+                doc.setAttribute('data-bg', bg);
+                doc.setAttribute('data-motion', motion);
+                doc.setAttribute('data-sidebar', sidebar);
+                if (sidebar === 'mini') doc.classList.add('mini');
+                if (motion === 'still') doc.classList.add('still');
+            } catch (e) {}
+        })();
+    </script>
+</head>
+<body>
+
+    <!-- Sidebar Fragment -->
+    <aside th:fragment="sidebar(activeItem, roleName)" class="sb" aria-label="Main navigation">
+        <div class="sbh">
+            <a class="brand" th:href="${roleName == 'reseller' ? '/portal' : '/dashboard'}">
+                <svg class="lgo" width="30" height="30" viewBox="0 0 64 64" role="img" aria-label="Japs Transfort logo" style="flex:none">
+                    <rect width="64" height="64" rx="17" fill="var(--amber, #F5A623)"/>
+                    <path d="M32 12l18 10-18 10-18-10z" fill="#fff" fill-opacity=".55"/>
+                    <path fill="none" stroke="var(--sb, #0A3A40)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" d="M32 12l18 10v20L32 52 14 42V22zM14 22l18 10 18-10M32 32v20"/>
+                </svg>
+                <span class="lb2">Japs Transfort</span>
+            </a>
+            <button type="button" class="sbt" onclick="window.jtToggleSidebar()" title="Toggle sidebar" aria-label="Toggle sidebar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+            </button>
+        </div>
+
+        <!-- ADMIN Navigation -->
+        <th:block th:if="${roleName != 'reseller'}">
+            <!-- Dashboard -->
+            <a th:href="@{/dashboard}" th:classappend="${activeItem == 'dashboard' ? 'on' : ''}" title="Dashboard">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+                <span class="lb2">Dashboard</span>
+            </a>
+
+            <!-- Sales Group -->
+            <div class="sg"><span>Sales</span></div>
+            <a th:href="@{/admin/orders}" th:classappend="${activeItem == 'orders' ? 'on' : ''}" title="Orders">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
+                <span class="lb2">Orders</span>
+            </a>
+            <a th:href="@{/admin/resellers}" th:classappend="${activeItem == 'resellers' ? 'on' : ''}" title="Resellers">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M17 4.5a3.5 3.5 0 010 7M21.5 20c0-2.5-1.5-4.5-4-5.5"/></svg>
+                <span class="lb2">Resellers</span>
+            </a>
+            <a th:href="@{/admin/commissions}" th:classappend="${activeItem == 'commissions' ? 'on' : ''}" title="Commissions">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2 0 00-5 0c0 2.5 5 1.5 5 4a2.5 2 0 01-5 0M12 6.5v11"/></svg>
+                <span class="lb2">Commissions</span>
+            </a>
+
+            <!-- Catalog Group -->
+            <div class="sg"><span>Catalog</span></div>
+            <a th:href="@{/admin/products}" th:classappend="${activeItem == 'products' ? 'on' : ''}" title="Products">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>
+                <span class="lb2">Products</span>
+            </a>
+            <a th:href="@{/admin/categories}" th:classappend="${activeItem == 'categories' ? 'on' : ''}" title="Categories">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg>
+                <span class="lb2">Categories</span>
+            </a>
+            <a th:href="@{/admin/tiers}" th:classappend="${activeItem == 'tiers' ? 'on' : ''}" title="Reseller tiers">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/></svg>
+                <span class="lb2">Reseller tiers</span>
+            </a>
+            <a th:href="@{/admin/inventory}" th:classappend="${activeItem == 'inventory' ? 'on' : ''}" title="Inventory">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10l8-6 8 6v10zM9 20v-6h6v6"/></svg>
+                <span class="lb2">Inventory</span>
+            </a>
+
+            <!-- Insights Group -->
+            <div class="sg"><span>Insights</span></div>
+            <a th:href="@{/admin/reports}" th:classappend="${activeItem == 'reports' ? 'on' : ''}" title="Reports">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V4M4 20h16M8 16v-5M13 16V8M18 16v-3"/></svg>
+                <span class="lb2">Reports</span>
+            </a>
+        </th:block>
+
+        <!-- RESELLER Navigation -->
+        <th:block th:if="${roleName == 'reseller'}">
+            <!-- Shop Group -->
+            <div class="sg"><span>Shop</span></div>
+            <a th:href="@{/portal}" th:classappend="${activeItem == 'home' ? 'on' : ''}" title="Home">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>
+                <span class="lb2">Home</span>
+            </a>
+            <a th:href="@{/portal/catalog}" th:classappend="${activeItem == 'catalog' ? 'on' : ''}" title="Catalog">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                <span class="lb2">Catalog</span>
+            </a>
+            <a th:href="@{/portal/cart}" th:classappend="${activeItem == 'cart' ? 'on' : ''}" title="Cart">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11l2-8H6"/></svg>
+                <span class="lb2">Cart</span>
+                <span class="badge lb2" th:if="${session.RESELLER_CART != null and !session.RESELLER_CART.isEmpty()}" th:text="${session.RESELLER_CART.size()}">0</span>
+            </a>
+
+            <!-- My account Group -->
+            <div class="sg"><span>My account</span></div>
+            <a th:href="@{/portal/orders}" th:classappend="${activeItem == 'orders' ? 'on' : ''}" title="My orders">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
+                <span class="lb2">My orders</span>
+            </a>
+            <a th:href="@{/portal/commissions}" th:classappend="${activeItem == 'commissions' ? 'on' : ''}" title="Commissions">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2 0 00-5 0c0 2.5 5 1.5 5 4a2.5 2 0 01-5 0M12 6.5v11"/></svg>
+                <span class="lb2">Commissions</span>
+            </a>
+            <a th:href="@{/portal/statement}" th:classappend="${activeItem == 'statement' ? 'on' : ''}" title="Statement">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>
+                <span class="lb2">Statement</span>
+            </a>
+        </th:block>
+
+        <div class="sp"></div>
+
+        <!-- Common bottom links -->
+        <a th:href="@{/account}" th:classappend="${activeItem == 'account' ? 'on' : ''}" title="Account">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+            <span class="lb2">Account</span>
+        </a>
+
+        <!-- Log out form (POST with CSRF) -->
+        <form th:action="@{/logout}" method="post" class="m-0 p-0" id="sbLogoutForm">
+            <button type="submit" class="sb-logout-btn" title="Log out" aria-label="Log out">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9"/></svg>
+                <span class="lb2">Log out</span>
+            </button>
+        </form>
+    </aside>
+
+    <!-- Topbar Fragment -->
+    <header th:fragment="topbar(pageTitle, roleName)" class="tb">
+        <button type="button" class="tb-menu-btn" onclick="window.jtToggleDrawer(true)" aria-label="Open navigation drawer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <b class="tb-title" th:text="${pageTitle}">Dashboard</b>
+        <div class="sp"></div>
+        <input type="text" class="gs" placeholder="Jump to a page   Ctrl K" aria-label="Jump to a page (Ctrl+K)" readonly
+               onclick="window.jtOpenCommandPalette()"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.jtOpenCommandPalette();}">
+        <a class="avatar" th:href="@{/account}" title="My Account" aria-label="My Account"
+           th:text="${currentUser != null and currentUser.fullName != null and #strings.length(currentUser.fullName) >= 2 ? #strings.substring(currentUser.fullName, 0, 2).toUpperCase() : (roleName == 'reseller' ? 'RP' : 'AD')}">
+            AD
+        </a>
+    </header>
+
+    <!-- Background effects element -->
+    <div th:fragment="bgfx" id="jt-bgfx" class="bgfx" aria-hidden="true"></div>
+
+    <!-- Command Palette Fragment -->
+    <div th:fragment="commandPalette(roleName)">
+        <!-- Hidden link source for Command Palette (includes only permitted links for this role) -->
+        <div id="cp-items-data" hidden>
+            <th:block th:if="${roleName != 'reseller'}">
+                <a th:href="@{/dashboard}" data-title="Dashboard" data-icon="dash">Dashboard</a>
+                <a th:href="@{/admin/orders}" data-title="Orders" data-icon="orders">Orders</a>
+                <a th:href="@{/admin/resellers}" data-title="Resellers" data-icon="resellers">Resellers</a>
+                <a th:href="@{/admin/commissions}" data-title="Commissions" data-icon="commissions">Commissions</a>
+                <a th:href="@{/admin/products}" data-title="Products" data-icon="products">Products</a>
+                <a th:href="@{/admin/categories}" data-title="Categories" data-icon="categories">Categories</a>
+                <a th:href="@{/admin/tiers}" data-title="Reseller tiers" data-icon="tiers">Reseller tiers</a>
+                <a th:href="@{/admin/inventory}" data-title="Inventory" data-icon="inventory">Inventory</a>
+                <a th:href="@{/admin/reports}" data-title="Reports" data-icon="reports">Reports</a>
+            </th:block>
+            <th:block th:if="${roleName == 'reseller'}">
+                <a th:href="@{/portal}" data-title="Home" data-icon="home">Home</a>
+                <a th:href="@{/portal/catalog}" data-title="Catalog" data-icon="catalog">Catalog</a>
+                <a th:href="@{/portal/cart}" data-title="Cart" data-icon="cart">Cart</a>
+                <a th:href="@{/portal/orders}" data-title="My orders" data-icon="orders">My orders</a>
+                <a th:href="@{/portal/commissions}" data-title="Commissions" data-icon="commissions">Commissions</a>
+                <a th:href="@{/portal/statement}" data-title="Statement" data-icon="statement">Statement</a>
+            </th:block>
+            <a th:href="@{/account}" data-title="Account" data-icon="settings">Account</a>
+        </div>
+    </div>
+
+    <!-- Scripts Fragment -->
+    <div th:fragment="scripts">
+        <script>
+            (function() {
+                var IC = {
+                    dash: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+                    orders: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+                    resellers: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M17 4.5a3.5 3.5 0 010 7M21.5 20c0-2.5-1.5-4.5-4-5.5"/>',
+                    commissions: '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2 0 00-5 0c0 2.5 5 1.5 5 4a2.5 2 0 01-5 0M12 6.5v11"/>',
+                    products: '<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+                    categories: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/>',
+                    tiers: '<circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L7 21l5-3 5 3-1.5-7.5"/>',
+                    inventory: '<path d="M4 20V10l8-6 8 6v10zM9 20v-6h6v6"/>',
+                    reports: '<path d="M4 20V4M4 20h16M8 16v-5M13 16V8M18 16v-3"/>',
+                    home: '<path d="M3 11l9-8 9 8M5 10v10h14V10"/>',
+                    catalog: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+                    cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11l2-8H6"/>',
+                    statement: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/>',
+                    settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'
+                };
+
+                // Appearance API
+                window.jt = {
+                    setTheme: function(theme) {
+                        document.documentElement.setAttribute('data-theme', theme);
+                        document.documentElement.setAttribute('data-bs-theme', theme);
+                        localStorage.setItem('jt.theme', theme);
+                    },
+                    setPal: function(pal) {
+                        document.documentElement.setAttribute('data-pal', pal);
+                        localStorage.setItem('jt.pal', pal);
+                    },
+                    setBg: function(bg) {
+                        document.documentElement.setAttribute('data-bg', bg);
+                        localStorage.setItem('jt.bg', bg);
+                        window.jtApplyBg(bg);
+                    },
+                    setMotion: function(motion) {
+                        document.documentElement.setAttribute('data-motion', motion);
+                        localStorage.setItem('jt.motion', motion);
+                        if (motion === 'still') {
+                            document.documentElement.classList.add('still');
+                            var app = document.querySelector('.app');
+                            if (app) app.classList.add('still');
+                        } else {
+                            document.documentElement.classList.remove('still');
+                            var app = document.querySelector('.app');
+                            if (app) app.classList.remove('still');
+                        }
+                    },
+                    setSidebar: function(sidebar) {
+                        document.documentElement.setAttribute('data-sidebar', sidebar);
+                        localStorage.setItem('jt.sidebar', sidebar);
+                        var app = document.querySelector('.app');
+                        if (sidebar === 'mini') {
+                            document.documentElement.classList.add('mini');
+                            if (app) app.classList.add('mini');
+                        } else {
+                            document.documentElement.classList.remove('mini');
+                            if (app) app.classList.remove('mini');
+                        }
+                    }
+                };
+
+                window.jtApplyBg = function(bg) {
+                    var el = document.getElementById('jt-bgfx');
+                    if (!el) return;
+                    el.className = 'bgfx';
+                    if (!bg || bg === 'none') {
+                        el.innerHTML = '';
+                        return;
+                    }
+                    el.classList.add('bg-' + bg);
+                    if (bg === 'glow') {
+                        el.innerHTML = '<i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i>';
+                    } else if (bg === 'dots') {
+                        el.innerHTML = '';
+                    } else if (bg === 'map') {
+                        el.innerHTML = '<svg class="mapg" viewBox="0 0 1600 1000" style="width:100%;height:100%;position:absolute;inset:0" preserveAspectRatio="none"><path class="mp-river" d="M-100,200 C400,300 600,100 1200,400 C1500,600 1600,500 1800,700"/><path class="mp-major" d="M-100,500 L1800,500 M800,-100 L800,1100"/><path class="mp-minor" d="M0,100 L1600,100 M0,300 L1600,300 M0,700 L1600,700 M0,900 L1600,900 M200,0 L200,1000 M400,0 L400,1000 M600,0 L600,1000 M1000,0 L1000,1000 M1200,0 L1200,1000 M1400,0 L1400,1000"/><path class="mp-route" d="M100,600 L500,400 L900,650 L1400,350"/></svg>';
+                    }
+                };
+
+                window.jtToggleSidebar = function() {
+                    var app = document.querySelector('.app');
+                    var isMini = app ? app.classList.contains('mini') : document.documentElement.classList.contains('mini');
+                    window.jt.setSidebar(isMini ? 'full' : 'mini');
+                };
+
+                window.jtToggleDrawer = function(open) {
+                    var app = document.querySelector('.app');
+                    if (!app) return;
+                    if (typeof open === 'boolean') {
+                        app.classList.toggle('sb-open', open);
+                    } else {
+                        app.classList.toggle('sb-open');
+                    }
+                };
+
+                // Highlight active item from current request path
+                function highlightActiveNav() {
+                    var currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+                    var links = document.querySelectorAll('.sb a[href]');
+                    var matched = false;
+                    links.forEach(function(link) {
+                        var href = link.getAttribute('href');
+                        if (href && href !== '#' && !href.startsWith('javascript:')) {
+                            var normHref = href.replace(/\/$/, '') || '/';
+                            if (normHref === currentPath) {
+                                link.classList.add('on');
+                                matched = true;
+                            }
+                        }
+                    });
+                }
+
+                // Command Palette
+                window.jtOpenCommandPalette = function() {
+                    if (document.querySelector('.cp')) return;
+                    var dataLinks = document.querySelectorAll('#cp-items-data a');
+                    var items = [];
+                    dataLinks.forEach(function(l) {
+                        items.push({
+                            title: l.getAttribute('data-title'),
+                            url: l.getAttribute('href'),
+                            icon: l.getAttribute('data-icon')
+                        });
+                    });
+
+                    var modal = document.createElement('div');
+                    modal.className = 'cp';
+                    modal.setAttribute('role', 'dialog');
+                    modal.setAttribute('aria-modal', 'true');
+                    modal.setAttribute('aria-label', 'Command Palette');
+                    modal.innerHTML = '<div>' +
+                        '<input type="text" placeholder="Jump to a page..." aria-label="Jump to a page">' +
+                        '<div id="cpl" role="listbox"></div>' +
+                        '</div>';
+                    document.body.appendChild(modal);
+
+                    var input = modal.querySelector('input');
+                    var list = modal.querySelector('#cpl');
+                    var activeIndex = 0;
+
+                    function renderList() {
+                        var q = input.value.trim().toLowerCase();
+                        var filtered = items.filter(function(it) {
+                            return it.title.toLowerCase().indexOf(q) !== -1;
+                        });
+
+                        if (filtered.length === 0) {
+                            list.innerHTML = '<div style="padding: 16px 20px; color: var(--mu); font-size: 13.5px;">No pages found</div>';
+                            return;
+                        }
+
+                        if (activeIndex >= filtered.length) activeIndex = 0;
+
+                        list.innerHTML = filtered.map(function(it, idx) {
+                            var svg = IC[it.icon] ? '<svg viewBox="0 0 24 24" aria-hidden="true">' + IC[it.icon] + '</svg>' : '';
+                            return '<a class="' + (idx === activeIndex ? 'f' : '') + '" href="' + it.url + '" data-idx="' + idx + '" role="option">' +
+                                svg + '<span>' + it.title + '</span></a>';
+                        }).join('');
+
+                        var links = list.querySelectorAll('a');
+                        links.forEach(function(a) {
+                            a.addEventListener('mouseenter', function() {
+                                links.forEach(function(x) { x.classList.remove('f'); });
+                                a.classList.add('f');
+                                activeIndex = parseInt(a.getAttribute('data-idx'), 10);
+                            });
+                        });
+                    }
+
+                    renderList();
+                    input.focus();
+
+                    input.addEventListener('input', function() {
+                        activeIndex = 0;
+                        renderList();
+                    });
+
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === modal || e.target.closest('a')) {
+                            modal.remove();
+                        }
+                    });
+
+                    input.addEventListener('keydown', function(e) {
+                        var links = list.querySelectorAll('a');
+                        if (e.key === 'Escape') {
+                            modal.remove();
+                        } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            if (links.length > 0) {
+                                activeIndex = (activeIndex + 1) % links.length;
+                                links.forEach(function(x, i) { x.classList.toggle('f', i === activeIndex); });
+                                links[activeIndex].scrollIntoView({ block: 'nearest' });
+                            }
+                        } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            if (links.length > 0) {
+                                activeIndex = (activeIndex - 1 + links.length) % links.length;
+                                links.forEach(function(x, i) { x.classList.toggle('f', i === activeIndex); });
+                                links[activeIndex].scrollIntoView({ block: 'nearest' });
+                            }
+                        } else if (e.key === 'Enter') {
+                            e.preventDefault();
+                            var selected = list.querySelector('a.f');
+                            if (selected) {
+                                window.location.href = selected.getAttribute('href');
+                                modal.remove();
+                            }
+                        }
+                    });
+                };
+
+                // Keyboard listener for Ctrl+K, Meta+K, and Escape
+                document.addEventListener('keydown', function(e) {
+                    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                        e.preventDefault();
+                        window.jtOpenCommandPalette();
+                    } else if (e.key === 'Escape') {
+                        var cp = document.querySelector('.cp');
+                        if (cp) {
+                            cp.remove();
+                        } else {
+                            window.jtToggleDrawer(false);
+                        }
+                    }
+                });
+
+                // Init on DOMContentLoaded
+                document.addEventListener('DOMContentLoaded', function() {
+                    highlightActiveNav();
+                    window.jtApplyBg(localStorage.getItem('jt.bg') || 'none');
+                });
+            })();
+        </script>
+    </div>
+
+</body>
+</html>

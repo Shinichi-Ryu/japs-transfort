@@ -11,11 +11,12 @@
     --amber: #F5A623;
     --bg: #F0F6F6;
     --card: #ffffff;
+    --surface: var(--card);
     --line: #E2E8F0;
     --soft: #EDF1F6;
     --tx: #13202E;
     --mu: #5A6B7D;
-    --r: 16px;
+    --r: 14px;
     --sh: 0 1px 3px rgba(11, 34, 57, 0.08);
 
     --c-o: #2F6FB0;
@@ -39,6 +40,21 @@
     --bs-body-font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --bs-body-bg: var(--bg);
     --bs-body-color: var(--tx);
+    --bs-card-bg: color-mix(in srgb, var(--surface) 78%, transparent);
+    --bs-card-color: var(--tx);
+    --bs-card-cap-bg: transparent;
+    --bs-card-border-color: var(--line);
+    --bs-card-border-radius: 14px;
+    --bs-border-color: var(--line);
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--tx);
+    --bs-modal-bg: var(--card);
+    --bs-modal-color: var(--tx);
+    --bs-dropdown-bg: var(--card);
+    --bs-dropdown-color: var(--tx);
+    --bs-list-group-bg: var(--card);
+    --bs-list-group-color: var(--tx);
+    --bs-list-group-border-color: var(--line);
     --bs-primary: var(--navy);
     --bs-primary-rgb: 15, 82, 87;
     --bs-secondary: var(--mu);
@@ -46,7 +62,6 @@
     --bs-danger: var(--c-r);
     --bs-warning: var(--amber);
     --bs-info: var(--c-o);
-    --bs-border-color: var(--line);
     --bs-border-radius: var(--r);
     --bs-link-color: var(--lk);
     --bs-link-hover-color: var(--n2);
@@ -96,11 +111,12 @@
     color-scheme: dark;
     --bg: #09131F;
     --card: #112437;
+    --surface: var(--card);
     --line: #223F5A;
     --soft: #193149;
     --tx: #E8EEF4;
     --mu: #9FB1C3;
-    --sh: none;
+    --sh: 0 1px 3px rgba(0, 0, 0, 0.35);
     --lk: #8DBDEB;
     --sb: #050F17;
 
@@ -114,7 +130,23 @@
 
     --bs-body-bg: var(--bg);
     --bs-body-color: var(--tx);
+    --bs-card-bg: color-mix(in srgb, var(--surface) 78%, transparent);
+    --bs-card-color: var(--tx);
+    --bs-card-cap-bg: transparent;
+    --bs-card-border-color: var(--line);
+    --bs-card-border-radius: 14px;
     --bs-border-color: var(--line);
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--tx);
+    --bs-modal-bg: var(--card);
+    --bs-modal-color: var(--tx);
+    --bs-dropdown-bg: var(--card);
+    --bs-dropdown-color: var(--tx);
+    --bs-list-group-bg: var(--card);
+    --bs-list-group-color: var(--tx);
+    --bs-list-group-border-color: var(--line);
+    --bs-tertiary-bg: var(--soft);
+    --bs-secondary-bg: var(--soft);
     --bs-primary: var(--amber);
     --bs-primary-rgb: 245, 166, 35;
     --bs-link-color: var(--lk);
@@ -193,23 +225,23 @@ a {
    Bootstrap Component Skinning
    =================================================================== */
 
-/* Cards & Glass-Effect - Solid / high-opacity backgrounds for 60fps window resize */
+/* Cards & Glass-Effect - Semi-transparent surface using plain alpha, NO blur */
 .card,
 .stat-card,
 .table-card {
-    background-color: var(--card);
+    background-color: color-mix(in srgb, var(--surface, var(--card)) 78%, transparent);
     border: 1px solid var(--line);
-    border-radius: var(--r);
-    box-shadow: var(--sh);
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(11, 34, 57, 0.08);
     color: var(--tx);
 }
 
 .card.glass,
 .glass-card {
-    background-color: var(--card);
+    background-color: color-mix(in srgb, var(--surface, var(--card)) 78%, transparent);
     border: 1px solid var(--line);
-    border-radius: var(--r);
-    box-shadow: var(--sh);
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(11, 34, 57, 0.08);
 }
 
 .card-header,
@@ -401,6 +433,43 @@ textarea:focus {
     color: var(--tx);
 }
 
+.input-group-text {
+    background-color: var(--soft);
+    color: var(--tx);
+    border-color: var(--line);
+    border-radius: 12px;
+}
+
+.list-group-item {
+    background-color: transparent;
+    color: var(--tx);
+    border-color: var(--line);
+}
+
+.modal-content {
+    background-color: var(--card);
+    color: var(--tx);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+}
+
+.dropdown-menu {
+    background-color: var(--card);
+    color: var(--tx);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+}
+
+.dropdown-item {
+    color: var(--tx);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--soft);
+    color: var(--tx);
+}
+
 /* Alerts */
 .alert {
     border-radius: var(--r);
@@ -586,27 +655,62 @@ textarea:focus {
 /* KPI Cards */
 .kpi {
     padding: 18px 20px;
-    background-color: var(--card);
+    background-color: color-mix(in srgb, var(--surface, var(--card)) 78%, transparent);
     border: 1px solid var(--line);
-    border-radius: var(--r);
-    box-shadow: var(--sh);
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(11, 34, 57, 0.08);
     display: flex;
     flex-direction: column;
+    color: var(--tx);
 }
 
 .kpi .k {
     color: var(--mu);
     font-weight: 600;
-    font-size: 12.5px;
+    font-size: 14px;
+    line-height: 1.3;
+    text-transform: none;
 }
 
+.kpi .ic {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    font-size: 18px;
+}
+
+.kpi .ic svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.kpi .ic.c-m { background: color-mix(in srgb, var(--c-m) 15%, transparent); color: var(--c-m); }
+.kpi .ic.c-o { background: color-mix(in srgb, var(--c-o) 15%, transparent); color: var(--c-o); }
+.kpi .ic.c-p { background: color-mix(in srgb, var(--c-p) 15%, transparent); color: var(--c-p); }
+.kpi .ic.c-r { background: color-mix(in srgb, var(--c-r) 15%, transparent); color: var(--c-r); }
+.kpi .ic.c-s { background: color-mix(in srgb, var(--c-s) 15%, transparent); color: var(--c-s); }
+.kpi .ic.c-g { background: color-mix(in srgb, var(--c-g) 15%, transparent); color: var(--c-g); }
+
 .kpi .v {
-    font-size: 30px;
+    font-size: 34px;
     letter-spacing: -0.03em;
     font-weight: 800;
     margin: 4px 0 6px;
     color: var(--tx);
     line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+
+[data-theme="dark"] .kpi .v {
+    color: #fff;
 }
 
 .kpi a {
@@ -614,6 +718,10 @@ textarea:focus {
     font-size: 13px;
     text-decoration: none;
     color: var(--lk);
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .kpi.hi {
@@ -624,11 +732,17 @@ textarea:focus {
 
 [data-theme="dark"] .kpi.hi {
     background-color: var(--n2);
+    border-color: transparent;
+    color: #fff;
 }
 
 .kpi.hi .k { color: #CFE0E6; }
 .kpi.hi .v { color: #fff; }
 .kpi.hi a { color: var(--amber); }
+.kpi.hi .ic {
+    background: rgba(255, 255, 255, 0.14) !important;
+    color: #fff !important;
+}
 
 /* Stat card subtle badges and icons */
 .stat-icon {
@@ -712,7 +826,7 @@ textarea:focus {
     display: flex;
     min-height: 100vh;
     position: relative;
-    background-color: var(--bg);
+    z-index: 2;
 }
 
 .mw {
@@ -734,7 +848,7 @@ textarea:focus {
    Animate: width + label opacity, 220ms ease
    =================================================================== */
 .sb {
-    width: 250px;
+    width: 260px;
     flex: none;
     background-color: var(--sb);
     color: #C9D6E3;
@@ -825,6 +939,14 @@ textarea:focus {
     width: 16px;
     height: 16px;
     transition: transform 150ms ease;
+}
+
+.sbt .sbt-chevron {
+    display: block;
+}
+
+.sbt .sbt-close {
+    display: none;
 }
 
 /* Scrollable Navigation Middle Section (silently scrolls when constrained) */
@@ -953,118 +1075,142 @@ textarea:focus {
 }
 
 /* ===================================================================
-   COLLAPSED MINI RAIL (html.mini or .app.mini)
-   Width → 76px, labels fade out, icons center
+   COLLAPSED MINI RAIL (>= 992px desktop only)
+   Width -> 72px, labels hidden, icons centered, chevron rotated
    =================================================================== */
-html.mini .sb,
-.app.mini .sb {
-    width: 76px;
-    padding: 14px 8px;
-    align-items: center;
-}
+@media (min-width: 992px) {
+    html.mini .sb,
+    .app.mini .sb {
+        width: 72px;
+        padding: 14px 8px;
+        align-items: center;
+    }
 
-html.mini .lb2,
-html.mini .sg span,
-.app.mini .lb2,
-.app.mini .sg span {
-    opacity: 0;
-    pointer-events: none;
-    display: none;
-    width: 0;
-    margin: 0;
-    padding: 0;
-}
+    html.mini .lb2,
+    html.mini .sg span,
+    .app.mini .lb2,
+    .app.mini .sg span {
+        opacity: 0;
+        pointer-events: none;
+        display: none;
+        width: 0;
+        margin: 0;
+        padding: 0;
+    }
 
-html.mini .sb-nav {
-    width: 100%;
-    align-items: center;
-}
+    html.mini .sb-nav {
+        width: 100%;
+        align-items: center;
+    }
 
-html.mini .sbh,
-.app.mini .sbh {
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 4px 0 16px;
-    gap: 12px;
-    width: 100%;
-}
+    html.mini .sbh,
+    .app.mini .sbh {
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 4px 0 16px;
+        gap: 12px;
+        width: 100%;
+    }
 
-html.mini .sbh .brand,
-.app.mini .sbh .brand {
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    flex: none;
-    gap: 0;
-}
+    html.mini .sbh .brand,
+    .app.mini .sbh .brand {
+        justify-content: center;
+        align-items: center;
+        width: auto;
+        height: 44px;
+        min-height: 44px;
+        flex: none;
+        gap: 0;
+        padding: 0;
+        min-width: 0;
+    }
 
-html.mini .sbh .brand .lgo,
-.app.mini .sbh .brand .lgo {
-    display: block !important;
-    width: 36px;
-    height: 36px;
-    margin: 0 auto;
-}
+    html.mini .sbh .brand .lgo,
+    .app.mini .sbh .brand .lgo {
+        display: block !important;
+        width: 36px;
+        height: 36px;
+        margin: 0 auto;
+    }
 
-html.mini .sbt,
-.app.mini .sbt {
-    margin: 0 auto;
-}
+    html.mini .sbt,
+    .app.mini .sbt {
+        display: grid !important;
+        place-items: center;
+        margin: 0 auto;
+        width: 32px;
+        height: 32px;
+        flex: none;
+    }
 
-html.mini .sbt svg,
-.app.mini .sbt svg {
-    transform: rotate(180deg);
-}
+    html.mini .sbt svg,
+    .app.mini .sbt svg {
+        transform: rotate(180deg);
+    }
 
-html.mini .sg,
-.app.mini .sg {
-    border-top: 1px solid var(--n2);
-    margin: 6px auto;
-    padding: 0;
-    height: 1px;
-    width: 36px;
-    font-size: 0;
-    line-height: 0;
-    box-sizing: border-box;
-}
+    html.mini .sbt .sbt-chevron,
+    .app.mini .sbt .sbt-chevron {
+        display: block !important;
+    }
 
-html.mini .sb a,
-.app.mini .sb a,
-html.mini .sb .sb-logout-btn,
-.app.mini .sb .sb-logout-btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0;
-    padding: 0;
-    margin: 0 auto;
-    min-height: 44px;
-    height: 44px;
-    width: 44px;
-    border-radius: 12px;
-    box-sizing: border-box;
-}
+    html.mini .sbt .sbt-close,
+    .app.mini .sbt .sbt-close {
+        display: none !important;
+    }
 
-html.mini .sb svg:not(.lgo),
-.app.mini .sb svg:not(.lgo) {
-    margin: 0 auto;
-}
+    html.mini .sg,
+    .app.mini .sg {
+        border-top: 1px solid var(--n2);
+        margin: 6px auto;
+        padding: 0;
+        height: 1px;
+        width: 36px;
+        font-size: 0;
+        line-height: 0;
+        box-sizing: border-box;
+    }
 
-html.mini .sbf,
-.app.mini .sbf {
-    width: 100%;
-    align-items: center;
-    padding-top: 10px;
-    margin-top: auto;
-    border-top: 1px solid var(--n2);
+    /* Nav links and logout btn become square icon tiles; exclude .brand */
+    html.mini .sb-nav a,
+    .app.mini .sb-nav a,
+    html.mini .sbf a,
+    .app.mini .sbf a,
+    html.mini .sb .sb-logout-btn,
+    .app.mini .sb .sb-logout-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0;
+        padding: 0;
+        margin: 0 auto;
+        min-height: 44px;
+        height: 44px;
+        width: 44px;
+        border-radius: 12px;
+        box-sizing: border-box;
+    }
+
+    html.mini .sb svg:not(.lgo),
+    .app.mini .sb svg:not(.lgo) {
+        margin: 0 auto;
+    }
+
+    html.mini .sbf,
+    .app.mini .sbf {
+        width: 100%;
+        align-items: center;
+        padding-top: 10px;
+        margin-top: auto;
+        border-top: 1px solid var(--n2);
+    }
 }
 
 /* ===================================================================
    SHORT SCREENS (height < 700px): Compact sidebar spacing
    Tighten item hit areas and dividers so nav fits without scrolling
    =================================================================== */
-@media (max-height: 700px) {
+@media (max-height: 700px) and (min-width: 992px) {
     .sb {
         top: 8px;
         height: calc(100vh - 16px);
@@ -1132,7 +1278,6 @@ html.mini .sbf,
 
 /* ===================================================================
    STICKY TOPBAR
-   Solid enough background, gap above it filled by page bg.
    =================================================================== */
 .tb {
     display: flex;
@@ -1141,7 +1286,7 @@ html.mini .sbf,
     padding: 10px 16px 10px 22px;
     margin: 12px 26px 0;
     border-radius: 20px;
-    background-color: var(--card);
+    background-color: color-mix(in srgb, var(--surface, var(--card)) 85%, transparent);
     border: 1px solid var(--line);
     box-shadow: var(--sh);
     position: sticky;
@@ -1168,7 +1313,7 @@ html.mini .sbf,
     height: 36px;
     border-radius: 10px;
     border: 1px solid var(--line);
-    background-color: var(--card);
+    background-color: color-mix(in srgb, var(--surface, var(--card)) 80%, transparent);
     color: var(--tx);
     display: none;
     align-items: center;
@@ -1176,6 +1321,41 @@ html.mini .sbf,
     cursor: pointer;
     padding: 0;
     flex: none;
+}
+
+.tb-menu-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.tb-motion-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background-color: color-mix(in srgb, var(--surface, var(--card)) 80%, transparent);
+    color: var(--mu);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex: none;
+    transition: background-color 150ms, color 150ms, border-color 150ms;
+}
+
+.tb-motion-btn:hover {
+    background-color: var(--soft);
+    color: var(--tx);
+}
+
+.tb-motion-btn[aria-pressed="false"] {
+    opacity: 0.55;
+}
+
+.tb-motion-btn svg {
+    width: 20px;
+    height: 20px;
 }
 
 .tb-title {
@@ -1233,9 +1413,28 @@ html.mini .sbf,
 }
 
 /* ===================================================================
+   PAGE LAYOUT & CONTAINER
+   =================================================================== */
+main {
+    max-width: 1240px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 26px;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.table-responsive,
+.table-card,
+.sc {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ===================================================================
    NARROW SCREENS (< 992px): Off-canvas Drawer
    Always shows icons + labels (ignore collapsed preference).
-   Width: min(300px, 85vw). Slides in with translateX.
+   Width: 260px. Slides in with translateX.
    Backdrop: solid dim surface, no blur filter.
    =================================================================== */
 .sb-backdrop {
@@ -1261,41 +1460,36 @@ html.mini .sbf,
         margin: 0 !important;
         border-radius: 0 24px 24px 0 !important;
         z-index: 1050 !important;
-        width: min(300px, 85vw) !important;
+        width: 260px !important;
         transform: translateX(-105%);
-        transition: transform 150ms ease !important;
-        /* Always show labels in drawer regardless of mini state */
+        transition: transform 200ms ease !important;
         overflow-x: hidden;
     }
 
-    /* Override mini-mode inside the drawer: restore labels */
-    html.mini .sb,
-    .app.mini .sb {
-        width: min(300px, 85vw) !important;
-        padding: 14px 12px !important;
-        align-items: stretch !important;
+    .sb .sbt-chevron {
+        display: none !important;
     }
 
-    html.mini .sb-nav,
-    .app.mini .sb-nav {
-        width: 100% !important;
-        align-items: stretch !important;
+    .sb .sbt-close {
+        display: block !important;
     }
 
-    html.mini .sb .lb2,
-    .app.mini .sb .lb2,
-    html.mini .sb .sg span,
-    .app.mini .sb .sg span {
+    /* Labels always visible inside drawer */
+    .sb .lb2,
+    .sb .sg span {
         opacity: 1 !important;
         pointer-events: auto !important;
         display: inline !important;
         width: auto !important;
     }
 
-    html.mini .sb a,
-    .app.mini .sb a,
-    html.mini .sb .sb-logout-btn,
-    .app.mini .sb .sb-logout-btn {
+    .sb-nav {
+        width: 100% !important;
+        align-items: stretch !important;
+    }
+
+    .sb a,
+    .sb .sb-logout-btn {
         justify-content: flex-start !important;
         padding: 0 12px !important;
         width: 100% !important;
@@ -1303,18 +1497,18 @@ html.mini .sbf,
         margin: 0 !important;
     }
 
-    html.mini .sb svg:not(.lgo),
-    .app.mini .sb svg:not(.lgo) {
+    .sb svg:not(.lgo) {
         margin: 0 !important;
     }
 
-    html.mini .sbf,
-    .app.mini .sbf {
+    .sbf {
         align-items: stretch !important;
+        padding-top: 8px !important;
+        margin-top: auto !important;
+        border-top: 1px solid var(--n2) !important;
     }
 
-    html.mini .sg,
-    .app.mini .sg {
+    .sg {
         border-top: none !important;
         margin: 0 !important;
         padding: 14px 12px 4px !important;
@@ -1324,42 +1518,26 @@ html.mini .sbf,
         line-height: normal !important;
     }
 
-    html.mini .sbh,
-    .app.mini .sbh {
+    .sbh {
         flex-direction: row !important;
         padding: 6px 4px 14px 8px !important;
         justify-content: space-between !important;
         gap: 8px !important;
     }
 
-    html.mini .sbh .brand,
-    .app.mini .sbh .brand {
+    .sbh .brand {
         justify-content: flex-start !important;
         width: auto !important;
         flex: 1 !important;
     }
 
-    html.mini .sbh .brand .lgo,
-    .app.mini .sbh .brand .lgo {
+    .sbh .brand .lgo {
         width: 36px !important;
         height: 36px !important;
     }
 
-    html.mini .sbt,
-    .app.mini .sbt {
+    .sbt {
         margin: 0 !important;
-    }
-
-    html.mini .sbt svg,
-    .app.mini .sbt svg {
-        transform: none !important;
-    }
-
-    html.mini .sbf,
-    .app.mini .sbf {
-        padding-top: 8px !important;
-        margin-top: auto !important;
-        border-top: 1px solid var(--n2) !important;
     }
 
     .app.sb-open .sb {
@@ -1371,9 +1549,10 @@ html.mini .sbf,
     }
 
     /* Lock body scroll when drawer is open */
+    body.sb-locked,
     .app.sb-open body,
     body:has(.app.sb-open) {
-        overflow: hidden;
+        overflow: hidden !important;
     }
 
     .tb {
@@ -1384,7 +1563,6 @@ html.mini .sbf,
         padding: 16px 14px !important;
     }
 
-    /* The topbar gap fill also applies narrow */
     .mw::before {
         position: sticky;
         top: 0;
@@ -1399,7 +1577,10 @@ html.mini .sbf,
     .sb,
     .sb .lb2,
     .sb .sg span,
-    .sbt svg {
+    .sbt svg,
+    .map-dot,
+    .map-node::after {
+        animation: none !important;
         transition: none !important;
     }
 }
@@ -1411,18 +1592,14 @@ html.still .sbt svg,
 .app.still .sb,
 .app.still .sb .lb2,
 .app.still .sb .sg span,
-.app.still .sbt svg {
-    transition: none !important;
-}
-
-/* ===================================================================
-   WINDOW RESIZE PERFORMANCE: Suppress transitions while resizing
-   =================================================================== */
-html.resizing,
-html.resizing *,
-html.resizing *::before,
-html.resizing *::after {
-    transition: none !important;
+.app.still .sbt svg,
+html.still .map-dot,
+.app.still .map-dot,
+[data-motion="still"] .map-dot,
+html.still .map-node::after,
+.app.still .map-node::after,
+[data-motion="still"] .map-node::after {
+    animation-play-state: paused !important;
 }
 
 /* Command Palette (.cp) */
@@ -1492,16 +1669,150 @@ html.resizing *::after {
     flex: none;
 }
 
-/* Background Effects - Static layer with scroll attachment, no blur, no fixed repaint */
+/* ===================================================================
+   BACKGROUND EFFECTS (CHEAP MOVING MAP)
+   =================================================================== */
 .bgfx {
-    position: absolute;
+    position: fixed;
     inset: 0;
+    z-index: 1;
     pointer-events: none;
-    z-index: 0;
     overflow: hidden;
-    background-attachment: scroll;
 }
 
+.bgfx.bg-map {
+    background-image: url('/img/map-bg.svg');
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* 4 small truck dots: 10px, amber with soft halo made by radial-gradient, no blur */
+.map-dot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    margin-top: -5px;
+    margin-left: -5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #F5A623 0%, #F5A623 45%, rgba(245, 166, 35, 0.45) 75%, transparent 100%);
+    will-change: transform;
+    pointer-events: none;
+}
+
+/* 3 Route Nodes with pulse ring pseudo-elements */
+.map-node {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    margin-left: -4px;
+    border-radius: 50%;
+    background-color: #F5A623;
+    pointer-events: none;
+}
+
+.map-node.n1 { top: 62vh; left: 25vw; }
+.map-node.n2 { top: 40vh; left: 55vw; }
+.map-node.n3 { top: 45vh; left: 75vw; }
+
+.map-node::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1.5px solid #F5A623;
+    animation: mapNodePulse 2.6s ease-out infinite;
+}
+
+@keyframes mapNodePulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(2.2);
+        opacity: 0;
+    }
+}
+
+/* 4 Routes matching polylines:
+   Route 1: 5,70 -> 25,62 -> 50,78 -> 75,45 -> 95,30
+   Route 2: 15,10 -> 30,35 -> 55,40 -> 70,75 -> 85,90
+   Route 3: 90,15 -> 80,25 -> 60,60 -> 35,65 -> 10,85
+   Route 4: 5,30 -> 40,25 -> 65,50 -> 85,65 -> 95,85
+*/
+.map-dot.d1 {
+    transform: translate3d(5vw, 70vh, 0);
+    animation: truckDot1 45s linear infinite;
+}
+
+.map-dot.d2 {
+    transform: translate3d(15vw, 10vh, 0);
+    animation: truckDot2 52s linear infinite;
+}
+
+.map-dot.d3 {
+    transform: translate3d(90vw, 15vh, 0);
+    animation: truckDot3 60s linear infinite;
+}
+
+.map-dot.d4 {
+    transform: translate3d(5vw, 30vh, 0);
+    animation: truckDot4 68s linear infinite;
+}
+
+@keyframes truckDot1 {
+    0%   { transform: translate3d(5vw, 70vh, 0); opacity: 0; }
+    5%   { transform: translate3d(5vw, 70vh, 0); opacity: 1; }
+    25%  { transform: translate3d(25vw, 62vh, 0); }
+    50%  { transform: translate3d(50vw, 78vh, 0); }
+    75%  { transform: translate3d(75vw, 45vh, 0); }
+    95%  { transform: translate3d(95vw, 30vh, 0); opacity: 1; }
+    100% { transform: translate3d(95vw, 30vh, 0); opacity: 0; }
+}
+
+@keyframes truckDot2 {
+    0%   { transform: translate3d(15vw, 10vh, 0); opacity: 0; }
+    5%   { transform: translate3d(15vw, 10vh, 0); opacity: 1; }
+    28%  { transform: translate3d(30vw, 35vh, 0); }
+    52%  { transform: translate3d(55vw, 40vh, 0); }
+    76%  { transform: translate3d(70vw, 75vh, 0); }
+    95%  { transform: translate3d(85vw, 90vh, 0); opacity: 1; }
+    100% { transform: translate3d(85vw, 90vh, 0); opacity: 0; }
+}
+
+@keyframes truckDot3 {
+    0%   { transform: translate3d(90vw, 15vh, 0); opacity: 0; }
+    5%   { transform: translate3d(90vw, 15vh, 0); opacity: 1; }
+    22%  { transform: translate3d(80vw, 25vh, 0); }
+    50%  { transform: translate3d(60vw, 60vh, 0); }
+    74%  { transform: translate3d(35vw, 65vh, 0); }
+    95%  { transform: translate3d(10vw, 85vh, 0); opacity: 1; }
+    100% { transform: translate3d(10vw, 85vh, 0); opacity: 0; }
+}
+
+@keyframes truckDot4 {
+    0%   { transform: translate3d(5vw, 30vh, 0); opacity: 0; }
+    5%   { transform: translate3d(5vw, 30vh, 0); opacity: 1; }
+    30%  { transform: translate3d(40vw, 25vh, 0); }
+    58%  { transform: translate3d(65vw, 50vh, 0); }
+    80%  { transform: translate3d(85vw, 65vh, 0); }
+    95%  { transform: translate3d(95vw, 85vh, 0); opacity: 1; }
+    100% { transform: translate3d(95vw, 85vh, 0); opacity: 0; }
+}
+
+/* Pause when tab hidden or loses focus */
+html.jt-paused .map-dot,
+html.jt-paused .map-node::after,
+.jt-paused .map-dot,
+.jt-paused .map-node::after {
+    animation-play-state: paused !important;
+}
+
+/* Static Glow background option */
 .orb {
     position: absolute;
     border-radius: 50%;
@@ -1532,39 +1843,9 @@ html.resizing *::after {
     left: 58%;
 }
 
+/* Static Dots background option */
 .bg-dots {
     background: radial-gradient(color-mix(in srgb, var(--lk) 24%, transparent) 1.3px, transparent 1.6px) 0 0 / 24px 24px;
-    background-attachment: scroll;
-}
-
-.mp-minor { stroke: var(--lk); stroke-width: 2; opacity: 0.1; fill: none; }
-.mp-major { stroke: var(--lk); stroke-width: 10; opacity: 0.11; fill: none; stroke-linecap: round; }
-.mp-river { stroke: var(--c-o); stroke-width: 50; opacity: 0.14; fill: none; stroke-linecap: round; }
-.mp-route {
-    stroke: var(--amber);
-    stroke-width: 5;
-    fill: none;
-    stroke-dasharray: 2 15;
-    stroke-linecap: round;
-}
-
-.mapg {
-    transform-origin: 800px 500px;
-}
-
-/* Motion Preference */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation: none !important;
-        transition: none !important;
-    }
-}
-
-html.still *,
-.app.still * {
-    transition: none !important;
 }
 
 /* Print Styles */

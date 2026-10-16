@@ -21,8 +21,8 @@
             try {
                 var theme = localStorage.getItem('jt.theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
                 var pal = localStorage.getItem('jt.pal') || 'teal';
-                var bg = localStorage.getItem('jt.bg') || 'none';
-                var motion = localStorage.getItem('jt.motion') || 'still';
+                var bg = localStorage.getItem('jt.bg') || 'map';
+                var motion = localStorage.getItem('jt.motion') || 'animated';
                 var sidebar = localStorage.getItem('jt.sidebar') || 'full';
                 var doc = document.documentElement;
                 doc.setAttribute('data-theme', theme);
@@ -51,7 +51,10 @@
                 <span class="lb2">Japs Transfort</span>
             </a>
             <button type="button" class="sbt" onclick="window.jtToggleSidebar()" title="Toggle sidebar" aria-label="Toggle sidebar">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path class="sbt-chevron" d="M15 6l-6 6 6 6"/>
+                    <path class="sbt-close" d="M6 6l12 12M6 18L18 6"/>
+                </svg>
             </button>
         </div>
 
@@ -169,6 +172,9 @@
         <input type="text" class="gs" placeholder="Jump to a page   Ctrl K" aria-label="Jump to a page (Ctrl+K)" readonly
                onclick="window.jtOpenCommandPalette()"
                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.jtOpenCommandPalette();}">
+        <button type="button" class="tb-motion-btn" id="jtMotionToggle" onclick="window.jtToggleMotion()" title="Toggle motion animation" aria-label="Toggle motion animation">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M10 8l6 4-6 4V8z" fill="currentColor" stroke="none"/></svg>
+        </button>
         <a class="avatar" th:href="@{/account}" title="My Account" aria-label="My Account"
            th:text="${currentUser != null and currentUser.fullName != null and #strings.length(currentUser.fullName) >= 2 ? #strings.substring(currentUser.fullName, 0, 2).toUpperCase() : (roleName == 'reseller' ? 'RP' : 'AD')}">
             AD
@@ -245,7 +251,8 @@
                     setMotion: function(motion) {
                         document.documentElement.setAttribute('data-motion', motion);
                         localStorage.setItem('jt.motion', motion);
-                        if (motion === 'still') {
+                        var isStill = motion === 'still';
+                        if (isStill) {
                             document.documentElement.classList.add('still');
                             var app = document.querySelector('.app');
                             if (app) app.classList.add('still');
@@ -253,6 +260,21 @@
                             document.documentElement.classList.remove('still');
                             var app = document.querySelector('.app');
                             if (app) app.classList.remove('still');
+                        }
+                        // Directly pause/resume live map dot animations
+                        var state = isStill ? 'paused' : 'running';
+                        document.querySelectorAll('.map-dot, .map-node').forEach(function(el) {
+                            el.style.animationPlayState = state;
+                        });
+                        document.querySelectorAll('.map-node').forEach(function(el) {
+                            el.style.animationPlayState = state;
+                        });
+                        var btn = document.getElementById('jtMotionToggle');
+                        if (btn) {
+                            btn.setAttribute('aria-pressed', isStill ? 'false' : 'true');
+                            btn.title = isStill ? 'Turn motion on' : 'Turn motion off';
+                            btn.setAttribute('aria-label', isStill ? 'Turn motion on' : 'Turn motion off');
+                            btn.style.opacity = isStill ? '0.5' : '';
                         }
                     },
                     setSidebar: function(sidebar) {
@@ -269,6 +291,12 @@
                     }
                 };
 
+                window.jtToggleMotion = function() {
+                    var cur = localStorage.getItem('jt.motion') || 'animated';
+                    var next = (cur === 'animated') ? 'still' : 'animated';
+                    window.jt.setMotion(next);
+                };
+
                 window.jtApplyBg = function(bg) {
                     var el = document.getElementById('jt-bgfx');
                     if (!bg || bg === 'none') {
@@ -276,24 +304,33 @@
                         return;
                     }
                     if (!el) {
-                        var mw = document.querySelector('.mw') || document.body;
                         el = document.createElement('div');
                         el.id = 'jt-bgfx';
                         el.className = 'bgfx';
                         el.setAttribute('aria-hidden', 'true');
-                        mw.prepend(el);
+                        document.body.appendChild(el);
                     }
                     el.className = 'bgfx bg-' + bg;
-                    if (bg === 'glow') {
+                    if (bg === 'map') {
+                        el.innerHTML = '<span class="map-dot d1"></span>' +
+                            '<span class="map-dot d2"></span>' +
+                            '<span class="map-dot d3"></span>' +
+                            '<span class="map-dot d4"></span>' +
+                            '<span class="map-node n1"></span>' +
+                            '<span class="map-node n2"></span>' +
+                            '<span class="map-node n3"></span>';
+                    } else if (bg === 'glow') {
                         el.innerHTML = '<i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i>';
-                    } else if (bg === 'dots') {
+                    } else {
                         el.innerHTML = '';
-                    } else if (bg === 'map') {
-                        el.innerHTML = '<svg class="mapg" viewBox="0 0 1600 1000" style="width:100%;height:100%;position:absolute;inset:0" preserveAspectRatio="none"><path class="mp-river" d="M-100,200 C400,300 600,100 1200,400 C1500,600 1600,500 1800,700"/><path class="mp-major" d="M-100,500 L1800,500 M800,-100 L800,1100"/><path class="mp-minor" d="M0,100 L1600,100 M0,300 L1600,300 M0,700 L1600,700 M0,900 L1600,900 M200,0 L200,1000 M400,0 L400,1000 M600,0 L600,1000 M1000,0 L1000,1000 M1200,0 L1200,1000 M1400,0 L1400,1000"/><path class="mp-route" d="M100,600 L500,400 L900,650 L1400,350"/></svg>';
                     }
                 };
 
                 window.jtToggleSidebar = function() {
+                    if (window.innerWidth < 992) {
+                        window.jtToggleDrawer(false);
+                        return;
+                    }
                     var app = document.querySelector('.app');
                     var isMini = app ? app.classList.contains('mini') : document.documentElement.classList.contains('mini');
                     window.jt.setSidebar(isMini ? 'full' : 'mini');
@@ -309,6 +346,7 @@
                     if (willOpen) {
                         window.__jtLastFocus = document.activeElement;
                         app.classList.add('sb-open');
+                        document.body.classList.add('sb-locked');
                         if (btn) btn.setAttribute('aria-expanded', 'true');
                         if (sidebar) {
                             var firstLink = sidebar.querySelector('.sb-nav a, .sbh a');
@@ -316,6 +354,7 @@
                         }
                     } else {
                         app.classList.remove('sb-open');
+                        document.body.classList.remove('sb-locked');
                         if (btn) btn.setAttribute('aria-expanded', 'false');
                         if (window.__jtLastFocus && typeof window.__jtLastFocus.focus === 'function') {
                             window.__jtLastFocus.focus();
@@ -488,13 +527,73 @@
                         } else {
                             window.jtToggleDrawer(false);
                         }
+                    } else if (e.key === 'Tab') {
+                        var app = document.querySelector('.app');
+                        if (app && app.classList.contains('sb-open')) {
+                            var sidebar = document.getElementById('main-sidebar');
+                            if (sidebar) {
+                                var focusables = sidebar.querySelectorAll('a[href], button:not([disabled]), input:not([disabled])');
+                                if (focusables.length > 0) {
+                                    var first = focusables[0];
+                                    var last = focusables[focusables.length - 1];
+                                    if (e.shiftKey && document.activeElement === first) {
+                                        e.preventDefault();
+                                        last.focus();
+                                    } else if (!e.shiftKey && document.activeElement === last) {
+                                        e.preventDefault();
+                                        first.focus();
+                                    }
+                                }
+                            }
+                        }
                     }
                 });
+
+                // Pause on tab hidden or blur, resume on focus
+                function handlePauseResume() {
+                    var isPaused = document.hidden || (document.hasFocus && !document.hasFocus());
+                    document.documentElement.classList.toggle('jt-paused', isPaused);
+                }
+                document.addEventListener('visibilitychange', handlePauseResume);
+                window.addEventListener('blur', function() {
+                    document.documentElement.classList.add('jt-paused');
+                });
+                window.addEventListener('focus', function() {
+                    document.documentElement.classList.remove('jt-paused');
+                });
+
+                // ONE matchMedia listener to close drawer and re-apply saved docked state (no resize listener)
+                var mql = window.matchMedia('(min-width: 992px)');
+                function handleBreakpoint(e) {
+                    window.jtToggleDrawer(false);
+                    var saved = localStorage.getItem('jt.sidebar') || 'full';
+                    window.jt.setSidebar(saved);
+                }
+                if (mql.addEventListener) {
+                    mql.addEventListener('change', handleBreakpoint);
+                } else if (mql.addListener) {
+                    mql.addListener(handleBreakpoint);
+                }
 
                 // Init on DOMContentLoaded
                 document.addEventListener('DOMContentLoaded', function() {
                     highlightActiveNav();
-                    window.jtApplyBg(localStorage.getItem('jt.bg') || 'none');
+                    window.jtApplyBg(localStorage.getItem('jt.bg') || 'map');
+
+                    var curMotion = localStorage.getItem('jt.motion') || 'animated';
+                    var mb = document.getElementById('jtMotionToggle');
+                    if (mb) {
+                        var isStill = curMotion === 'still';
+                        mb.setAttribute('aria-pressed', isStill ? 'false' : 'true');
+                        mb.title = isStill ? 'Turn motion on' : 'Turn motion off';
+                        mb.setAttribute('aria-label', isStill ? 'Turn motion on' : 'Turn motion off');
+                        mb.style.opacity = isStill ? '0.5' : '';
+                        if (isStill) {
+                            document.querySelectorAll('.map-dot, .map-node').forEach(function(el) {
+                                el.style.animationPlayState = 'paused';
+                            });
+                        }
+                    }
 
                     // Delegated click on sidebar for mobile drawer closing
                     var sidebar = document.getElementById('main-sidebar');
@@ -506,17 +605,6 @@
                             }
                         });
                     }
-
-                    // Single throttled resize handler using passive listener
-                    var resizeTimer = null;
-                    window.addEventListener('resize', function() {
-                        if (resizeTimer) return;
-                        document.documentElement.classList.add('resizing');
-                        resizeTimer = setTimeout(function() {
-                            document.documentElement.classList.remove('resizing');
-                            resizeTimer = null;
-                        }, 150);
-                    }, { passive: true });
                 });
             })();
         </script>

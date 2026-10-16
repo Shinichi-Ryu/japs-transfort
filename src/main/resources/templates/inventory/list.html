@@ -25,8 +25,8 @@
             try {
                 var theme = localStorage.getItem('jt.theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
                 var pal = localStorage.getItem('jt.pal') || 'teal';
-                var bg = localStorage.getItem('jt.bg') || 'none';
-                var motion = localStorage.getItem('jt.motion') || 'still';
+                var bg = localStorage.getItem('jt.bg') || 'map';
+                var motion = localStorage.getItem('jt.motion') || 'animated';
                 var sidebar = localStorage.getItem('jt.sidebar') || 'full';
                 var doc = document.documentElement;
                 doc.setAttribute('data-theme', theme);

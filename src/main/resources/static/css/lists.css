@@ -37,7 +37,7 @@
     flex-wrap: wrap;
 }
 
-/* Base Card - Fast rendering without backdrop-filter */
+/* Base Card - Solid surface without blur */
 .jt-card {
     background-color: var(--card);
     border: 1px solid var(--line);
@@ -87,7 +87,7 @@
     color: var(--tx);
     font-family: inherit;
     font-size: 13.5px;
-    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    transition: border-color 150ms ease-in-out;
     box-sizing: border-box;
     width: 100%;
 }
@@ -342,7 +342,7 @@ td .jt-thumb {
     font-family: inherit;
     cursor: pointer;
     text-decoration: none;
-    transition: transform .12s, filter .12s, box-shadow .12s, background-color .12s;
+    transition: transform 120ms ease, background-color 120ms ease;
     line-height: 1;
 }
 
@@ -373,7 +373,6 @@ td .jt-thumb {
     background-color: var(--navy);
     border-color: var(--navy);
     color: #fff !important;
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--navy) 25%, transparent);
 }
 
 .jt-btn-p:hover {
@@ -386,7 +385,6 @@ td .jt-thumb {
     background-color: var(--amber);
     border-color: var(--amber);
     color: #2F2100 !important;
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--amber) 30%, transparent);
 }
 
 [data-theme="dark"] .jt-btn-p:hover {
@@ -542,7 +540,7 @@ td .jt-thumb {
     font-weight: 600;
     font-size: 12.5px;
     text-decoration: none;
-    transition: background-color .12s, color .12s, border-color .12s;
+    transition: background-color 120ms, color 120ms, border-color 120ms;
 }
 
 .jt-pager-links a:hover,
@@ -610,7 +608,7 @@ td .jt-thumb {
     cursor: pointer;
     padding: 0 4px;
     opacity: 0.6;
-    transition: opacity .15s;
+    transition: opacity 150ms;
 }
 
 .jt-alert-close:hover {
@@ -623,7 +621,7 @@ td .jt-thumb {
     color: var(--tx);
     border: 1px solid var(--line);
     border-radius: 20px;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .modal-content.jt-modal .modal-header {
@@ -758,5 +756,26 @@ td .jt-thumb {
 @media (max-width: 991.98px) {
     .jt-split {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    *,
+    *::before,
+    *::after {
+        box-shadow: none !important;
+        text-shadow: none !important;
+        filter: none !important;
     }
 }

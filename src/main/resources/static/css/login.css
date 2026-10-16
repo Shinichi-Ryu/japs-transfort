@@ -16,7 +16,7 @@ body.jt-login {
     --jt-login-mu: #5A6B7D;
     --jt-login-lk: #0F766E;
     --jt-login-r: 16px;
-    --jt-login-sh: 0 1px 2px rgba(11, 34, 57, 0.04), 0 10px 30px rgba(11, 34, 57, 0.06);
+    --jt-login-sh: 0 1px 3px rgba(11, 34, 57, 0.08);
 
     margin: 0;
     padding: 0;
@@ -58,23 +58,10 @@ body.jt-login *::after {
     position: absolute;
     left: 0;
     top: 0;
-    width: calc(100% + 480px);
-    height: calc(100% + 340px);
+    width: 100%;
+    height: 100%;
     pointer-events: none;
     z-index: 0;
-    animation: jt-login-rtm 45s linear infinite;
-}
-
-@keyframes jt-login-rtm {
-    to {
-        transform: translate(-480px, -340px);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .jt-login-route-bg {
-        animation: none !important;
-    }
 }
 
 .jt-login-banner-content {
@@ -232,7 +219,7 @@ body.jt-login *::after {
     font-size: 14px;
     width: 100%;
     box-shadow: none;
-    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    transition: border-color 150ms ease-in-out;
 }
 
 .jt-login-input:focus {
@@ -270,7 +257,7 @@ body.jt-login *::after {
     justify-content: center;
     padding: 0;
     cursor: pointer;
-    transition: background-color .15s, border-color .15s, transform .12s;
+    transition: background-color 150ms, border-color 150ms, transform 120ms;
 }
 
 .jt-login-eye-btn:hover {
@@ -326,8 +313,7 @@ body.jt-login *::after {
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 6px 16px rgba(15, 82, 87, 0.28);
-    transition: transform .12s, filter .12s, box-shadow .12s;
+    transition: transform 120ms ease;
     text-decoration: none;
 }
 
@@ -393,5 +379,26 @@ body.jt-login *::after {
     }
     .jt-login-card {
         padding: 28px 20px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    *,
+    *::before,
+    *::after {
+        box-shadow: none !important;
+        text-shadow: none !important;
+        filter: none !important;
     }
 }

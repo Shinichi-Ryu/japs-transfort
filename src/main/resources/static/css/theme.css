@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 /* ===================================================================
    Japs Transfort - Unified Theme & Design System Tokens
@@ -16,7 +16,7 @@
     --tx: #13202E;
     --mu: #5A6B7D;
     --r: 16px;
-    --sh: 0 1px 2px rgba(11, 34, 57, 0.04), 0 10px 30px rgba(11, 34, 57, 0.06);
+    --sh: 0 1px 3px rgba(11, 34, 57, 0.08);
 
     --c-o: #2F6FB0;
     --c-s: #0E8F8A;
@@ -240,7 +240,7 @@ a {
     font-family: inherit;
     cursor: pointer;
     text-decoration: none;
-    transition: transform .12s, filter .12s, box-shadow .12s, background-color .12s;
+    transition: transform 120ms ease, background-color 120ms ease;
 }
 
 .btn:hover {
@@ -264,7 +264,6 @@ a {
     background-color: var(--navy);
     border-color: var(--navy);
     color: #fff;
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--navy) 25%, transparent);
 }
 
 .btn-primary:hover,
@@ -279,7 +278,6 @@ a {
     background-color: var(--amber);
     border-color: var(--amber);
     color: #2F2100;
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--amber) 30%, transparent);
 }
 
 [data-theme="dark"] .btn-primary:hover,
@@ -388,7 +386,7 @@ textarea {
     padding: 0 12px;
     font-family: inherit;
     font-size: 14px;
-    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    transition: border-color 150ms ease-in-out;
 }
 
 .form-control:focus,
@@ -485,7 +483,7 @@ textarea:focus {
     color: var(--tx);
     border: 1px solid var(--line);
     border-radius: 20px;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .modal-header {
@@ -746,16 +744,13 @@ textarea:focus {
     margin: 12px 0 12px 12px;
     border-radius: 24px;
     border: 1px solid color-mix(in srgb, var(--n2) 35%, transparent);
-    box-shadow: 0 20px 50px rgba(5, 15, 25, 0.28);
+    box-shadow: 0 1px 3px rgba(5, 15, 25, 0.15);
     z-index: 100;
     display: flex;
     flex-direction: column;
     padding: 14px 12px;
     gap: 0;
     overflow: hidden;
-    /* Smooth width transition – no jump */
-    transition: width 220ms ease;
-    will-change: width;
     box-sizing: border-box;
 }
 
@@ -768,7 +763,6 @@ textarea:focus {
     padding: 6px 4px 14px 8px;
     flex: none;
     box-sizing: border-box;
-    transition: padding 220ms ease;
 }
 
 .sbh .brand {
@@ -805,7 +799,6 @@ textarea:focus {
     display: block;
     fill: none;
     stroke: none;
-    transition: width 220ms ease, height 220ms ease;
 }
 
 .sbt {
@@ -820,7 +813,7 @@ textarea:focus {
     place-items: center;
     padding: 0;
     flex: none;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    transition: background-color 150ms, color 150ms, border-color 150ms;
 }
 
 .sbt:hover {
@@ -831,7 +824,7 @@ textarea:focus {
 .sbt svg {
     width: 16px;
     height: 16px;
-    transition: transform 220ms ease;
+    transition: transform 150ms ease;
 }
 
 /* Scrollable Navigation Middle Section (silently scrolls when constrained) */
@@ -859,7 +852,7 @@ textarea:focus {
 .sb .lb2,
 .sb .sg span {
     opacity: 1;
-    transition: opacity 180ms ease;
+    transition: opacity 150ms ease;
     white-space: nowrap;
     overflow: hidden;
 }
@@ -878,7 +871,7 @@ textarea:focus {
     min-height: 44px;
     height: 44px;
     box-sizing: border-box;
-    transition: background 0.15s, color 0.15s, min-height 220ms ease, height 220ms ease, padding 220ms ease;
+    transition: background-color 150ms, color 150ms;
     overflow: hidden;
     flex: none;
 }
@@ -888,13 +881,12 @@ textarea:focus {
     color: #fff;
 }
 
-/* Active item: amber rounded pill with soft amber glow - ONLY inside .sb-nav */
+/* Active item: amber rounded pill - ONLY inside .sb-nav */
 .sb-nav a.on,
 .sb-nav a[aria-current="page"] {
     background-color: var(--amber) !important;
     color: #2F2100 !important;
     font-weight: 700;
-    box-shadow: 0 8px 20px color-mix(in srgb, var(--amber) 40%, transparent);
 }
 
 .sb svg:not(.lgo),
@@ -917,7 +909,6 @@ textarea:focus {
     font-weight: 600;
     text-transform: none;
     letter-spacing: normal;
-    transition: padding 220ms ease, margin 220ms ease;
     flex: none;
 }
 
@@ -951,7 +942,7 @@ textarea:focus {
     height: 44px;
     box-sizing: border-box;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s, min-height 220ms ease, height 220ms ease, padding 220ms ease;
+    transition: background-color 150ms, color 150ms;
     overflow: hidden;
     flex: none;
 }
@@ -1206,13 +1197,12 @@ html.mini .sbf,
     font-size: 13px;
     text-decoration: none;
     flex: none;
-    transition: transform 0.15s, box-shadow 0.15s;
+    transition: transform 150ms ease;
 }
 
 .avatar:hover {
     transform: scale(1.05);
     color: #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .gs {
@@ -1246,18 +1236,15 @@ html.mini .sbf,
    NARROW SCREENS (< 992px): Off-canvas Drawer
    Always shows icons + labels (ignore collapsed preference).
    Width: min(300px, 85vw). Slides in with translateX.
-   Backdrop: dim only (45% dark), no heavy blur.
+   Backdrop: solid dim surface, no blur filter.
    =================================================================== */
 .sb-backdrop {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(5, 15, 25, 0.45);
-    /* Light blur only – not heavy */
-    backdrop-filter: blur(1px);
-    -webkit-backdrop-filter: blur(1px);
+    background: rgba(5, 15, 25, 0.5);
     z-index: 1040;
-    transition: opacity 220ms ease;
+    transition: opacity 150ms ease;
 }
 
 @media (max-width: 991.98px) {
@@ -1276,7 +1263,7 @@ html.mini .sbf,
         z-index: 1050 !important;
         width: min(300px, 85vw) !important;
         transform: translateX(-105%);
-        transition: transform 220ms ease !important;
+        transition: transform 150ms ease !important;
         /* Always show labels in drawer regardless of mini state */
         overflow-x: hidden;
     }
@@ -1442,9 +1429,7 @@ html.resizing *::after {
 .cp {
     position: fixed;
     inset: 0;
-    background: rgba(5, 15, 25, 0.45);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(5, 15, 25, 0.6);
     z-index: 1060;
     display: grid;
     place-items: start center;
@@ -1456,7 +1441,7 @@ html.resizing *::after {
     background-color: var(--card);
     border: 1px solid var(--line);
     border-radius: 20px;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     overflow: hidden;
 }
 
@@ -1487,7 +1472,7 @@ html.resizing *::after {
     color: var(--tx);
     font-weight: 500;
     font-size: 14px;
-    transition: background 0.1s;
+    transition: background-color 100ms, color 100ms;
 }
 
 .cp a:hover,
@@ -1507,59 +1492,49 @@ html.resizing *::after {
     flex: none;
 }
 
-/* Background Effects - Single isolated fixed GPU layer, no heavy full-screen blur filters */
+/* Background Effects - Static layer with scroll attachment, no blur, no fixed repaint */
 .bgfx {
-    position: fixed;
+    position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 0;
     overflow: hidden;
-    contain: strict;
-    transform: translateZ(0);
+    background-attachment: scroll;
 }
 
 .orb {
     position: absolute;
     border-radius: 50%;
-    will-change: transform;
     pointer-events: none;
 }
 
 .o1 {
     width: 480px;
     height: 480px;
-    background: radial-gradient(circle, color-mix(in srgb, var(--amber) 40%, transparent) 0%, transparent 70%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--amber) 25%, transparent) 0%, transparent 70%);
     top: -140px;
     right: -60px;
-    animation: d1 22s ease-in-out infinite alternate;
 }
 
 .o2 {
     width: 560px;
     height: 560px;
-    background: radial-gradient(circle, color-mix(in srgb, var(--lk) 30%, transparent) 0%, transparent 70%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--lk) 20%, transparent) 0%, transparent 70%);
     bottom: -200px;
     left: 12%;
-    animation: d2 28s ease-in-out infinite alternate;
 }
 
 .o3 {
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, color-mix(in srgb, var(--c-p) 22%, transparent) 0%, transparent 70%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--c-p) 18%, transparent) 0%, transparent 70%);
     top: 38%;
     left: 58%;
-    animation: d3 34s ease-in-out infinite alternate;
 }
-
-@keyframes d1 { to { transform: translate(-160px, 120px) scale(1.15); } }
-@keyframes d2 { to { transform: translate(180px, -110px) scale(1.1); } }
-@keyframes d3 { to { transform: translate(-200px, 90px) scale(0.9); } }
-@keyframes dd { to { background-position: 24px 24px; } }
 
 .bg-dots {
     background: radial-gradient(color-mix(in srgb, var(--lk) 24%, transparent) 1.3px, transparent 1.6px) 0 0 / 24px 24px;
-    animation: dd 8s linear infinite;
+    background-attachment: scroll;
 }
 
 .mp-minor { stroke: var(--lk); stroke-width: 2; opacity: 0.1; fill: none; }
@@ -1571,39 +1546,25 @@ html.resizing *::after {
     fill: none;
     stroke-dasharray: 2 15;
     stroke-linecap: round;
-    animation: flow 2.4s linear infinite;
 }
 
 .mapg {
     transform-origin: 800px 500px;
-    animation: drift 30s ease-in-out infinite alternate;
-}
-
-@keyframes flow { to { stroke-dashoffset: -34; } }
-@keyframes drift {
-    from { transform: scale(1.15) translate(60px, 38px); }
-    to { transform: scale(1.15) translate(-60px, -38px); }
 }
 
 /* Motion Preference */
-html.still .orb,
-html.still .bg-dots,
-html.still .mp-route,
-html.still .mapg,
-.app.still .orb,
-.app.still .bg-dots,
-.app.still .mp-route,
-.app.still .mapg {
-    animation: none !important;
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .orb,
-    .bg-dots,
-    .mp-route,
-    .mapg {
-        animation: none !important;
-    }
+html.still *,
+.app.still * {
+    transition: none !important;
 }
 
 /* Print Styles */
@@ -1616,14 +1577,19 @@ html.still .mapg,
     .cp {
         display: none !important;
     }
+    *,
+    *::before,
+    *::after {
+        box-shadow: none !important;
+        text-shadow: none !important;
+        filter: none !important;
+    }
     .card,
     .glass-card,
     .card.glass,
     .tb,
     .kpi,
     .stat-card {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
         background: #ffffff !important;
         box-shadow: none !important;
         border: 1px solid #cccccc !important;

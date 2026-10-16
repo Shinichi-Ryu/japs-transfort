@@ -182,6 +182,8 @@
                                          th:data-version="${meta.version}"
                                          class="product-thumb-catalog rounded"
                                          width="64" height="64"
+                                         loading="lazy"
+                                         decoding="async"
                                          style="cursor:pointer;"
                                          data-bs-toggle="modal"
                                          data-bs-target="#photoModal">
@@ -279,7 +281,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center p-3">
-                    <img id="photoModalImg" src="" alt="Product photo" class="img-fluid rounded" style="max-width: 800px;">
+                    <img id="photoModalImg" src="" alt="Product photo" class="img-fluid rounded" width="800" height="600" loading="lazy" decoding="async" style="max-width: 800px;">
                 </div>
             </div>
         </div>

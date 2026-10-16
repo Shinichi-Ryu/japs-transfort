@@ -4,12 +4,14 @@
    Japs Transfort - Unified Theme & Design System Tokens
    =================================================================== */
 
-:root {
+:root,
+[data-theme="light"] {
+    color-scheme: light;
     --navy: #0F5257;
     --sb: #0A3A40;
     --n2: #17666C;
     --amber: #F5A623;
-    --bg: #F0F6F6;
+    --bg: #F3F5F8;
     --card: #ffffff;
     --surface: var(--card);
     --line: #E2E8F0;
@@ -40,7 +42,7 @@
     --bs-body-font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --bs-body-bg: var(--bg);
     --bs-body-color: var(--tx);
-    --bs-card-bg: color-mix(in srgb, var(--surface) 85%, transparent);
+    --bs-card-bg: var(--card);
     --bs-card-color: var(--tx);
     --bs-card-cap-bg: transparent;
     --bs-card-border-color: var(--line);
@@ -68,39 +70,82 @@
 }
 
 /* Light Palettes */
-[data-pal="teal"] {
+[data-pal="teal"]:not([data-theme="dark"]),
+[data-theme="light"][data-pal="teal"] {
+    --navy: #0F5257;
+    --sb: #0A3A40;
+    --n2: #17666C;
+    --amber: #F5A623;
+    --lk: #0F766E;
     --bg: #F0F6F6;
+    --card: #ffffff;
+    --surface: var(--card);
+    --line: #E2E8F0;
+    --soft: #EDF1F6;
+    --tx: #13202E;
+    --mu: #5A6B7D;
+    --c-o: #2F6FB0;
+    --c-g: #2E8B4A;
+    --bs-primary: #0F5257;
+    --bs-primary-rgb: 15, 82, 87;
 }
 
-[data-pal="navy"] {
+[data-pal="navy"]:not([data-theme="dark"]),
+[data-theme="light"][data-pal="navy"] {
     --navy: #0B2239;
     --sb: #0B2239;
     --n2: #16385C;
     --amber: #F5A300;
     --lk: #16385C;
     --bg: #F3F5F8;
+    --card: #ffffff;
+    --surface: var(--card);
+    --line: #E2E8F0;
+    --soft: #EDF1F6;
+    --tx: #13202E;
+    --mu: #5A6B7D;
+    --c-o: #2F6FB0;
+    --c-g: #2E8B4A;
     --bs-primary: #0B2239;
     --bs-primary-rgb: 11, 34, 57;
 }
 
-[data-pal="indigo"] {
+[data-pal="indigo"]:not([data-theme="dark"]),
+[data-theme="light"][data-pal="indigo"] {
     --navy: #25286B;
     --sb: #1B1E55;
     --n2: #33378A;
     --amber: #FF8A3D;
     --lk: #4C4FD6;
     --bg: #F4F4FB;
+    --card: #ffffff;
+    --surface: var(--card);
+    --line: #E2E8F0;
+    --soft: #EDF1F6;
+    --tx: #13202E;
+    --mu: #5A6B7D;
+    --c-o: #2F6FB0;
+    --c-g: #2E8B4A;
     --bs-primary: #25286B;
     --bs-primary-rgb: 37, 40, 107;
 }
 
-[data-pal="forest"] {
+[data-pal="forest"]:not([data-theme="dark"]),
+[data-theme="light"][data-pal="forest"] {
     --navy: #1A4D3A;
     --sb: #12352A;
     --n2: #23694F;
     --amber: #E9B949;
     --lk: #1F7A4D;
     --bg: #F2F6F3;
+    --card: #ffffff;
+    --surface: var(--card);
+    --line: #E2E8F0;
+    --soft: #EDF1F6;
+    --tx: #13202E;
+    --mu: #5A6B7D;
+    --c-o: #2F6FB0;
+    --c-g: #2E8B4A;
     --bs-primary: #1A4D3A;
     --bs-primary-rgb: 26, 77, 58;
 }
@@ -120,6 +165,10 @@
     --lk: #8DBDEB;
     --sb: #050F17;
 
+    --c-o: #2F6FB0;
+    --c-g: #2E8B4A;
+    --amber: #F5A623;
+
     --yb: #3A2F10; --yt: #F7CB5A;
     --bb: #16304B; --bt: #8DBDEB;
     --vb: #262A55; --vt: #B0B5F5;
@@ -130,7 +179,7 @@
 
     --bs-body-bg: var(--bg);
     --bs-body-color: var(--tx);
-    --bs-card-bg: color-mix(in srgb, var(--surface) 85%, transparent);
+    --bs-card-bg: var(--card);
     --bs-card-color: var(--tx);
     --bs-card-cap-bg: transparent;
     --bs-card-border-color: var(--line);
@@ -155,41 +204,65 @@
 [data-theme="dark"][data-pal="teal"] {
     --bg: #07181C;
     --card: #0E2A2F;
+    --surface: var(--card);
     --line: #1C474D;
     --soft: #14393F;
     --sb: #041114;
     --n2: #0F3A40;
     --lk: #5EEAD4;
+    --c-o: #2F6FB0;
+    --c-g: #2E8B4A;
+    --amber: #F5A623;
+    --tx: #E8EEF4;
+    --mu: #9FB1C3;
 }
 
 [data-theme="dark"][data-pal="navy"] {
     --bg: #09131F;
     --card: #112437;
+    --surface: var(--card);
     --line: #223F5A;
     --soft: #193149;
     --sb: #050F17;
     --n2: #16385C;
     --lk: #8DBDEB;
+    --c-o: #2F6FB0;
+    --c-g: #2E8B4A;
+    --amber: #F5A623;
+    --tx: #E8EEF4;
+    --mu: #9FB1C3;
 }
 
 [data-theme="dark"][data-pal="indigo"] {
     --bg: #0E0F25;
     --card: #171A3D;
+    --surface: var(--card);
     --line: #2B3070;
     --soft: #212654;
     --sb: #0A0B1D;
     --n2: #2A2F7A;
     --lk: #A5A8FF;
+    --c-o: #2F6FB0;
+    --c-g: #2E8B4A;
+    --amber: #FF8A3D;
+    --tx: #E8EEF4;
+    --mu: #9FB1C3;
 }
 
 [data-theme="dark"][data-pal="forest"] {
     --bg: #0A1712;
     --card: #10261C;
+    --surface: var(--card);
     --line: #1F4A37;
     --soft: #173627;
     --sb: #07110C;
     --n2: #1F5A41;
     --lk: #7FD9A6;
+    --c-o: #2F6FB0;
+    --c-g: #2E8B4A;
+    --amber: #E9B949;
+    --tx: #E8EEF4;
+    --mu: #9FB1C3;
 }
 
 /* ===================================================================
@@ -225,23 +298,21 @@ a {
    Bootstrap Component Skinning
    =================================================================== */
 
-/* Cards & Glass-Effect - Semi-transparent surface using plain alpha, NO blur */
+/* Base Cards - Solid panels */
 .card,
 .stat-card,
-.table-card {
-    background-color: color-mix(in srgb, var(--surface, var(--card)) 85%, transparent);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    box-shadow: 0 1px 3px rgba(11, 34, 57, 0.08);
-    color: var(--tx);
-}
-
+.table-card,
 .card.glass,
 .glass-card {
-    background-color: color-mix(in srgb, var(--surface, var(--card)) 85%, transparent);
+    background: var(--card) !important;
+    background-color: var(--card) !important;
     border: 1px solid var(--line);
-    border-radius: 14px;
-    box-shadow: 0 1px 3px rgba(11, 34, 57, 0.08);
+    border-radius: var(--r);
+    box-shadow: var(--sh);
+    color: var(--tx);
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 .card-header,
@@ -655,13 +726,17 @@ textarea:focus {
 /* KPI Cards */
 .kpi {
     padding: 18px 20px;
-    background-color: color-mix(in srgb, var(--surface, var(--card)) 85%, transparent);
+    background: var(--card) !important;
+    background-color: var(--card) !important;
     border: 1px solid var(--line);
-    border-radius: 14px;
-    box-shadow: 0 1px 3px rgba(11, 34, 57, 0.08);
+    border-radius: var(--r);
+    box-shadow: var(--sh);
     display: flex;
     flex-direction: column;
     color: var(--tx);
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 .kpi .k {
@@ -725,20 +800,22 @@ textarea:focus {
 }
 
 .kpi.hi {
-    background-color: var(--navy);
+    background: var(--n2) !important;
+    background-color: var(--n2) !important;
     border-color: transparent;
-    color: #fff;
+    color: #fff !important;
 }
 
 [data-theme="dark"] .kpi.hi {
-    background-color: var(--n2);
+    background: var(--n2) !important;
+    background-color: var(--n2) !important;
     border-color: transparent;
-    color: #fff;
+    color: #fff !important;
 }
 
-.kpi.hi .k { color: #CFE0E6; }
-.kpi.hi .v { color: #fff; }
-.kpi.hi a { color: var(--amber); }
+.kpi.hi .k { color: #CFE0E6 !important; }
+.kpi.hi .v { color: #fff !important; }
+.kpi.hi a { color: var(--amber) !important; }
 .kpi.hi .ic {
     background: rgba(255, 255, 255, 0.14) !important;
     color: #fff !important;
@@ -802,7 +879,15 @@ textarea:focus {
     color: var(--tx) !important;
 }
 
+[data-theme="light"] .text-dark {
+    color: var(--tx) !important;
+}
+
 [data-theme="dark"] .text-muted {
+    color: var(--mu) !important;
+}
+
+[data-theme="light"] .text-muted {
     color: var(--mu) !important;
 }
 
@@ -1285,14 +1370,18 @@ textarea:focus {
     gap: 12px;
     padding: 10px 16px 10px 22px;
     margin: 12px 26px 0;
-    border-radius: 20px;
-    background-color: color-mix(in srgb, var(--surface, var(--card)) 85%, transparent);
+    border-radius: var(--r);
+    background: var(--card) !important;
+    background-color: var(--card) !important;
     border: 1px solid var(--line);
     box-shadow: var(--sh);
     position: sticky;
     top: 12px;
     z-index: 40;
     contain: layout style;
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 /* Fill the gap above the topbar so content can't scroll up above it */
@@ -1313,7 +1402,7 @@ textarea:focus {
     height: 36px;
     border-radius: 10px;
     border: 1px solid var(--line);
-    background-color: color-mix(in srgb, var(--surface, var(--card)) 80%, transparent);
+    background-color: var(--card);
     color: var(--tx);
     display: none;
     align-items: center;
@@ -1333,7 +1422,7 @@ textarea:focus {
     height: 38px;
     border-radius: 12px;
     border: 1px solid var(--line);
-    background-color: color-mix(in srgb, var(--surface, var(--card)) 80%, transparent);
+    background-color: var(--card);
     color: var(--mu);
     display: inline-flex;
     align-items: center;
@@ -1361,7 +1450,7 @@ textarea:focus {
 .tb-title {
     font-size: 15px;
     font-weight: 700;
-    color: var(--tx);
+    color: var(--tx) !important;
     margin: 0;
 }
 
@@ -1571,15 +1660,16 @@ main {
 }
 
 /* ===================================================================
-   REDUCED MOTION
+   REDUCED MOTION & PAUSE STATES
    =================================================================== */
 @media (prefers-reduced-motion: reduce) {
     .sb,
     .sb .lb2,
     .sb .sg span,
     .sbt svg,
-    .map-dot,
-    .map-node::after {
+    .mapg,
+    .pulse,
+    .mp-route {
         animation: none !important;
         transition: none !important;
     }
@@ -1593,12 +1683,24 @@ html.still .sbt svg,
 .app.still .sb .lb2,
 .app.still .sb .sg span,
 .app.still .sbt svg,
-html.still .map-dot,
-.app.still .map-dot,
-[data-motion="still"] .map-dot,
-html.still .map-node::after,
-.app.still .map-node::after,
-[data-motion="still"] .map-node::after {
+html.still .mapg,
+html.still .pulse,
+html.still .mp-route,
+.app.still .mapg,
+.app.still .pulse,
+.app.still .mp-route,
+[data-motion="still"] .mapg,
+[data-motion="still"] .pulse,
+[data-motion="still"] .mp-route,
+html.resizing .mapg,
+html.resizing .pulse,
+html.resizing .mp-route,
+html.jt-paused .mapg,
+html.jt-paused .pulse,
+html.jt-paused .mp-route,
+.jt-paused .mapg,
+.jt-paused .pulse,
+.jt-paused .mp-route {
     animation-play-state: paused !important;
 }
 
@@ -1670,146 +1772,100 @@ html.still .map-node::after,
 }
 
 /* ===================================================================
-   BACKGROUND EFFECTS (CHEAP MOVING MAP)
+   BACKGROUND EFFECTS (CITY MAP BACKGROUND)
    =================================================================== */
 .bgfx {
     position: fixed;
     inset: 0;
-    z-index: 1;
+    z-index: 0;
     pointer-events: none;
     overflow: hidden;
 }
 
-.bgfx.bg-map {
-    background-image: url('/img/map-bg.svg');
-    background-size: 100% 100%;
-    background-position: center;
-    background-repeat: no-repeat;
+.mp-minor {
+    stroke: var(--lk);
+    stroke-width: 2;
+    opacity: .10;
+    fill: none;
 }
 
-/* 4 small truck dots: 10px, amber with soft halo made by radial-gradient, no blur */
-.map-dot {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 10px;
-    height: 10px;
-    margin-top: -5px;
-    margin-left: -5px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #F5A623 0%, #F5A623 45%, rgba(245, 166, 35, 0.45) 75%, transparent 100%);
+.mp-major {
+    stroke: var(--lk);
+    stroke-width: 10;
+    opacity: .11;
+    fill: none;
+    stroke-linecap: round;
+}
+
+.mp-river {
+    stroke: var(--c-o);
+    stroke-width: 50;
+    opacity: .14;
+    fill: none;
+    stroke-linecap: round;
+}
+
+.mp-park {
+    fill: var(--c-g);
+    opacity: .14;
+}
+
+.mp-bld {
+    fill: var(--lk);
+    opacity: .08;
+}
+
+.mp-route {
+    stroke: var(--amber);
+    stroke-width: 5;
+    fill: none;
+    stroke-dasharray: 2 15;
+    stroke-linecap: round;
+    animation: flow 2.4s linear infinite;
+}
+
+.mp-pin {
+    fill: var(--amber);
+}
+
+.pulse {
+    fill: var(--amber);
+    opacity: .5;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pl 2.6s ease-out infinite;
+}
+
+.mapg {
+    transform-origin: 800px 500px;
+    animation: drift 30s ease-in-out infinite alternate;
     will-change: transform;
-    pointer-events: none;
 }
 
-/* 3 Route Nodes with pulse ring pseudo-elements */
-.map-node {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    margin-top: -4px;
-    margin-left: -4px;
-    border-radius: 50%;
-    background-color: #F5A623;
-    pointer-events: none;
-}
-
-.map-node.n1 { top: 68vh; left: 18vw; }
-.map-node.n2 { top: 78vh; left: 72vw; }
-.map-node.n3 { top: 12vh; left: 82vw; }
-
-.map-node::after {
-    content: '';
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    border: 1.5px solid #F5A623;
-    animation: mapNodePulse 2.6s ease-out infinite;
-}
-
-@keyframes mapNodePulse {
-    0% {
-        transform: scale(0.5);
-        opacity: 0.9;
+@keyframes flow {
+    to {
+        stroke-dashoffset: -34;
     }
-    100% {
-        transform: scale(2.2);
+}
+
+@keyframes pl {
+    from {
+        transform: scale(.7);
+        opacity: .6;
+    }
+    to {
+        transform: scale(2.8);
         opacity: 0;
     }
 }
 
-/* 4 Routes matching polylines:
-   Route 1: 5,70 -> 25,62 -> 50,78 -> 75,45 -> 95,30
-   Route 2: 15,10 -> 30,35 -> 55,40 -> 70,75 -> 85,90
-   Route 3: 90,15 -> 80,25 -> 60,60 -> 35,65 -> 10,85
-   Route 4: 5,30 -> 40,25 -> 65,50 -> 85,65 -> 95,85
-*/
-.map-dot.d1 {
-    transform: translate3d(5vw, 70vh, 0);
-    animation: truckDot1 45s linear infinite;
-}
-
-.map-dot.d2 {
-    transform: translate3d(15vw, 10vh, 0);
-    animation: truckDot2 52s linear infinite;
-}
-
-.map-dot.d3 {
-    transform: translate3d(90vw, 15vh, 0);
-    animation: truckDot3 60s linear infinite;
-}
-
-.map-dot.d4 {
-    transform: translate3d(5vw, 30vh, 0);
-    animation: truckDot4 68s linear infinite;
-}
-
-@keyframes truckDot1 {
-    0%   { transform: translate3d(5vw, 70vh, 0); opacity: 0; }
-    5%   { transform: translate3d(5vw, 70vh, 0); opacity: 0.55; }
-    25%  { transform: translate3d(25vw, 62vh, 0); }
-    50%  { transform: translate3d(50vw, 78vh, 0); }
-    75%  { transform: translate3d(75vw, 45vh, 0); }
-    95%  { transform: translate3d(95vw, 30vh, 0); opacity: 0.55; }
-    100% { transform: translate3d(95vw, 30vh, 0); opacity: 0; }
-}
-
-@keyframes truckDot2 {
-    0%   { transform: translate3d(15vw, 10vh, 0); opacity: 0; }
-    5%   { transform: translate3d(15vw, 10vh, 0); opacity: 0.55; }
-    28%  { transform: translate3d(30vw, 35vh, 0); }
-    52%  { transform: translate3d(55vw, 40vh, 0); }
-    76%  { transform: translate3d(70vw, 75vh, 0); }
-    95%  { transform: translate3d(85vw, 90vh, 0); opacity: 0.55; }
-    100% { transform: translate3d(85vw, 90vh, 0); opacity: 0; }
-}
-
-@keyframes truckDot3 {
-    0%   { transform: translate3d(90vw, 15vh, 0); opacity: 0; }
-    5%   { transform: translate3d(90vw, 15vh, 0); opacity: 0.55; }
-    22%  { transform: translate3d(80vw, 25vh, 0); }
-    50%  { transform: translate3d(60vw, 60vh, 0); }
-    74%  { transform: translate3d(35vw, 65vh, 0); }
-    95%  { transform: translate3d(10vw, 85vh, 0); opacity: 0.55; }
-    100% { transform: translate3d(10vw, 85vh, 0); opacity: 0; }
-}
-
-@keyframes truckDot4 {
-    0%   { transform: translate3d(5vw, 30vh, 0); opacity: 0; }
-    5%   { transform: translate3d(5vw, 30vh, 0); opacity: 0.55; }
-    30%  { transform: translate3d(40vw, 25vh, 0); }
-    58%  { transform: translate3d(65vw, 50vh, 0); }
-    80%  { transform: translate3d(85vw, 65vh, 0); }
-    95%  { transform: translate3d(95vw, 85vh, 0); opacity: 0.55; }
-    100% { transform: translate3d(95vw, 85vh, 0); opacity: 0; }
-}
-
-/* Pause when tab hidden or loses focus */
-html.jt-paused .map-dot,
-html.jt-paused .map-node::after,
-.jt-paused .map-dot,
-.jt-paused .map-node::after {
-    animation-play-state: paused !important;
+@keyframes drift {
+    from {
+        transform: scale(1.15) translate(60px, 38px);
+    }
+    to {
+        transform: scale(1.15) translate(-60px, -38px);
+    }
 }
 
 /* Static Glow background option */

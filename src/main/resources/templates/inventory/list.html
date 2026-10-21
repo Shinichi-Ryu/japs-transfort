@@ -104,16 +104,19 @@
                 </div>
 
                 <!-- Inventory Table Card -->
-                <div class="jt-card jt-table-wrap">
+                <div class="jt-card jt-table-wrap" data-table-id="inventory">
                     <div class="jt-card-header d-flex justify-content-between align-items-center p-3 border-bottom" style="border-color: var(--line) !important;">
                         <h6 class="fw-bold mb-0" style="color: var(--tx);"><i class="bi bi-box-seam me-1 text-muted"></i> Warehouse Stock Levels</h6>
-                        <span class="jt-badge-total" th:text="${inventoryPage.totalElements} + ' total'">0 total</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <div th:replace="~{fragments/layout :: tableControls('inventory')}"></div>
+                            <span class="jt-badge-total" th:text="${inventoryPage.totalElements} + ' total'">0 total</span>
+                        </div>
                     </div>
                     <div class="jt-table-scroll">
                         <table class="jt-table jt-table-inventory">
                             <thead>
                                 <tr>
-                                    <th scope="col" style="padding-left: 20px;">
+                                    <th scope="col" data-col="sku" class="d-none d-lg-table-cell" style="padding-left: 20px;">
                                         <a class="text-decoration-none d-inline-flex align-items-center"
                                            style="color: inherit;"
                                            th:href="@{/admin/inventory(search=${search}, warehouseId=${warehouseId}, sort='sku', dir=${sort == 'sku' ? reverseDir : 'asc'})}">
@@ -121,7 +124,7 @@
                                             <i class="bi ms-1" th:classappend="${sort == 'sku' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col">
+                                    <th scope="col" data-col="name">
                                         <a class="text-decoration-none d-inline-flex align-items-center"
                                            style="color: inherit;"
                                            th:href="@{/admin/inventory(search=${search}, warehouseId=${warehouseId}, sort='name', dir=${sort == 'name' ? reverseDir : 'asc'})}">
@@ -129,8 +132,8 @@
                                             <i class="bi ms-1" th:classappend="${sort == 'name' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col">Category</th>
-                                    <th scope="col">
+                                    <th scope="col" data-col="category" class="d-none d-xl-table-cell">Category</th>
+                                    <th scope="col" data-col="warehouse">
                                         <a class="text-decoration-none d-inline-flex align-items-center"
                                            style="color: inherit;"
                                            th:href="@{/admin/inventory(search=${search}, warehouseId=${warehouseId}, sort='warehouse', dir=${sort == 'warehouse' ? reverseDir : 'asc'})}">
@@ -138,10 +141,10 @@
                                             <i class="bi ms-1" th:classappend="${sort == 'warehouse' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col" class="n text-end">Reorder Level</th>
-                                    <th scope="col" class="n text-end">Current Stock</th>
-                                    <th scope="col" class="text-center">Status</th>
-                                    <th scope="col" class="text-end" style="padding-right: 20px;">Actions</th>
+                                    <th scope="col" data-col="reorder" class="n text-end d-none d-md-table-cell">Reorder Level</th>
+                                    <th scope="col" data-col="stock" class="n text-end">Current Stock</th>
+                                    <th scope="col" data-col="status" class="text-center">Status</th>
+                                    <th scope="col" data-col="actions" class="text-end" style="padding-right: 20px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -151,26 +154,27 @@
                                     </td>
                                 </tr>
                                 <tr th:each="row : ${inventoryPage.content}">
-                                    <td class="fw-semibold font-monospace small jt-sku-cell" th:text="${row.product.sku}">SKU-001</td>
-                                    <td>
+                                    <td data-col="sku" data-label="SKU" class="fw-semibold font-monospace small jt-sku-cell d-none d-lg-table-cell" th:text="${row.product.sku}">SKU-001</td>
+                                    <td data-col="name" data-label="Product">
                                         <div class="fw-bold" style="color: var(--tx);" th:text="${row.product.name}">Product Name</div>
+                                        <div class="jt-compact-sub text-muted font-monospace small" th:text="'SKU: ' + ${row.product.sku}">SKU-001</div>
                                         <div class="small" style="color: var(--mu);" th:text="${row.product.unit != null ? row.product.unit : 'pc'}">pc</div>
                                     </td>
-                                    <td>
+                                    <td data-col="category" data-label="Category" class="d-none d-xl-table-cell">
                                         <span class="jt-pill x"
                                               th:text="${row.product.category != null ? row.product.category.name : 'Uncategorized'}">
                                             Category
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-col="warehouse" data-label="Warehouse">
                                         <span class="fw-medium" style="color: var(--tx);" th:text="${row.warehouse.name}">Main Warehouse</span>
                                     </td>
-                                    <td class="n text-end font-monospace" th:text="${row.product.reorderLevel}">10</td>
-                                    <td class="n text-end font-monospace">
+                                    <td data-col="reorder" data-label="Reorder Level" class="n text-end font-monospace d-none d-md-table-cell" th:text="${row.product.reorderLevel}">10</td>
+                                    <td data-col="stock" data-label="Current Stock" class="n text-end font-monospace">
                                         <span th:if="${row.lowStock}" class="fw-bold" style="color: var(--rt);" th:text="${row.quantity}">0</span>
                                         <span th:unless="${row.lowStock}" class="fw-semibold" style="color: var(--tx);" th:text="${row.quantity}">0</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td data-col="status" data-label="Status" class="text-center">
                                         <span th:if="${row.lowStock}" class="jt-pill r">
                                             <i class="bi bi-exclamation-triangle-fill me-1"></i> Low stock
                                         </span>
@@ -178,7 +182,7 @@
                                             <i class="bi bi-check-circle me-1"></i> In Stock
                                         </span>
                                     </td>
-                                    <td class="text-end" style="padding-right: 20px; white-space: nowrap;">
+                                    <td data-col="actions" data-label="Actions" class="text-end" style="padding-right: 20px; white-space: nowrap;">
                                         <div class="d-inline-flex gap-1">
                                             <button type="button"
                                                     class="jt-btn jt-btn-s btn-receive"
@@ -508,5 +512,6 @@
             }
         });
     </script>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>
 </html>

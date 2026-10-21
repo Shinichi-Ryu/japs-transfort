@@ -176,23 +176,26 @@
                 </div>
 
                 <!-- Stock Levels Table Card -->
-                <div class="jt-card jt-table-wrap mb-4">
+                <div class="jt-card jt-table-wrap mb-4" data-table-id="report-stock">
                     <div class="jt-card-header d-flex justify-content-between align-items-center">
                         <h6 class="fw-bold mb-0" style="color: var(--tx);"><i class="bi bi-boxes me-1 text-muted"></i> Stock Levels</h6>
-                        <span class="jt-badge-total" th:text="${#lists.size(stockRows)} + ' rows'">0 rows</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <div th:replace="~{fragments/layout :: tableControls('report-stock')}"></div>
+                            <span class="jt-badge-total" th:text="${#lists.size(stockRows)} + ' rows'">0 rows</span>
+                        </div>
                     </div>
                     <div class="jt-table-scroll">
                         <table class="jt-table">
                             <thead>
                                 <tr>
-                                    <th scope="col" style="padding-left: 18px;">SKU</th>
-                                    <th scope="col">Product Name</th>
-                                    <th scope="col">Warehouse</th>
-                                    <th scope="col" class="n text-center">Qty</th>
-                                    <th scope="col" class="n text-center">Reorder Level</th>
-                                    <th scope="col" class="text-center">Status</th>
-                                    <th scope="col" class="n text-end">Value (Cost)</th>
-                                    <th scope="col" class="n text-end" style="padding-right: 18px;">Value (SRP)</th>
+                                    <th scope="col" data-col="sku" class="d-none d-lg-table-cell" style="padding-left: 18px;">SKU</th>
+                                    <th scope="col" data-col="name">Product Name</th>
+                                    <th scope="col" data-col="warehouse">Warehouse</th>
+                                    <th scope="col" data-col="qty" class="n text-center">Qty</th>
+                                    <th scope="col" data-col="reorder" class="n text-center d-none d-md-table-cell">Reorder Level</th>
+                                    <th scope="col" data-col="status" class="text-center">Status</th>
+                                    <th scope="col" data-col="cost" class="n text-end d-none d-xl-table-cell">Value (Cost)</th>
+                                    <th scope="col" data-col="srp" class="n text-end" style="padding-right: 18px;">Value (SRP)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -200,18 +203,21 @@
                                     <td colspan="8" class="text-center py-4" style="color: var(--mu);">No data for this period</td>
                                 </tr>
                                 <tr th:each="row : ${stockRows}">
-                                    <td style="padding-left: 18px;" class="font-monospace small fw-semibold jt-sku-cell" th:text="${row.sku}">SKU</td>
-                                    <td class="fw-medium" th:text="${row.name}">Product</td>
-                                    <td class="small" style="color: var(--mu);" th:text="${row.warehouseName}">Warehouse</td>
-                                    <td class="n text-center font-monospace" th:text="${row.quantity}">0</td>
-                                    <td class="n text-center" style="color: var(--mu);" th:text="${row.reorderLevel}">0</td>
-                                    <td class="text-center">
+                                    <td data-col="sku" data-label="SKU" style="padding-left: 18px;" class="font-monospace small fw-semibold jt-sku-cell d-none d-lg-table-cell" th:text="${row.sku}">SKU</td>
+                                    <td data-col="name" data-label="Product Name">
+                                        <div class="fw-medium" th:text="${row.name}">Product</div>
+                                        <div class="jt-compact-sub text-muted font-monospace small" th:text="'SKU: ' + ${row.sku}">SKU</div>
+                                    </td>
+                                    <td data-col="warehouse" data-label="Warehouse" class="small" style="color: var(--mu);" th:text="${row.warehouseName}">Warehouse</td>
+                                    <td data-col="qty" data-label="Qty" class="n text-center font-monospace" th:text="${row.quantity}">0</td>
+                                    <td data-col="reorder" data-label="Reorder Level" class="n text-center d-none d-md-table-cell" style="color: var(--mu);" th:text="${row.reorderLevel}">0</td>
+                                    <td data-col="status" data-label="Status" class="text-center">
                                         <span class="jt-pill text-uppercase"
                                               th:classappend="${(row.stockStatus != null and #strings.equalsIgnoreCase(row.stockStatus, 'Out of stock')) ? 'r' : ((row.stockStatus != null and #strings.equalsIgnoreCase(row.stockStatus, 'Low stock')) ? 'y' : 'g')} + ' ' + ${row.stockStatusBadgeClass}"
                                               th:text="${row.stockStatus}">OK</span>
                                     </td>
-                                    <td class="n text-end font-monospace" th:text="'₱' + ${#numbers.formatDecimal(row.stockValueAtCost, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td style="padding-right: 18px;" class="n text-end font-monospace" th:text="'₱' + ${#numbers.formatDecimal(row.stockValueAtSrp, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="cost" data-label="Value (Cost)" class="n text-end font-monospace d-none d-xl-table-cell" th:text="'₱' + ${#numbers.formatDecimal(row.stockValueAtCost, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="srp" data-label="Value (SRP)" style="padding-right: 18px;" class="n text-end font-monospace" th:text="'₱' + ${#numbers.formatDecimal(row.stockValueAtSrp, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -219,7 +225,7 @@
                 </div>
 
                 <!-- Stock Movement Summary Table Card -->
-                <div class="jt-card jt-table-wrap mb-0">
+                <div class="jt-card jt-table-wrap mb-0" data-table-id="report-stock-movements">
                     <div class="jt-card-header d-flex justify-content-between align-items-center">
                         <h6 class="fw-bold mb-0" style="color: var(--tx);">
                             <i class="bi bi-arrow-left-right me-1 text-muted"></i> Stock Movements
@@ -228,17 +234,20 @@
                                 to <span th:text="${#temporals.format(toDate, 'yyyy-MM-dd')}">to</span>)
                             </span>
                         </h6>
+                        <div class="d-flex align-items-center gap-2">
+                            <div th:replace="~{fragments/layout :: tableControls('report-stock-movements')}"></div>
+                        </div>
                     </div>
                     <div class="jt-table-scroll">
                         <table class="jt-table">
                             <thead>
                                 <tr>
-                                    <th scope="col" style="padding-left: 18px;">SKU</th>
-                                    <th scope="col">Product Name</th>
-                                    <th scope="col" class="n text-center">In</th>
-                                    <th scope="col" class="n text-center">Out</th>
-                                    <th scope="col" class="n text-center">Adjust</th>
-                                    <th scope="col" class="n text-center" style="padding-right: 18px;">Return</th>
+                                    <th scope="col" data-col="sku" class="d-none d-md-table-cell" style="padding-left: 18px;">SKU</th>
+                                    <th scope="col" data-col="name">Product Name</th>
+                                    <th scope="col" data-col="in" class="n text-center">In</th>
+                                    <th scope="col" data-col="out" class="n text-center">Out</th>
+                                    <th scope="col" data-col="adjust" class="n text-center">Adjust</th>
+                                    <th scope="col" data-col="return" class="n text-center" style="padding-right: 18px;">Return</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -246,12 +255,15 @@
                                     <td colspan="6" class="text-center py-4" style="color: var(--mu);">No data for this period</td>
                                 </tr>
                                 <tr th:each="m : ${movementSummary}">
-                                    <td style="padding-left: 18px;" class="font-monospace small fw-semibold jt-sku-cell" th:text="${m.sku}">SKU</td>
-                                    <td class="fw-medium" th:text="${m.name}">Product</td>
-                                    <td class="n text-center font-monospace" th:classappend="${m.qtyIn > 0 ? 'text-success fw-semibold' : 'text-muted'}" th:text="${m.qtyIn}">0</td>
-                                    <td class="n text-center font-monospace" th:classappend="${m.qtyOut > 0 ? 'text-danger fw-semibold' : 'text-muted'}" th:text="${m.qtyOut}">0</td>
-                                    <td class="n text-center font-monospace" th:classappend="${m.qtyAdjust != 0 ? 'text-info fw-semibold' : 'text-muted'}" th:text="${m.qtyAdjust}">0</td>
-                                    <td style="padding-right: 18px;" class="n text-center font-monospace" th:classappend="${m.qtyReturn > 0 ? 'text-warning fw-semibold' : 'text-muted'}" th:text="${m.qtyReturn}">0</td>
+                                    <td data-col="sku" data-label="SKU" style="padding-left: 18px;" class="font-monospace small fw-semibold jt-sku-cell d-none d-md-table-cell" th:text="${m.sku}">SKU</td>
+                                    <td data-col="name" data-label="Product Name">
+                                        <div class="fw-medium" th:text="${m.name}">Product</div>
+                                        <div class="jt-compact-sub text-muted font-monospace small" th:text="'SKU: ' + ${m.sku}">SKU</div>
+                                    </td>
+                                    <td data-col="in" data-label="In" class="n text-center font-monospace" th:classappend="${m.qtyIn > 0 ? 'text-success fw-semibold' : 'text-muted'}" th:text="${m.qtyIn}">0</td>
+                                    <td data-col="out" data-label="Out" class="n text-center font-monospace" th:classappend="${m.qtyOut > 0 ? 'text-danger fw-semibold' : 'text-muted'}" th:text="${m.qtyOut}">0</td>
+                                    <td data-col="adjust" data-label="Adjust" class="n text-center font-monospace" th:classappend="${m.qtyAdjust != 0 ? 'text-info fw-semibold' : 'text-muted'}" th:text="${m.qtyAdjust}">0</td>
+                                    <td data-col="return" data-label="Return" style="padding-right: 18px;" class="n text-center font-monospace" th:classappend="${m.qtyReturn > 0 ? 'text-warning fw-semibold' : 'text-muted'}" th:text="${m.qtyReturn}">0</td>
                                 </tr>
                             </tbody>
                         </table>

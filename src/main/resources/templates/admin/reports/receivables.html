@@ -138,26 +138,29 @@
                 </div>
 
                 <!-- Main Table Card -->
-                <div class="jt-card jt-table-wrap mb-0">
+                <div class="jt-card jt-table-wrap mb-0" data-table-id="report-receivables">
                     <div class="jt-card-header d-flex justify-content-between align-items-center">
                         <h6 class="fw-bold mb-0" style="color: var(--tx);"><i class="bi bi-wallet2 me-1 text-muted"></i> Receivables by Reseller</h6>
-                        <span class="jt-badge-total" th:text="${#lists.size(receivables)} + ' resellers'">0 resellers</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <div th:replace="~{fragments/layout :: tableControls('report-receivables')}"></div>
+                            <span class="jt-badge-total" th:text="${#lists.size(receivables)} + ' resellers'">0 resellers</span>
+                        </div>
                     </div>
                     <div class="jt-table-scroll">
                         <table class="jt-table">
                             <thead>
                                 <tr>
-                                    <th scope="col" style="padding-left: 18px;">Business Name</th>
-                                    <th scope="col" class="n text-end">Balance</th>
-                                    <th scope="col" class="n text-end">Credit Limit</th>
-                                    <th scope="col" class="n text-end">Available Credit</th>
-                                    <th scope="col" class="n text-center">Open Orders</th>
-                                    <th scope="col" class="text-center">Oldest Open</th>
-                                    <th scope="col" class="n text-end">0–30 Days</th>
-                                    <th scope="col" class="n text-end">31–60 Days</th>
-                                    <th scope="col" class="n text-end">61–90 Days</th>
-                                    <th scope="col" class="n text-end">Over 90</th>
-                                    <th scope="col" class="n text-end" style="padding-right: 18px;">Total Remaining</th>
+                                    <th scope="col" data-col="reseller" style="padding-left: 18px;">Business Name</th>
+                                    <th scope="col" data-col="balance" class="n text-end">Balance</th>
+                                    <th scope="col" data-col="credit-limit" class="n text-end d-none d-lg-table-cell">Credit Limit</th>
+                                    <th scope="col" data-col="available-credit" class="n text-end d-none d-md-table-cell">Available Credit</th>
+                                    <th scope="col" data-col="orders" class="n text-center d-none d-xl-table-cell">Open Orders</th>
+                                    <th scope="col" data-col="oldest" class="text-center d-none d-xxl-table-cell">Oldest Open</th>
+                                    <th scope="col" data-col="b0-30" class="n text-end d-none d-xxl-table-cell">0–30 Days</th>
+                                    <th scope="col" data-col="b31-60" class="n text-end d-none d-xxl-table-cell">31–60 Days</th>
+                                    <th scope="col" data-col="b61-90" class="n text-end d-none d-xxl-table-cell">61–90 Days</th>
+                                    <th scope="col" data-col="over90" class="n text-end d-none d-xl-table-cell">Over 90</th>
+                                    <th scope="col" data-col="total" class="n text-end" style="padding-right: 18px;">Total Remaining</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -166,22 +169,22 @@
                                 </tr>
                                 <tr th:each="row : ${receivables}"
                                     th:classappend="${row.overCreditLimit ? 'table-danger' : ''}">
-                                    <td style="padding-left: 18px;" class="fw-medium">
+                                    <td data-col="reseller" data-label="Business Name" style="padding-left: 18px;" class="fw-medium">
                                         <span th:text="${row.businessName}">Reseller</span>
                                         <span th:if="${row.overCreditLimit}" class="jt-pill r ms-1 small">Over Limit</span>
                                     </td>
-                                    <td class="n text-end font-monospace" th:text="'₱' + ${#numbers.formatDecimal(row.balance, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td class="n text-end font-monospace" th:text="'₱' + ${#numbers.formatDecimal(row.creditLimit, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td class="n text-end font-monospace"
+                                    <td data-col="balance" data-label="Balance" class="n text-end font-monospace" th:text="'₱' + ${#numbers.formatDecimal(row.balance, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="credit-limit" data-label="Credit Limit" class="n text-end font-monospace d-none d-lg-table-cell" th:text="'₱' + ${#numbers.formatDecimal(row.creditLimit, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="available-credit" data-label="Available Credit" class="n text-end font-monospace d-none d-md-table-cell"
                                         th:classappend="${row.availableCredit.compareTo(T(java.math.BigDecimal).ZERO) < 0 ? 'text-danger fw-semibold' : ''}"
                                         th:text="'₱' + ${#numbers.formatDecimal(row.availableCredit, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td class="n text-center font-monospace" th:text="${row.openOrderCount}">0</td>
-                                    <td class="text-center small jt-sku-cell" th:text="${row.oldestOpenOrderDate != null ? #temporals.format(row.oldestOpenOrderDate, 'yyyy-MM-dd') : '—'}">—</td>
-                                    <td class="n text-end font-monospace" th:text="'₱' + ${#numbers.formatDecimal(row.bucket0to30, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td class="n text-end font-monospace" th:text="'₱' + ${#numbers.formatDecimal(row.bucket31to60, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td class="n text-end font-monospace" th:text="'₱' + ${#numbers.formatDecimal(row.bucket61to90, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td class="n text-end font-monospace" th:text="'₱' + ${#numbers.formatDecimal(row.bucketOver90, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td style="padding-right: 18px;" class="n text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(row.totalRemaining, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="orders" data-label="Open Orders" class="n text-center font-monospace d-none d-xl-table-cell" th:text="${row.openOrderCount}">0</td>
+                                    <td data-col="oldest" data-label="Oldest Open" class="text-center small jt-sku-cell d-none d-xxl-table-cell" th:text="${row.oldestOpenOrderDate != null ? #temporals.format(row.oldestOpenOrderDate, 'yyyy-MM-dd') : '—'}">—</td>
+                                    <td data-col="b0-30" data-label="0–30 Days" class="n text-end font-monospace d-none d-xxl-table-cell" th:text="'₱' + ${#numbers.formatDecimal(row.bucket0to30, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="b31-60" data-label="31–60 Days" class="n text-end font-monospace d-none d-xxl-table-cell" th:text="'₱' + ${#numbers.formatDecimal(row.bucket31to60, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="b61-90" data-label="61–90 Days" class="n text-end font-monospace d-none d-xxl-table-cell" th:text="'₱' + ${#numbers.formatDecimal(row.bucket61to90, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="over90" data-label="Over 90" class="n text-end font-monospace d-none d-xl-table-cell" th:text="'₱' + ${#numbers.formatDecimal(row.bucketOver90, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="total" data-label="Total Remaining" style="padding-right: 18px;" class="n text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(row.totalRemaining, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
                                 </tr>
                             </tbody>
                         </table>

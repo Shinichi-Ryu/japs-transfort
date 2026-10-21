@@ -105,50 +105,53 @@
                 </div>
 
                 <!-- Resellers Table Card -->
-                <div class="jt-table-wrap">
+                <div class="jt-table-wrap" data-table-id="resellers">
                     <div class="jt-table-header">
-                        <h6><i class="bi bi-people me-1"></i> Resellers List</h6>
-                        <span class="jt-badge-total" th:text="${resellersPage.totalElements} + ' total'">0 total</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <h6><i class="bi bi-people me-1"></i> Resellers List</h6>
+                            <span class="jt-badge-total" th:text="${resellersPage.totalElements} + ' total'">0 total</span>
+                        </div>
+                        <div th:replace="~{fragments/layout :: tableControls('resellers')}"></div>
                     </div>
                     <div class="jt-table-scroll">
                         <table class="jt-table jt-table-resellers">
                             <thead>
                                 <tr>
-                                    <th scope="col">
+                                    <th scope="col" data-col="businessName" data-col-name="Business Name">
                                         <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='businessName', dir=${sort == 'businessName' ? reverseDir : 'asc'})}">
                                             Business Name
                                             <i class="bi ms-1" th:classappend="${sort == 'businessName' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col">Contact Person</th>
-                                    <th scope="col">Email (Login)</th>
-                                    <th scope="col">Contact No</th>
-                                    <th scope="col">
+                                    <th scope="col" data-col="contactPerson" data-col-name="Contact Person" class="d-none d-xl-table-cell">Contact Person</th>
+                                    <th scope="col" data-col="email" data-col-name="Email" class="d-none d-xxl-table-cell">Email (Login)</th>
+                                    <th scope="col" data-col="contactNo" data-col-name="Contact No" class="d-none d-xxl-table-cell">Contact No</th>
+                                    <th scope="col" data-col="territory" data-col-name="City/Location" class="d-none d-md-table-cell">
                                         <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='territory', dir=${sort == 'territory' ? reverseDir : 'asc'})}">
                                             City/Location
                                             <i class="bi ms-1" th:classappend="${sort == 'territory' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col">Tier</th>
-                                    <th scope="col" class="n">
+                                    <th scope="col" data-col="tier" data-col-name="Tier">Tier</th>
+                                    <th scope="col" data-col="creditLimit" data-col-name="Credit Limit" class="n d-none d-lg-table-cell">
                                         <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='creditLimit', dir=${sort == 'creditLimit' ? reverseDir : 'asc'})}">
                                             Credit Limit
                                             <i class="bi ms-1" th:classappend="${sort == 'creditLimit' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col" class="n">
+                                    <th scope="col" data-col="balance" data-col-name="Balance" class="n">
                                         <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='balance', dir=${sort == 'balance' ? reverseDir : 'asc'})}">
                                             Balance
                                             <i class="bi ms-1" th:classappend="${sort == 'balance' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col" style="text-align: center;">
+                                    <th scope="col" data-col="status" data-col-name="Status" style="text-align: center;">
                                         <a th:href="@{/admin/resellers(search=${search}, tierId=${tierId}, status=${status}, sort='status', dir=${sort == 'status' ? reverseDir : 'asc'})}">
                                             Status
                                             <i class="bi ms-1" th:classappend="${sort == 'status' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col" class="n" style="min-width: 140px;">Actions</th>
+                                    <th scope="col" data-col="actions" data-col-name="Actions" class="n" style="min-width: 140px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -158,26 +161,29 @@
                                     </td>
                                 </tr>
                                 <tr th:each="reseller : ${resellersPage.content}">
-                                    <td><b th:text="${reseller.businessName}">Business Name</b></td>
-                                    <td th:text="${reseller.user != null ? reseller.user.fullName : '-'}">Contact Person</td>
-                                    <td style="font-family: monospace; font-size: 13px; color: var(--mu);" th:text="${reseller.user != null ? reseller.user.email : '-'}">email@example.com</td>
-                                    <td style="color: var(--mu);" th:text="${reseller.contactNo != null && !reseller.contactNo.isEmpty() ? reseller.contactNo : '-'}">-</td>
-                                    <td th:text="${reseller.territory != null && !reseller.territory.isEmpty() ? reseller.territory : '-'}">-</td>
-                                    <td>
+                                    <td data-col="businessName" data-label="Business Name">
+                                        <b th:text="${reseller.businessName}">Business Name</b>
+                                        <div class="d-xl-none text-muted small jt-compact-sub" th:text="${reseller.user != null ? reseller.user.fullName : ''}">Contact Person</div>
+                                    </td>
+                                    <td data-col="contactPerson" data-label="Contact Person" class="d-none d-xl-table-cell" th:text="${reseller.user != null ? reseller.user.fullName : '-'}">Contact Person</td>
+                                    <td data-col="email" data-label="Email" class="d-none d-xxl-table-cell" style="font-family: monospace; font-size: 13px; color: var(--mu);" th:text="${reseller.user != null ? reseller.user.email : '-'}">email@example.com</td>
+                                    <td data-col="contactNo" data-label="Contact No" class="d-none d-xxl-table-cell" style="color: var(--mu);" th:text="${reseller.contactNo != null && !reseller.contactNo.isEmpty() ? reseller.contactNo : '-'}">-</td>
+                                    <td data-col="territory" data-label="City/Location" class="d-none d-md-table-cell" th:text="${reseller.territory != null && !reseller.territory.isEmpty() ? reseller.territory : '-'}">-</td>
+                                    <td data-col="tier" data-label="Tier">
                                         <span class="jt-pill b"
                                                th:text="${reseller.tier != null ? reseller.tier.tierName : 'Unassigned'}">
                                             Tier
                                         </span>
                                     </td>
-                                    <td class="n" th:text="'₱' + ${#numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td class="n" style="font-weight: 700;" th:text="'₱' + ${#numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td style="text-align: center;">
+                                    <td data-col="creditLimit" data-label="Credit Limit" class="n d-none d-lg-table-cell" th:text="'₱' + ${#numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="balance" data-label="Balance" class="n" style="font-weight: 700;" th:text="'₱' + ${#numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="status" data-label="Status" style="text-align: center;">
                                         <span th:if="${reseller.status == 'active'}" class="jt-pill g">Active</span>
                                         <span th:if="${reseller.status == 'pending'}" class="jt-pill y">Pending</span>
                                         <span th:if="${reseller.status == 'rejected'}" class="jt-pill x">Rejected</span>
                                         <span th:if="${reseller.status == 'inactive'}" class="jt-pill x">Inactive</span>
                                     </td>
-                                    <td class="n">
+                                    <td data-col="actions" data-label="Actions" class="n">
                                         <div class="jt-action-group justify-content-end">
                                             <!-- Actions for Pending Applications -->
                                             <th:block th:if="${reseller.status == 'pending'}">

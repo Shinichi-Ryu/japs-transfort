@@ -146,11 +146,8 @@
     border: 1px solid var(--line);
     border-radius: var(--r);
     box-shadow: var(--sh);
-    overflow: hidden;
     margin-bottom: 20px;
-    contain: layout style;
     position: relative;
-    isolation: isolate;
 }
 
 .jt-table-scroll {
@@ -159,6 +156,186 @@
     -webkit-overflow-scrolling: touch;
     /* scrollbar inside the card, never the page */
     overflow-y: visible;
+}
+
+/* Default compact table rules: no horizontal scrollbar on card */
+.jt-table-wrap .jt-table-scroll {
+    overflow-x: hidden;
+}
+
+.jt-table-wrap .jt-table {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+.jt-table-wrap .jt-table thead th {
+    padding: 8px 10px;
+    font-size: 11px;
+}
+
+.jt-table-wrap .jt-table tbody td {
+    padding: 7px 10px;
+    font-size: 13px;
+}
+
+.jt-table th.jt-col-hidden,
+.jt-table td.jt-col-hidden {
+    display: none !important;
+}
+
+/* Table Controls */
+.jt-table-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.jt-cols-dropdown {
+    position: relative;
+}
+
+.jt-cols-dropdown .dropdown-menu,
+.jt-cols-menu {
+    display: none;
+    position: fixed !important;
+    z-index: 99999 !important;
+    background-color: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+    min-width: 220px;
+    max-width: 320px;
+    max-height: min(60vh, 320px);
+    overflow: hidden;
+    padding: 0;
+    box-sizing: border-box;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+.jt-cols-dropdown .dropdown-menu.show,
+.jt-cols-menu.show {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+[data-theme="dark"] .jt-cols-dropdown .dropdown-menu,
+[data-theme="dark"] .jt-cols-menu {
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+}
+
+.jt-cols-header {
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mu);
+    padding: 10px 14px 8px;
+    background-color: var(--card);
+    border-bottom: 1px solid var(--line);
+    box-sizing: border-box;
+}
+
+.jt-cols-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    padding: 4px 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+    box-sizing: border-box;
+}
+
+.jt-cols-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.jt-cols-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.jt-cols-list::-webkit-scrollbar-thumb {
+    background-color: var(--line);
+    border-radius: 99px;
+}
+
+.jt-cols-list::-webkit-scrollbar-thumb:hover {
+    background-color: var(--mu);
+}
+
+.jt-cols-list label.dropdown-item {
+    font-size: 13px;
+    color: var(--tx);
+    cursor: pointer;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+    box-sizing: border-box;
+    transition: none !important;
+}
+
+.jt-cols-list label.dropdown-item:hover {
+    background-color: var(--soft);
+    color: var(--tx);
+    transition: none !important;
+}
+
+.jt-cols-reset-row {
+    flex: 0 0 auto;
+    background-color: var(--card);
+    border-top: 1px solid var(--line);
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-radius: 0 0 12px 12px;
+}
+
+.jt-cols-reset {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--mu);
+    padding: 9px 14px;
+    width: 100%;
+    text-align: left;
+    background-color: var(--card);
+    border: none;
+    border-radius: 0 0 12px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-sizing: border-box;
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: none !important;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+.jt-cols-reset:hover {
+    color: var(--tx) !important;
+    background-color: var(--soft) !important;
+    transition: none !important;
+}
+
+.jt-cols-reset:focus,
+.jt-cols-reset:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.jt-cols-reset * {
+    pointer-events: none;
 }
 
 .jt-table-header,
@@ -187,23 +364,12 @@ table.jt-table,
 .jt-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 760px;  /* default; see page-specific overrides below */
     font-size: 13.5px;
     margin: 0;
     background-color: transparent;
     --bs-table-bg: transparent;
     --bs-table-hover-bg: color-mix(in srgb, var(--soft) 60%, transparent);
 }
-
-/* Page-specific min-widths based on column count */
-.jt-table.jt-table-products { min-width: 860px; }
-.jt-table.jt-table-categories { min-width: 500px; }
-.jt-table.jt-table-tiers { min-width: 500px; }
-.jt-table.jt-table-resellers { min-width: 820px; }
-.jt-table.jt-table-orders { min-width: 860px; }
-.jt-table.jt-table-commissions { min-width: 760px; }
-.jt-table.jt-table-inventory { min-width: 900px; }
-.jt-table.jt-table-movements { min-width: 800px; }
 
 table.jt-table thead th,
 .jt-table thead th {
@@ -354,7 +520,6 @@ td .jt-thumb {
 
 .jt-btn:hover {
     transform: translateY(-1px);
-    filter: brightness(.97);
     color: var(--tx);
 }
 
@@ -422,11 +587,25 @@ td .jt-thumb {
     background-color: transparent;
     border-color: transparent;
     color: var(--mu);
+    transform: none !important;
+    transition: background-color 100ms ease, color 100ms ease;
 }
 
 .jt-btn-ghost:hover {
-    background-color: var(--soft);
-    color: var(--tx);
+    transform: none !important;
+    filter: none !important;
+    background-color: var(--soft) !important;
+    color: var(--tx) !important;
+}
+
+.jt-filter-actions .jt-btn {
+    transform: none !important;
+    filter: none !important;
+}
+
+.jt-filter-actions .jt-btn:hover {
+    transform: none !important;
+    filter: none !important;
 }
 
 .jt-btn-icon {
@@ -756,6 +935,126 @@ td .jt-thumb {
     .jt-card-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+/* ===================================================================
+   Mobile Stacked Table View (< 768px)
+   Transforms table rows into responsive cards with key-value data-labels.
+   =================================================================== */
+@media (max-width: 767.98px) {
+    /* Hide table toolbar controls on phones as cards display all fields */
+    .jt-table-controls {
+        display: none !important;
+    }
+
+    /* Hide table compact secondary lines on phone since all fields are shown */
+    .jt-table-wrap .jt-compact-sub {
+        display: none !important;
+    }
+
+    /* Table scroll wrapper does not scroll sideways */
+    .jt-table-scroll {
+        overflow-x: visible !important;
+        padding: 10px;
+    }
+
+    /* Transform table into stacked card list */
+    table.jt-table,
+    .jt-table,
+    .jt-table tbody,
+    .jt-table tr,
+    .jt-table td {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Hide table header row completely */
+    .jt-table thead {
+        display: none !important;
+    }
+
+    /* Each row is a card */
+    .jt-table tbody tr {
+        background-color: var(--card) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: var(--r) !important;
+        padding: 12px 14px !important;
+        margin-bottom: 12px !important;
+        box-shadow: var(--sh) !important;
+    }
+
+    .jt-table tbody tr:hover {
+        background-color: var(--card) !important;
+    }
+
+    /* Empty state row */
+    .jt-table tbody tr td[colspan] {
+        text-align: center !important;
+        padding: 24px 12px !important;
+        border: none !important;
+    }
+
+    /* Each cell is a key-value row */
+    .jt-table tbody td:not([colspan]) {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 6px 0 !important;
+        border-top: none !important;
+        border-bottom: 1px solid color-mix(in srgb, var(--line) 40%, transparent) !important;
+        background-color: transparent !important;
+        text-align: right !important;
+        font-size: 13.5px !important;
+        min-height: 36px;
+    }
+
+    /* Left label from data-label */
+    .jt-table tbody td[data-label]::before {
+        content: attr(data-label);
+        font-size: 11.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--mu);
+        text-align: left;
+        margin-right: 12px;
+        flex: 0 0 auto;
+    }
+
+    /* Top photo styling */
+    .jt-table tbody td[data-col="photo"] {
+        border-bottom: none !important;
+        padding-bottom: 4px !important;
+        justify-content: flex-start !important;
+    }
+    .jt-table tbody td[data-col="photo"]::before {
+        display: none !important;
+    }
+
+    /* Bottom Actions Row */
+    .jt-table tbody td[data-col="actions"],
+    .jt-table tbody td.jt-col-actions {
+        border-bottom: none !important;
+        padding-top: 10px !important;
+        padding-bottom: 0 !important;
+        justify-content: flex-end !important;
+        width: 100% !important;
+    }
+    .jt-table tbody td[data-col="actions"]::before,
+    .jt-table tbody td.jt-col-actions::before {
+        display: none !important;
+    }
+
+    .jt-table tbody td[data-col="actions"] .jt-action-group,
+    .jt-table tbody td.jt-col-actions .jt-action-group,
+    .jt-table tbody td[data-col="actions"] .d-inline-flex,
+    .jt-table tbody td.jt-col-actions .d-inline-flex {
+        width: 100%;
+        justify-content: flex-end;
+        gap: 6px;
     }
 }
 

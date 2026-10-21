@@ -147,20 +147,23 @@
                 </div>
 
                 <!-- Main Table Card -->
-                <div class="jt-card jt-table-wrap mb-0">
+                <div class="jt-card jt-table-wrap mb-0" data-table-id="report-commissions">
                     <div class="jt-card-header d-flex justify-content-between align-items-center">
                         <h6 class="fw-bold mb-0" style="color: var(--tx);"><i class="bi bi-cash-stack me-1 text-muted"></i> Commissions by Reseller</h6>
-                        <span class="jt-badge-total" th:text="${#lists.size(commissionRows)} + ' resellers'">0 resellers</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <div th:replace="~{fragments/layout :: tableControls('report-commissions')}"></div>
+                            <span class="jt-badge-total" th:text="${#lists.size(commissionRows)} + ' resellers'">0 resellers</span>
+                        </div>
                     </div>
                     <div class="jt-table-scroll">
                         <table class="jt-table">
                             <thead>
                                 <tr>
-                                    <th scope="col" style="padding-left: 18px;">Business Name</th>
-                                    <th scope="col" class="n text-center">Commissions</th>
-                                    <th scope="col" class="n text-end">Pending</th>
-                                    <th scope="col" class="n text-end">Paid</th>
-                                    <th scope="col" class="n text-end" style="padding-right: 18px;">Total</th>
+                                    <th scope="col" data-col="reseller" style="padding-left: 18px;">Business Name</th>
+                                    <th scope="col" data-col="commissions" class="n text-center">Commissions</th>
+                                    <th scope="col" data-col="pending" class="n text-end">Pending</th>
+                                    <th scope="col" data-col="paid" class="n text-end">Paid</th>
+                                    <th scope="col" data-col="total" class="n text-end" style="padding-right: 18px;">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -168,15 +171,15 @@
                                     <td colspan="5" class="text-center py-4" style="color: var(--mu);">No data for this period</td>
                                 </tr>
                                 <tr th:each="row : ${commissionRows}">
-                                    <td style="padding-left: 18px;" class="fw-medium" th:text="${row.businessName}">Reseller</td>
-                                    <td class="n text-center font-monospace" th:text="${row.commissionCount}">0</td>
-                                    <td class="n text-end font-monospace"
+                                    <td data-col="reseller" data-label="Business Name" style="padding-left: 18px;" class="fw-medium" th:text="${row.businessName}">Reseller</td>
+                                    <td data-col="commissions" data-label="Commissions" class="n text-center font-monospace" th:text="${row.commissionCount}">0</td>
+                                    <td data-col="pending" data-label="Pending" class="n text-end font-monospace"
                                         th:style="${row.pendingAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? 'color: var(--yt); font-weight: 600;' : 'color: var(--mu);'}"
                                         th:text="'₱' + ${#numbers.formatDecimal(row.pendingAmount, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td class="n text-end font-monospace"
+                                    <td data-col="paid" data-label="Paid" class="n text-end font-monospace"
                                         style="color: var(--gt);"
                                         th:text="'₱' + ${#numbers.formatDecimal(row.paidAmount, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td style="padding-right: 18px;" class="n text-end font-monospace fw-semibold"
+                                    <td data-col="total" data-label="Total" style="padding-right: 18px;" class="n text-end font-monospace fw-semibold"
                                         th:text="'₱' + ${#numbers.formatDecimal(row.totalAmount, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
                                 </tr>
                             </tbody>

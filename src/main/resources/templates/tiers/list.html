@@ -136,21 +136,24 @@
 
                     <!-- Tiers Table (Right / Bottom) -->
                     <div class="col-12 col-lg-8">
-                        <div class="jt-table-wrap">
+                        <div class="jt-table-wrap" data-table-id="tiers">
                             <div class="jt-table-header">
-                                <h6><i class="bi bi-award me-1"></i> Tier List</h6>
-                                <span class="jt-badge-total" th:text="${tiers.size()} + ' total'">0 total</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h6><i class="bi bi-award me-1"></i> Tier List</h6>
+                                    <span class="jt-badge-total" th:text="${tiers.size()} + ' total'">0 total</span>
+                                </div>
+                                <div th:replace="~{fragments/layout :: tableControls('tiers')}"></div>
                             </div>
                             <div class="jt-table-scroll">
                                 <table class="jt-table jt-table-tiers">
                                     <thead>
                                         <tr>
-                                            <th scope="col" style="width: 80px;">ID</th>
-                                            <th scope="col">Tier</th>
-                                            <th scope="col" class="n">Discount</th>
-                                            <th scope="col" class="n">Commission</th>
-                                            <th scope="col" class="n">Min. monthly order</th>
-                                            <th scope="col" class="n">Actions</th>
+                                            <th scope="col" data-col="id" data-col-name="ID" style="width: 80px;">ID</th>
+                                            <th scope="col" data-col="tier" data-col-name="Tier">Tier</th>
+                                            <th scope="col" data-col="discount" data-col-name="Discount" class="n">Discount</th>
+                                            <th scope="col" data-col="commission" data-col-name="Commission" class="n">Commission</th>
+                                            <th scope="col" data-col="minPurchase" data-col-name="Min. monthly order" class="n">Min. monthly order</th>
+                                            <th scope="col" data-col="actions" data-col-name="Actions" class="n">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -160,12 +163,12 @@
                                             </td>
                                         </tr>
                                         <tr th:each="tier : ${tiers}">
-                                            <td style="font-family: monospace; font-size: 13px; font-weight: 600; color: var(--mu);" th:text="${tier.tierId}">1</td>
-                                            <td><b th:text="${tier.tierName}">Bronze</b></td>
-                                            <td class="n" th:text="${#numbers.formatDecimal(tier.discountPct, 1, 2)} + '%'">0.00%</td>
-                                            <td class="n" th:text="${#numbers.formatDecimal(tier.commissionPct, 1, 2)} + '%'">0.00%</td>
-                                            <td class="n" style="font-weight: 600;" th:text="'₱' + ${#numbers.formatDecimal(tier.minMonthlyPurchase, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                            <td class="n">
+                                            <td data-col="id" data-label="ID" style="font-family: monospace; font-size: 13px; font-weight: 600; color: var(--mu);" th:text="${tier.tierId}">1</td>
+                                            <td data-col="tier" data-label="Tier"><b th:text="${tier.tierName}">Bronze</b></td>
+                                            <td data-col="discount" data-label="Discount" class="n" th:text="${#numbers.formatDecimal(tier.discountPct, 1, 2)} + '%'">0.00%</td>
+                                            <td data-col="commission" data-label="Commission" class="n" th:text="${#numbers.formatDecimal(tier.commissionPct, 1, 2)} + '%'">0.00%</td>
+                                            <td data-col="minPurchase" data-label="Min. monthly order" class="n" style="font-weight: 600;" th:text="'₱' + ${#numbers.formatDecimal(tier.minMonthlyPurchase, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                            <td data-col="actions" data-label="Actions" class="n">
                                                 <div class="jt-action-group justify-content-end">
                                                     <a th:href="@{'/admin/tiers/edit/' + ${tier.tierId}}"
                                                        class="jt-btn jt-btn-s"

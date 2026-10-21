@@ -160,18 +160,21 @@
                 <div class="row g-4 mb-4">
                     <!-- Sales by Reseller -->
                     <div class="col-12 col-lg-7">
-                        <div class="jt-card jt-table-wrap h-100 mb-0">
+                        <div class="jt-card jt-table-wrap h-100 mb-0" data-table-id="report-sales-reseller">
                             <div class="jt-card-header d-flex justify-content-between align-items-center">
                                 <h6 class="fw-bold mb-0" style="color: var(--tx);"><i class="bi bi-people me-1 text-muted"></i> Sales by Reseller</h6>
-                                <span class="jt-badge-total" th:text="${totalResellersCount} + ' resellers'">0 resellers</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div th:replace="~{fragments/layout :: tableControls('report-sales-reseller')}"></div>
+                                    <span class="jt-badge-total" th:text="${totalResellersCount} + ' resellers'">0 resellers</span>
+                                </div>
                             </div>
                             <div class="jt-table-scroll">
                                 <table class="jt-table">
                                     <thead>
                                         <tr>
-                                            <th scope="col" style="padding-left: 18px;">Business Name</th>
-                                            <th scope="col" class="n text-center">Orders</th>
-                                            <th scope="col" class="n text-end" style="padding-right: 18px;">Total Sales</th>
+                                            <th scope="col" data-col="reseller" style="padding-left: 18px;">Business Name</th>
+                                            <th scope="col" data-col="orders" class="n text-center">Orders</th>
+                                            <th scope="col" data-col="total" class="n text-end" style="padding-right: 18px;">Total Sales</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -181,9 +184,9 @@
                                             </td>
                                         </tr>
                                         <tr th:each="r : ${resellerSales}">
-                                            <td style="padding-left: 18px;" class="fw-medium" th:text="${r.businessName}">Reseller Business</td>
-                                            <td class="n text-center font-monospace" th:text="${r.orderCount}">0</td>
-                                            <td style="padding-right: 18px;" class="n text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(r.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                            <td data-col="reseller" data-label="Business Name" style="padding-left: 18px;" class="fw-medium" th:text="${r.businessName}">Reseller Business</td>
+                                            <td data-col="orders" data-label="Orders" class="n text-center font-monospace" th:text="${r.orderCount}">0</td>
+                                            <td data-col="total" data-label="Total Sales" style="padding-right: 18px;" class="n text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(r.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -205,7 +208,7 @@
 
                     <!-- Sales by Payment Method -->
                     <div class="col-12 col-lg-5">
-                        <div class="jt-card jt-table-wrap h-100 mb-0">
+                        <div class="jt-card jt-table-wrap h-100 mb-0" data-table-id="report-sales-pm">
                             <div class="jt-card-header d-flex justify-content-between align-items-center">
                                 <h6 class="fw-bold mb-0" style="color: var(--tx);"><i class="bi bi-credit-card me-1 text-muted"></i> Sales by Payment Method</h6>
                             </div>
@@ -213,9 +216,9 @@
                                 <table class="jt-table">
                                     <thead>
                                         <tr>
-                                            <th scope="col" style="padding-left: 18px;">Payment Method</th>
-                                            <th scope="col" class="n text-center">Orders</th>
-                                            <th scope="col" class="n text-end" style="padding-right: 18px;">Total</th>
+                                            <th scope="col" data-col="method" style="padding-left: 18px;">Payment Method</th>
+                                            <th scope="col" data-col="orders" class="n text-center">Orders</th>
+                                            <th scope="col" data-col="total" class="n text-end" style="padding-right: 18px;">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -225,7 +228,7 @@
                                             </td>
                                         </tr>
                                         <tr th:if="${totalOrders > 0}" th:each="pm : ${paymentMethodSales}">
-                                            <td style="padding-left: 18px;">
+                                            <td data-col="method" data-label="Payment Method" style="padding-left: 18px;">
                                                 <span class="jt-pill"
                                                       th:classappend="${pm.paymentMethod != null and pm.paymentMethod.name() == 'COD' ? 'b' :
                                                                        (pm.paymentMethod != null and pm.paymentMethod.name() == 'ONLINE' ? 't' : 'x')}"
@@ -233,8 +236,8 @@
                                                     Method
                                                 </span>
                                             </td>
-                                            <td class="n text-center font-monospace" th:text="${pm.orderCount}">0</td>
-                                            <td style="padding-right: 18px;" class="n text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(pm.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                            <td data-col="orders" data-label="Orders" class="n text-center font-monospace" th:text="${pm.orderCount}">0</td>
+                                            <td data-col="total" data-label="Total" style="padding-right: 18px;" class="n text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(pm.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -247,19 +250,22 @@
                 <div class="row g-4">
                     <!-- Sales by Product -->
                     <div class="col-12 col-lg-7">
-                        <div class="jt-card jt-table-wrap h-100 mb-0">
+                        <div class="jt-card jt-table-wrap h-100 mb-0" data-table-id="report-sales-product">
                             <div class="jt-card-header d-flex justify-content-between align-items-center">
                                 <h6 class="fw-bold mb-0" style="color: var(--tx);"><i class="bi bi-boxes me-1 text-muted"></i> Sales by Product</h6>
-                                <span class="jt-badge-total" th:text="${totalProductsCount} + ' products'">0 products</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div th:replace="~{fragments/layout :: tableControls('report-sales-product')}"></div>
+                                    <span class="jt-badge-total" th:text="${totalProductsCount} + ' products'">0 products</span>
+                                </div>
                             </div>
                             <div class="jt-table-scroll">
                                 <table class="jt-table">
                                     <thead>
                                         <tr>
-                                            <th scope="col" style="padding-left: 18px;">SKU</th>
-                                            <th scope="col">Product Name</th>
-                                            <th scope="col" class="n text-center">Qty Sold</th>
-                                            <th scope="col" class="n text-end" style="padding-right: 18px;">Revenue</th>
+                                            <th scope="col" data-col="sku" class="d-none d-sm-table-cell" style="padding-left: 18px;">SKU</th>
+                                            <th scope="col" data-col="name">Product Name</th>
+                                            <th scope="col" data-col="qty" class="n text-center">Qty Sold</th>
+                                            <th scope="col" data-col="revenue" class="n text-end" style="padding-right: 18px;">Revenue</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -269,10 +275,13 @@
                                             </td>
                                         </tr>
                                         <tr th:each="p : ${productSales}">
-                                            <td style="padding-left: 18px;" class="font-monospace small fw-semibold jt-sku-cell" th:text="${p.sku}">SKU-001</td>
-                                            <td class="fw-medium" th:text="${p.name}">Product Name</td>
-                                            <td class="n text-center font-monospace" th:text="${p.quantitySold}">0</td>
-                                            <td style="padding-right: 18px;" class="n text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(p.revenue, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                            <td data-col="sku" data-label="SKU" style="padding-left: 18px;" class="font-monospace small fw-semibold jt-sku-cell d-none d-sm-table-cell" th:text="${p.sku}">SKU-001</td>
+                                            <td data-col="name" data-label="Product Name">
+                                                <div class="fw-medium" th:text="${p.name}">Product Name</div>
+                                                <div class="jt-compact-sub text-muted font-monospace small" th:text="'SKU: ' + ${p.sku}">SKU-001</div>
+                                            </td>
+                                            <td data-col="qty" data-label="Qty Sold" class="n text-center font-monospace" th:text="${p.quantitySold}">0</td>
+                                            <td data-col="revenue" data-label="Revenue" style="padding-right: 18px;" class="n text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(p.revenue, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -294,7 +303,7 @@
 
                     <!-- Daily Sales Table -->
                     <div class="col-12 col-lg-5">
-                        <div class="jt-card jt-table-wrap h-100 mb-0">
+                        <div class="jt-card jt-table-wrap h-100 mb-0" data-table-id="report-sales-daily">
                             <div class="jt-card-header d-flex justify-content-between align-items-center">
                                 <h6 class="fw-bold mb-0" style="color: var(--tx);"><i class="bi bi-calendar-event me-1 text-muted"></i> Daily Sales</h6>
                             </div>
@@ -302,9 +311,9 @@
                                 <table class="jt-table">
                                     <thead>
                                         <tr>
-                                            <th scope="col" style="padding-left: 18px;">Date</th>
-                                            <th scope="col" class="n text-center">Orders</th>
-                                            <th scope="col" class="n text-end" style="padding-right: 18px;">Total</th>
+                                            <th scope="col" data-col="date" style="padding-left: 18px;">Date</th>
+                                            <th scope="col" data-col="orders" class="n text-center">Orders</th>
+                                            <th scope="col" data-col="total" class="n text-end" style="padding-right: 18px;">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -314,9 +323,9 @@
                                             </td>
                                         </tr>
                                         <tr th:each="d : ${dailySales}">
-                                            <td style="padding-left: 18px;" class="font-monospace small jt-sku-cell" th:text="${d.date}">2026-10-15</td>
-                                            <td class="n text-center font-monospace" th:text="${d.orderCount}">0</td>
-                                            <td style="padding-right: 18px;" class="n text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(d.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                            <td data-col="date" data-label="Date" style="padding-left: 18px;" class="font-monospace small jt-sku-cell" th:text="${d.date}">2026-10-15</td>
+                                            <td data-col="orders" data-label="Orders" class="n text-center font-monospace" th:text="${d.orderCount}">0</td>
+                                            <td data-col="total" data-label="Total" style="padding-right: 18px;" class="n text-end font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(d.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
                                         </tr>
                                     </tbody>
                                 </table>

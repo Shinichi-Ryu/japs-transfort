@@ -103,56 +103,59 @@
                 </div>
 
                 <!-- Products Table Card -->
-                <div class="jt-table-wrap">
+                <div class="jt-table-wrap" data-table-id="products">
                     <div class="jt-table-header">
-                        <h6><i class="bi bi-boxes me-1"></i> Products Catalog</h6>
-                        <span class="jt-badge-total" th:text="${productsPage.totalElements} + ' total'">0 total</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <h6><i class="bi bi-boxes me-1"></i> Products Catalog</h6>
+                            <span class="jt-badge-total" th:text="${productsPage.totalElements} + ' total'">0 total</span>
+                        </div>
+                        <div th:replace="~{fragments/layout :: tableControls('products')}"></div>
                     </div>
                     <div class="jt-table-scroll">
                         <table class="jt-table jt-table-products">
                             <thead>
                                 <tr>
                                     <!-- Photo column header (no sort) -->
-                                    <th scope="col" style="width: 56px;"></th>
-                                    <th scope="col">
+                                    <th scope="col" data-col="photo" data-col-name="Photo" style="width: 56px;"></th>
+                                    <th scope="col" data-col="sku" data-col-name="SKU" class="d-none d-xl-table-cell">
                                         <a th:href="@{/admin/products(search=${search}, categoryId=${categoryId}, status=${status}, sort='sku', dir=${sort == 'sku' ? reverseDir : 'asc'})}">
                                             SKU
                                             <i class="bi ms-1" th:classappend="${sort == 'sku' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col">
+                                    <th scope="col" data-col="name" data-col-name="Name">
                                         <a th:href="@{/admin/products(search=${search}, categoryId=${categoryId}, status=${status}, sort='name', dir=${sort == 'name' ? reverseDir : 'asc'})}">
                                             Name
                                             <i class="bi ms-1" th:classappend="${sort == 'name' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col">Category</th>
-                                    <th scope="col">Unit</th>
-                                    <th scope="col" class="n">
+                                    <th scope="col" data-col="category" data-col-name="Category">Category</th>
+                                    <th scope="col" data-col="unit" data-col-name="Unit" class="d-none d-md-table-cell">Unit</th>
+                                    <th scope="col" data-col="cost" data-col-name="Cost" class="n d-none d-lg-table-cell">
                                         <a th:href="@{/admin/products(search=${search}, categoryId=${categoryId}, status=${status}, sort='costPrice', dir=${sort == 'costPrice' ? reverseDir : 'asc'})}">
                                             Cost
                                             <i class="bi ms-1" th:classappend="${sort == 'costPrice' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col" class="n">
+                                    <th scope="col" data-col="srp" data-col-name="SRP" class="n">
                                         <a th:href="@{/admin/products(search=${search}, categoryId=${categoryId}, status=${status}, sort='srp', dir=${sort == 'srp' ? reverseDir : 'asc'})}">
                                             SRP
                                             <i class="bi ms-1" th:classappend="${sort == 'srp' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col" class="n">
+                                    <th scope="col" data-col="reorderLevel" data-col-name="Low Level" class="n d-none d-xxl-table-cell">
                                         <a th:href="@{/admin/products(search=${search}, categoryId=${categoryId}, status=${status}, sort='reorderLevel', dir=${sort == 'reorderLevel' ? reverseDir : 'asc'})}">
                                             Low level
                                             <i class="bi ms-1" th:classappend="${sort == 'reorderLevel' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col" style="text-align: center;">
+                                    <th scope="col" data-col="status" data-col-name="Status" style="text-align: center;">
                                         <a th:href="@{/admin/products(search=${search}, categoryId=${categoryId}, status=${status}, sort='isActive', dir=${sort == 'isActive' ? reverseDir : 'asc'})}">
                                             Status
                                             <i class="bi ms-1" th:classappend="${sort == 'isActive' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
                                         </a>
                                     </th>
-                                    <th scope="col" class="n" style="min-width: 90px;"></th>
+                                    <th scope="col" data-col="actions" data-col-name="Actions" class="n" style="min-width: 90px;"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -164,7 +167,7 @@
                                 <tr th:each="product : ${productsPage.content}"
                                     th:with="meta=${imageMetas[product.productId]}">
                                     <!-- Thumbnail cell -->
-                                    <td>
+                                    <td data-col="photo" data-label="Photo">
                                         <img th:if="${meta != null and meta.hasImage}"
                                              th:src="@{/products/{id}/image(id=${product.productId},v=${meta.version})}"
                                              alt="Product photo"
@@ -181,23 +184,26 @@
                                             </svg>
                                         </span>
                                     </td>
-                                    <td style="font-family: monospace; font-size: 13px; font-weight: 600; color: var(--mu);" th:text="${product.sku}">SKU-001</td>
-                                    <td><b th:text="${product.name}">Product Name</b></td>
-                                    <td>
+                                    <td data-col="sku" data-label="SKU" class="d-none d-xl-table-cell" style="font-family: monospace; font-size: 13px; font-weight: 600; color: var(--mu);" th:text="${product.sku}">SKU-001</td>
+                                    <td data-col="name" data-label="Name">
+                                        <b th:text="${product.name}">Product Name</b>
+                                        <div class="d-xl-none text-muted small font-monospace jt-compact-sub" th:text="${product.sku}">SKU-001</div>
+                                    </td>
+                                    <td data-col="category" data-label="Category">
                                         <span class="jt-pill b"
                                               th:text="${product.category != null ? product.category.name : 'Uncategorized'}">
                                             Category
                                         </span>
                                     </td>
-                                    <td style="color: var(--mu);" th:text="${product.unit}">pc</td>
-                                    <td class="n" th:text="'₱' + ${#numbers.formatDecimal(product.costPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td class="n" style="font-weight: 700;" th:text="'₱' + ${#numbers.formatDecimal(product.srp, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                    <td class="n" th:text="${product.reorderLevel}">10</td>
-                                    <td style="text-align: center;">
+                                    <td data-col="unit" data-label="Unit" class="d-none d-md-table-cell" style="color: var(--mu);" th:text="${product.unit}">pc</td>
+                                    <td data-col="cost" data-label="Cost" class="n d-none d-lg-table-cell" th:text="'₱' + ${#numbers.formatDecimal(product.costPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="srp" data-label="SRP" class="n" style="font-weight: 700;" th:text="'₱' + ${#numbers.formatDecimal(product.srp, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td data-col="reorderLevel" data-label="Low Level" class="n d-none d-xxl-table-cell" th:text="${product.reorderLevel}">10</td>
+                                    <td data-col="status" data-label="Status" style="text-align: center;">
                                         <span th:if="${product.isActive}" class="jt-pill g">Active</span>
                                         <span th:unless="${product.isActive}" class="jt-pill x">Inactive</span>
                                     </td>
-                                    <td class="n">
+                                    <td data-col="actions" data-label="Actions" class="n">
                                         <div class="jt-action-group justify-content-end">
                                             <a th:href="@{'/admin/products/edit/' + ${product.productId}}"
                                                class="jt-btn jt-btn-s jt-btn-icon"

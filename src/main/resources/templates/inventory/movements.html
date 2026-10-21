@@ -38,22 +38,25 @@
                 </div>
 
                 <!-- Movements Table Card -->
-                <div class="jt-card jt-table-wrap">
+                <div class="jt-card jt-table-wrap" data-table-id="movements">
                     <div class="jt-card-header d-flex justify-content-between align-items-center p-3 border-bottom" style="border-color: var(--line) !important;">
                         <h6 class="fw-bold mb-0" style="color: var(--tx);"><i class="bi bi-clock-history me-1 text-muted"></i> Movement Log</h6>
-                        <span class="jt-badge-total" th:text="${movementsPage.totalElements} + ' total'">0 total</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <div th:replace="~{fragments/layout :: tableControls('movements')}"></div>
+                            <span class="jt-badge-total" th:text="${movementsPage.totalElements} + ' total'">0 total</span>
+                        </div>
                     </div>
                     <div class="jt-table-scroll">
                         <table class="jt-table jt-table-movements">
                             <thead>
                                 <tr>
-                                    <th scope="col" style="padding-left: 20px;">Date</th>
-                                    <th scope="col">Product</th>
-                                    <th scope="col">Warehouse</th>
-                                    <th scope="col" class="text-center">Type</th>
-                                    <th scope="col" class="n text-end">Quantity</th>
-                                    <th scope="col">Reference</th>
-                                    <th scope="col" style="padding-right: 20px;">Recorded By</th>
+                                    <th scope="col" data-col="date" style="padding-left: 20px;">Date</th>
+                                    <th scope="col" data-col="product">Product</th>
+                                    <th scope="col" data-col="warehouse">Warehouse</th>
+                                    <th scope="col" data-col="type" class="text-center">Type</th>
+                                    <th scope="col" data-col="quantity" class="n text-end">Quantity</th>
+                                    <th scope="col" data-col="reference" class="d-none d-lg-table-cell">Reference</th>
+                                    <th scope="col" data-col="user" class="d-none d-md-table-cell" style="padding-right: 20px;">Recorded By</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -64,18 +67,18 @@
                                     </td>
                                 </tr>
                                 <tr th:each="m : ${movementsPage.content}">
-                                    <td class="small text-nowrap jt-sku-cell"
+                                    <td data-col="date" data-label="Date" class="small text-nowrap jt-sku-cell"
                                         th:text="${m.createdAt != null ? #temporals.format(m.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">
                                         2026-10-13 14:00
                                     </td>
-                                    <td>
+                                    <td data-col="product" data-label="Product">
                                         <div class="fw-bold" style="color: var(--tx);" th:text="${m.product != null ? m.product.name : 'Unknown Product'}">Product Name</div>
                                         <div class="small font-monospace" style="color: var(--mu);" th:text="${m.product != null ? m.product.sku : ''}">SKU-001</div>
                                     </td>
-                                    <td>
+                                    <td data-col="warehouse" data-label="Warehouse">
                                         <span class="fw-medium" style="color: var(--tx);" th:text="${m.warehouse != null ? m.warehouse.name : 'N/A'}">Main Warehouse</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td data-col="type" data-label="Type" class="text-center">
                                         <span class="jt-pill text-uppercase"
                                               th:classappend="${m.type.name() == 'in' ? 'g' :
                                                                (m.type.name() == 'out' ? 'b' :
@@ -84,7 +87,7 @@
                                             in
                                         </span>
                                     </td>
-                                    <td class="n text-end font-monospace">
+                                    <td data-col="quantity" data-label="Quantity" class="n text-end font-monospace">
                                         <span th:if="${m.type.name() == 'in'}" class="fw-bold" style="color: var(--gt);" th:text="'+' + ${m.quantity}">+10</span>
                                         <span th:if="${m.type.name() == 'out'}" class="fw-bold" style="color: var(--rt);" th:text="'-' + ${m.quantity}">-10</span>
                                         <span th:if="${m.type.name() == 'adjust'}"
@@ -95,10 +98,10 @@
                                         </span>
                                         <span th:if="${m.type.name() == 'return_'}" class="fw-bold" style="color: var(--yt);" th:text="'+' + ${m.quantity}">+1</span>
                                     </td>
-                                    <td>
+                                    <td data-col="reference" data-label="Reference" class="d-none d-lg-table-cell">
                                         <span class="font-monospace small" style="color: var(--tx);" th:text="${m.reference != null ? m.reference : '-'}">REF-001</span>
                                     </td>
-                                    <td style="padding-right: 20px;">
+                                    <td data-col="user" data-label="Recorded By" class="d-none d-md-table-cell" style="padding-right: 20px;">
                                         <span class="small fw-medium" style="color: var(--tx);" th:text="${m.createdBy != null ? m.createdBy.fullName : 'System'}">Admin</span>
                                     </td>
                                 </tr>
@@ -154,5 +157,6 @@
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>
 </html>

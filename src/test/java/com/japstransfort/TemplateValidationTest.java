@@ -162,4 +162,129 @@ public class TemplateValidationTest {
             }, "Template failed parsing: " + template);
         }
     }
+
+    @Test
+    void testOrderDetailAllStatuses() {
+        SpringTemplateEngine engine = new SpringTemplateEngine();
+        ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+        resolver.setPrefix("templates/");
+        resolver.setSuffix(".html");
+        resolver.setTemplateMode(TemplateMode.HTML);
+        engine.setTemplateResolver(resolver);
+
+        engine.setLinkBuilder(new StandardLinkBuilder() {
+            @Override
+            protected String computeContextPath(IExpressionContext context, String base, Map<String, Object> parameters) {
+                return "";
+            }
+        });
+
+        MockServletContext servletContext = new MockServletContext();
+        StaticWebApplicationContext wac = new StaticWebApplicationContext();
+        wac.setServletContext(servletContext);
+        wac.refresh();
+        servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+
+        JakartaServletWebApplication application = JakartaServletWebApplication.buildApplication(servletContext);
+
+        com.japstransfort.entity.OrderStatus[] statuses = {
+            com.japstransfort.entity.OrderStatus.pending,
+            com.japstransfort.entity.OrderStatus.approved,
+            com.japstransfort.entity.OrderStatus.packed,
+            com.japstransfort.entity.OrderStatus.shipped,
+            com.japstransfort.entity.OrderStatus.delivered,
+            com.japstransfort.entity.OrderStatus.cancelled
+        };
+
+        for (com.japstransfort.entity.OrderStatus status : statuses) {
+            MockHttpServletRequest request = new MockHttpServletRequest(servletContext);
+            MockHttpServletResponse response = new MockHttpServletResponse();
+
+            Map<String, Object> model = new HashMap<>();
+            com.japstransfort.entity.Order order = new com.japstransfort.entity.Order();
+            order.setOrderId(101);
+            order.setOrderNo("ORD-TEST-" + status.name());
+            order.setStatus(status);
+            order.setPaymentStatus(com.japstransfort.entity.PaymentStatus.unpaid);
+            order.setPaymentMethod(com.japstransfort.entity.PaymentMethod.COD);
+            order.setCreatedAt(java.time.LocalDateTime.now());
+            order.setTotal(java.math.BigDecimal.valueOf(1500));
+            order.setItems(Collections.emptyList());
+
+            com.japstransfort.entity.Reseller reseller = new com.japstransfort.entity.Reseller();
+            reseller.setBusinessName("Test Reseller");
+            reseller.setContactNo("09123456789");
+            reseller.setTerritory("Metro Manila");
+            com.japstransfort.entity.User user = new com.japstransfort.entity.User();
+            user.setFullName("Jane Doe");
+            user.setEmail("jane@example.com");
+            reseller.setUser(user);
+            order.setReseller(reseller);
+
+            if (status == com.japstransfort.entity.OrderStatus.cancelled) {
+                order.setCancelReason("Customer request");
+                order.setCancelledBy("Admin User");
+                order.setCancelledAt(java.time.LocalDateTime.now());
+            }
+
+            model.put("order", order);
+            model.put("warehouses", Collections.emptyList());
+            model.put("payments", Collections.emptyList());
+            model.put("amountPaid", java.math.BigDecimal.ZERO);
+            model.put("amountRemaining", java.math.BigDecimal.valueOf(1500));
+            model.put("_csrf", new org.springframework.security.web.csrf.DefaultCsrfToken("X-CSRF-TOKEN", "_csrf", "test-token"));
+
+            RequestContext requestContext = new RequestContext(request, response, servletContext, model);
+            request.setAttribute(RequestContext.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+            request.setAttribute("org.springframework.web.servlet.support.RequestContext", requestContext);
+            model.put("springRequestContext", requestContext);
+            model.put("thymeleafRequestContext", new org.thymeleaf.spring6.context.webmvc.SpringWebMvcThymeleafRequestContext(requestContext, request));
+
+            model.forEach(request::setAttribute);
+
+            IWebExchange webExchange = application.buildExchange(request, response);
+            WebContext webContext = new WebContext(webExchange, request.getLocale(), model);
+
+            String html = engine.process("admin/orders/detail", webContext);
+            System.out.println(">>> Verified order detail rendered successfully for status: " + status.name() + " (HTML length: " + html.length() + ")");
+
+            switch (status) {
+                case pending -> {
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("class=\"jt-step-h-item active\">\n                            <div class=\"jt-step-h-node\"><i class=\"bi bi-clock-history\"></i></div>\n                            <div class=\"jt-step-h-label\">Pending</div>")
+                            || html.contains("class=\"jt-step-h-item active\">\r\n                            <div class=\"jt-step-h-node\"><i class=\"bi bi-clock-history\"></i></div>\r\n                            <div class=\"jt-step-h-label\">Pending</div>"), "Pending step must be active");
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("id=\"warehouseSelect\""), "Approve warehouse select must be present");
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("confirmAdminCancel(this)"), "Cancel onsubmit must be present for pending");
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("name=\"cancelReason\""), "Cancel reason select must be present for pending");
+                    org.junit.jupiter.api.Assertions.assertFalse(html.contains("name=\"courier\""), "Courier should not be present in pending");
+                }
+                case approved -> {
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("class=\"jt-step-h-item active\">\n                            <div class=\"jt-step-h-node\"><i class=\"bi bi-check-circle\"></i></div>\n                            <div class=\"jt-step-h-label\">Approved</div>")
+                            || html.contains("class=\"jt-step-h-item active\">\r\n                            <div class=\"jt-step-h-node\"><i class=\"bi bi-check-circle\"></i></div>\r\n                            <div class=\"jt-step-h-label\">Approved</div>"), "Approved step must be active");
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("/admin/orders/101/pack"), "Pack action must be present");
+                    org.junit.jupiter.api.Assertions.assertFalse(html.contains("id=\"warehouseSelect\""), "Warehouse select should not be present in approved");
+                }
+                case packed -> {
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("class=\"jt-step-h-item active\">\n                            <div class=\"jt-step-h-node\"><i class=\"bi bi-box-seam\"></i></div>\n                            <div class=\"jt-step-h-label\">Packed</div>")
+                            || html.contains("class=\"jt-step-h-item active\">\r\n                            <div class=\"jt-step-h-node\"><i class=\"bi bi-box-seam\"></i></div>\r\n                            <div class=\"jt-step-h-label\">Packed</div>"), "Packed step must be active");
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("name=\"courier\""), "Courier input must be present");
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("name=\"trackingNo\""), "Tracking number input must be present");
+                }
+                case shipped -> {
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("class=\"jt-step-h-item active\">\n                            <div class=\"jt-step-h-node\"><i class=\"bi bi-truck\"></i></div>\n                            <div class=\"jt-step-h-label\">Shipped</div>")
+                            || html.contains("class=\"jt-step-h-item active\">\r\n                            <div class=\"jt-step-h-node\"><i class=\"bi bi-truck\"></i></div>\r\n                            <div class=\"jt-step-h-label\">Shipped</div>"), "Shipped step must be active");
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("id=\"cashCollected\""), "Cash collected checkbox must be present");
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("/admin/orders/101/deliver"), "Deliver action must be present");
+                }
+                case delivered -> {
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("class=\"jt-step-h-item active completed\">\n                            <div class=\"jt-step-h-node\"><i class=\"bi bi-check2-all\"></i></div>\n                            <div class=\"jt-step-h-label\">Delivered</div>")
+                            || html.contains("class=\"jt-step-h-item active completed\">\r\n                            <div class=\"jt-step-h-node\"><i class=\"bi bi-check2-all\"></i></div>\r\n                            <div class=\"jt-step-h-label\">Delivered</div>"), "Delivered step must be active completed");
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("This order has been <strong>delivered</strong> to the reseller."), "Delivered alert must be present");
+                }
+                case cancelled -> {
+                    org.junit.jupiter.api.Assertions.assertTrue(html.contains("This order was cancelled."), "Cancelled alert must be present");
+                    org.junit.jupiter.api.Assertions.assertFalse(html.contains("jt-step-h-item active"), "No step should be active when cancelled");
+                }
+            }
+        }
+    }
 }

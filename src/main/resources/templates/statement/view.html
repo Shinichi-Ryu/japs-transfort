@@ -5,32 +5,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${statement != null ? 'Statement – ' + statement.businessName : 'Statement of Account'}">Statement of Account</title>
+
+    <!-- Early script: sync theme & palette before first paint -->
+    <script>
+      (function(){
+        try {
+          var s = JSON.parse(localStorage.getItem('jt') || '{}');
+          var t = s.theme || localStorage.getItem('jt_theme') || 'light';
+          var p = s.palette || localStorage.getItem('jt_palette') || 'teal';
+          var cl = document.documentElement.classList;
+          cl.remove('dark','teal','navy','indigo','forest');
+          if (t === 'dark') cl.add('dark');
+          cl.add(p);
+        } catch(e){}
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/theme.css}" href="/css/theme.css">
+    <link rel="stylesheet" th:href="@{/css/lists.css}" href="/css/lists.css">
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+
+    <style>
+      @media screen {
+        body {
+          background-color: var(--bg) !important;
+          color: var(--tx) !important;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          min-height: 100vh;
+        }
+        .statement-screen-doc {
+          background: var(--card);
+          border: 1px solid var(--line);
+          border-radius: var(--r);
+          box-shadow: var(--sh);
+          padding: 2.25rem;
+        }
+        .statement-summary-card {
+          background: var(--card-2) !important;
+          border: 1px solid var(--line) !important;
+          border-radius: var(--r-sm) !important;
+        }
+        .statement-table {
+          color: var(--tx);
+        }
+        .statement-table thead th {
+          background: var(--card-2);
+          color: var(--mu);
+          font-weight: 600;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          border-bottom: 1px solid var(--line);
+        }
+        .statement-table td, .statement-table th {
+          border-color: var(--line);
+        }
+        .statement-opening-row, .statement-closing-row {
+          background: var(--card-2) !important;
+        }
+      }
+      @media print {
+        .statement-screen-doc {
+          background: #ffffff !important;
+          border: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+        }
+        .statement-summary-card {
+          background: #ffffff !important;
+          border: 1px solid #dee2e6 !important;
+        }
+      }
+    </style>
 </head>
-<body class="bg-white">
+<body>
 
     <!-- ── Top action bar (hidden on print) ────────────────────────────────── -->
-    <div class="no-print bg-light border-bottom py-3 mb-4">
+    <div class="no-print py-3 mb-4" style="background: var(--card); border-bottom: 1px solid var(--line); box-shadow: var(--sh);">
         <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <a th:href="${backUrl}" class="btn btn-outline-secondary btn-sm">
-                &larr; Back
+            <a th:href="${backUrl}" class="btn btn-outline-secondary btn-sm" style="border-radius: 999px; padding: 0.35rem 0.85rem;">
+                <i class="bi bi-arrow-left me-1"></i> Back
             </a>
             <div class="d-flex gap-2 flex-wrap" th:if="${statement != null}">
                 <!-- Export CSV -->
                 <a th:if="${isAdmin}"
                    th:href="@{'/admin/resellers/' + ${resellerId} + '/statement/export'(from=${fromDate}, to=${toDate})}"
-                   class="btn btn-outline-secondary btn-sm">
+                   class="btn btn-outline-secondary btn-sm" style="border-radius: 999px; padding: 0.35rem 0.85rem;">
                     <i class="bi bi-download me-1"></i> Export CSV
                 </a>
                 <a th:unless="${isAdmin}"
                    th:href="@{/portal/statement/export(from=${fromDate}, to=${toDate})}"
-                   class="btn btn-outline-secondary btn-sm">
+                   class="btn btn-outline-secondary btn-sm" style="border-radius: 999px; padding: 0.35rem 0.85rem;">
                     <i class="bi bi-download me-1"></i> Export CSV
                 </a>
                 <!-- Print -->
-                <button type="button" onclick="window.print()" class="btn btn-primary btn-sm">
+                <button type="button" onclick="window.print()" class="btn btn-primary btn-sm jt-btn-amber" style="border-radius: 999px; padding: 0.35rem 0.95rem;">
                     <i class="bi bi-printer me-1"></i> Print
                 </button>
             </div>
@@ -39,27 +113,25 @@
 
     <!-- ── Filter bar (hidden on print) ────────────────────────────────────── -->
     <div class="no-print container mb-4">
-        <div class="card table-card">
-            <div class="card-body p-3">
-                <form th:action="${isAdmin ? '/admin/resellers/' + resellerId + '/statement' : '/portal/statement'}"
-                      method="get" class="row g-2 align-items-end">
-                    <div class="col-12 col-sm-auto">
-                        <label class="form-label small fw-semibold mb-1">From</label>
-                        <input type="date" name="from" class="form-control form-control-sm"
-                               th:value="${fromDate}" required>
-                    </div>
-                    <div class="col-12 col-sm-auto">
-                        <label class="form-label small fw-semibold mb-1">To</label>
-                        <input type="date" name="to" class="form-control form-control-sm"
-                               th:value="${toDate}" required>
-                    </div>
-                    <div class="col-12 col-sm-auto">
-                        <button type="submit" class="btn btn-secondary btn-sm">
-                            <i class="bi bi-funnel me-1"></i> Apply
-                        </button>
-                    </div>
-                </form>
-            </div>
+        <div class="jt-card p-3">
+            <form th:action="${isAdmin ? '/admin/resellers/' + resellerId + '/statement' : '/portal/statement'}"
+                  method="get" class="row g-2 align-items-end">
+                <div class="col-12 col-sm-auto">
+                    <label class="form-label small fw-semibold mb-1" style="color: var(--tx);">From</label>
+                    <input type="date" name="from" class="form-control form-control-sm jt-input"
+                           th:value="${fromDate}" required style="min-width: 160px; height: 38px;">
+                </div>
+                <div class="col-12 col-sm-auto">
+                    <label class="form-label small fw-semibold mb-1" style="color: var(--tx);">To</label>
+                    <input type="date" name="to" class="form-control form-control-sm jt-input"
+                           th:value="${toDate}" required style="min-width: 160px; height: 38px;">
+                </div>
+                <div class="col-12 col-sm-auto">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm" style="border-radius: 999px; height: 38px; padding: 0 1rem;">
+                        <i class="bi bi-funnel me-1"></i> Apply
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -73,187 +145,191 @@
 
     <!-- ── Printable content ─────────────────────────────────────────────────── -->
     <div th:if="${statement != null}" class="container print-container pb-5">
+        <div class="statement-screen-doc">
 
-        <!-- Company & document header (same fragment as invoice/receipt) -->
-        <div th:replace="~{print/header :: header}"></div>
+            <!-- Company & document header (same fragment as invoice/receipt) -->
+            <div th:replace="~{print/header :: header}"></div>
 
-        <!-- Document title -->
-        <div class="text-center mb-4">
-            <h3 class="fw-bold text-uppercase text-dark mb-0">Statement of Account</h3>
-            <div class="text-muted small"
-                 th:text="'Period: ' + ${#temporals.format(statement.fromDate, 'MMM dd, yyyy')} + ' – ' + ${#temporals.format(statement.toDate, 'MMM dd, yyyy')}">
-                Period
-            </div>
-        </div>
-
-        <!-- Reseller info -->
-        <div class="row g-3 mb-4">
-            <div class="col-12 col-md-6">
-                <h6 class="text-muted text-uppercase small fw-bold mb-2">Account</h6>
-                <div class="fw-bold text-dark fs-6" th:text="${statement.businessName}">Business Name</div>
-                <div class="text-dark small"
-                     th:if="${statement.contactPerson != null and !#strings.isEmpty(statement.contactPerson)}"
-                     th:text="${statement.contactPerson}">Contact Person</div>
-                <div class="text-secondary small"
-                     th:if="${statement.address != null and !#strings.isEmpty(statement.address)}"
-                     th:text="${statement.address}">Address</div>
-                <div class="text-secondary small"
-                     th:if="${statement.cityLocation != null and !#strings.isEmpty(statement.cityLocation)}"
-                     th:text="${statement.cityLocation}">City / Location</div>
-            </div>
-        </div>
-
-        <!-- ── Summary card ─────────────────────────────────────────────────── -->
-        <div class="card border mb-4">
-            <div class="card-body p-3">
-                <div class="row g-3 text-center">
-                    <div class="col-6 col-md-4">
-                        <div class="text-muted small text-uppercase fw-semibold">Charged This Period</div>
-                        <div class="fw-bold font-monospace fs-6 text-dark"
-                             th:text="'₱' + ${#numbers.formatDecimal(statement.periodCharges, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="text-muted small text-uppercase fw-semibold">Paid This Period</div>
-                        <div class="fw-bold font-monospace fs-6 text-success"
-                             th:text="'₱' + ${#numbers.formatDecimal(statement.periodPayments, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="text-muted small text-uppercase fw-semibold">Closing Balance</div>
-                        <div class="fw-bold font-monospace fs-6"
-                             th:classappend="${statement.closingBalance.signum() > 0 ? 'text-danger' : 'text-dark'}"
-                             th:text="'₱' + ${#numbers.formatDecimal(statement.closingBalance, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="text-muted small text-uppercase fw-semibold">Account Balance</div>
-                        <div class="fw-bold font-monospace fs-6 text-dark"
-                             th:text="'₱' + ${#numbers.formatDecimal(statement.accountBalance, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="text-muted small text-uppercase fw-semibold">Credit Limit</div>
-                        <div class="fw-bold font-monospace fs-6 text-dark"
-                             th:text="'₱' + ${#numbers.formatDecimal(statement.creditLimit, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="text-muted small text-uppercase fw-semibold">Available Credit</div>
-                        <div class="fw-bold font-monospace fs-6"
-                             th:classappend="${statement.availableCredit.signum() < 0 ? 'text-danger' : 'text-success'}"
-                             th:text="'₱' + ${#numbers.formatDecimal(statement.availableCredit, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
-                    </div>
-                </div>
-
-                <!-- Reconciliation line -->
-                <div class="border-top mt-3 pt-2 text-center small"
-                     th:if="${statement.todayReport}">
-                    <span th:if="${statement.reconciliationOk}"
-                          class="text-success fw-semibold">
-                        <i class="bi bi-check-circle-fill me-1"></i>
-                        Closing balance matches the account balance.
-                    </span>
-                    <span th:unless="${statement.reconciliationOk}"
-                          class="text-warning fw-semibold">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                        Difference of ₱<span th:text="${#numbers.formatDecimal(statement.reconciliationDiff, 1, 'COMMA', 2, 'POINT')}">0.00</span> with the account balance.
-                    </span>
-                </div>
-
-                <!-- Note -->
-                <div class="mt-2 text-center text-muted small fst-italic">
-                    Orders are listed by order date.
+            <!-- Document title -->
+            <div class="text-center mb-4">
+                <h3 class="fw-bold text-uppercase mb-0" style="color: var(--tx);">Statement of Account</h3>
+                <div class="small" style="color: var(--mu);"
+                     th:text="'Period: ' + ${#temporals.format(statement.fromDate, 'MMM dd, yyyy')} + ' – ' + ${#temporals.format(statement.toDate, 'MMM dd, yyyy')}">
+                    Period
                 </div>
             </div>
+
+            <!-- Reseller info -->
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6">
+                    <h6 class="text-uppercase small fw-bold mb-2" style="color: var(--mu);">Account</h6>
+                    <div class="fw-bold fs-6" style="color: var(--tx);" th:text="${statement.businessName}">Business Name</div>
+                    <div class="small" style="color: var(--tx);"
+                         th:if="${statement.contactPerson != null and !#strings.isEmpty(statement.contactPerson)}"
+                         th:text="${statement.contactPerson}">Contact Person</div>
+                    <div class="small" style="color: var(--mu);"
+                         th:if="${statement.address != null and !#strings.isEmpty(statement.address)}"
+                         th:text="${statement.address}">Address</div>
+                    <div class="small" style="color: var(--mu);"
+                         th:if="${statement.cityLocation != null and !#strings.isEmpty(statement.cityLocation)}"
+                         th:text="${statement.cityLocation}">City / Location</div>
+                </div>
+            </div>
+
+            <!-- ── Summary card ─────────────────────────────────────────────────── -->
+            <div class="card statement-summary-card mb-4">
+                <div class="card-body p-3">
+                    <div class="row g-3 text-center">
+                        <div class="col-6 col-md-4">
+                            <div class="small text-uppercase fw-semibold" style="color: var(--mu);">Charged This Period</div>
+                            <div class="fw-bold font-monospace fs-6" style="color: var(--tx);"
+                                 th:text="'₱' + ${#numbers.formatDecimal(statement.periodCharges, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-uppercase fw-semibold" style="color: var(--mu);">Paid This Period</div>
+                            <div class="fw-bold font-monospace fs-6 text-success"
+                                 th:text="'₱' + ${#numbers.formatDecimal(statement.periodPayments, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-uppercase fw-semibold" style="color: var(--mu);">Closing Balance</div>
+                            <div class="fw-bold font-monospace fs-6"
+                                 th:classappend="${statement.closingBalance.signum() > 0 ? 'text-danger' : ''}"
+                                 th:style="${statement.closingBalance.signum() <= 0 ? 'color: var(--tx);' : ''}"
+                                 th:text="'₱' + ${#numbers.formatDecimal(statement.closingBalance, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-uppercase fw-semibold" style="color: var(--mu);">Account Balance</div>
+                            <div class="fw-bold font-monospace fs-6" style="color: var(--tx);"
+                                 th:text="'₱' + ${#numbers.formatDecimal(statement.accountBalance, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-uppercase fw-semibold" style="color: var(--mu);">Credit Limit</div>
+                            <div class="fw-bold font-monospace fs-6" style="color: var(--tx);"
+                                 th:text="'₱' + ${#numbers.formatDecimal(statement.creditLimit, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-uppercase fw-semibold" style="color: var(--mu);">Available Credit</div>
+                            <div class="fw-bold font-monospace fs-6"
+                                 th:classappend="${statement.availableCredit.signum() < 0 ? 'text-danger' : 'text-success'}"
+                                 th:text="'₱' + ${#numbers.formatDecimal(statement.availableCredit, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                        </div>
+                    </div>
+
+                    <!-- Reconciliation line -->
+                    <div class="border-top mt-3 pt-2 text-center small" style="border-color: var(--line) !important;"
+                         th:if="${statement.todayReport}">
+                        <span th:if="${statement.reconciliationOk}"
+                              class="text-success fw-semibold">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            Closing balance matches the account balance.
+                        </span>
+                        <span th:unless="${statement.reconciliationOk}"
+                              class="text-warning fw-semibold">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            Difference of ₱<span th:text="${#numbers.formatDecimal(statement.reconciliationDiff, 1, 'COMMA', 2, 'POINT')}">0.00</span> with the account balance.
+                        </span>
+                    </div>
+
+                    <!-- Note -->
+                    <div class="mt-2 text-center small fst-italic" style="color: var(--mu);">
+                        Orders are listed by order date.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Opening balance & Transactions ───────────────────────────────── -->
+            <div class="table-responsive mb-0">
+                <table class="table table-bordered align-middle mb-0 statement-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 11%;">Date</th>
+                            <th style="width: 12%;">Type</th>
+                            <th>Reference</th>
+                            <th style="width: 16%;" class="text-end">Debit</th>
+                            <th style="width: 16%;" class="text-end">Credit</th>
+                            <th style="width: 16%;" class="text-end">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Opening balance row -->
+                        <tr class="statement-opening-row fw-bold">
+                            <td class="small" th:text="${#temporals.format(statement.fromDate, 'yyyy-MM-dd')}">2026-01-01</td>
+                            <td class="small" style="color: var(--mu);"></td>
+                            <td class="small fw-bold">Opening Balance</td>
+                            <td class="text-end font-monospace small"></td>
+                            <td class="text-end font-monospace small"></td>
+                            <td class="text-end font-monospace fw-bold"
+                                th:text="'₱' + ${#numbers.formatDecimal(statement.openingBalance, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                        </tr>
+
+                        <!-- No transactions message -->
+                        <tr th:if="${statement.rows == null or statement.rows.empty}">
+                            <td colspan="6" class="text-center py-3 fst-italic" style="color: var(--mu);">
+                                No transactions in this period.
+                            </td>
+                        </tr>
+
+                        <!-- Transaction rows -->
+                        <tr th:each="row : ${statement.rows}">
+                            <td class="small" th:text="${row.date != null ? #temporals.format(row.date, 'yyyy-MM-dd') : ''}">2026-01-01</td>
+                            <td class="small">
+                                <span th:if="${row.type == 'Invoice'}" class="badge bg-primary-subtle text-primary border border-primary-subtle">Invoice</span>
+                                <span th:unless="${row.type == 'Invoice'}" class="badge bg-success-subtle text-success border border-success-subtle">Payment</span>
+                            </td>
+                            <td class="small font-monospace" style="white-space: nowrap;">
+                                <!-- Invoice row: link to order detail -->
+                                <a th:if="${row.type == 'Invoice' and isAdmin and row.orderId != null}"
+                                   th:href="@{/admin/orders/{id}(id=${row.orderId})}"
+                                   th:text="${row.reference}" class="text-decoration-none">REF</a>
+                                <a th:if="${row.type == 'Invoice' and !isAdmin and row.orderId != null}"
+                                   th:href="@{/portal/orders/{id}(id=${row.orderId})}"
+                                   th:text="${row.reference}" class="text-decoration-none">REF</a>
+                                <!-- Payment row: link to receipt -->
+                                <a th:if="${row.type != 'Invoice' and isAdmin and row.paymentId != null}"
+                                   th:href="@{/admin/payments/{id}/receipt(id=${row.paymentId})}"
+                                   th:text="${row.reference}" class="text-decoration-none">REF</a>
+                                <a th:if="${row.type != 'Invoice' and !isAdmin and row.paymentId != null}"
+                                   th:href="@{/portal/payments/{id}/receipt(id=${row.paymentId})}"
+                                   th:text="${row.reference}" class="text-decoration-none">REF</a>
+                            </td>
+                            <td class="text-end font-monospace small"
+                                th:if="${row.debit != null}"
+                                th:text="'₱' + ${#numbers.formatDecimal(row.debit, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                            <td class="text-end font-monospace small" style="color: var(--mu);" th:if="${row.debit != null}">–</td>
+
+                            <td class="text-end font-monospace small" style="color: var(--mu);" th:if="${row.credit != null}">–</td>
+                            <td class="text-end font-monospace small text-success"
+                                th:if="${row.credit != null}"
+                                th:text="'₱' + ${#numbers.formatDecimal(row.credit, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+
+                            <td class="text-end font-monospace small fw-semibold"
+                                th:classappend="${row.balance != null and row.balance.signum() > 0 ? 'text-danger' : ''}"
+                                th:text="${row.balance != null ? '₱' + #numbers.formatDecimal(row.balance, 1, 'COMMA', 2, 'POINT') : ''}">₱0.00</td>
+                        </tr>
+
+                        <!-- Closing balance row -->
+                        <tr class="statement-closing-row fw-bold">
+                            <td class="small" th:text="${#temporals.format(statement.toDate, 'yyyy-MM-dd')}">2026-01-31</td>
+                            <td class="small" style="color: var(--mu);"></td>
+                            <td class="small fw-bold">Closing Balance</td>
+                            <td class="text-end font-monospace small"></td>
+                            <td class="text-end font-monospace small"></td>
+                            <td class="text-end font-monospace fw-bold"
+                                th:classappend="${statement.closingBalance.signum() > 0 ? 'text-danger' : ''}"
+                                th:text="'₱' + ${#numbers.formatDecimal(statement.closingBalance, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="invoice-footer mt-5 pt-3 border-top text-center small"
+                 style="color: var(--mu); border-color: var(--line) !important;"
+                 th:if="${company != null and company.footer != null and !#strings.isEmpty(company.footer)}"
+                 th:text="${company.footer}">
+            </div>
+
         </div>
-
-        <!-- ── Opening balance ───────────────────────────────────────────────── -->
-        <div class="table-responsive mb-0">
-            <table class="table table-bordered align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 11%;">Date</th>
-                        <th style="width: 12%;">Type</th>
-                        <th>Reference</th>
-                        <th style="width: 16%;" class="text-end">Debit</th>
-                        <th style="width: 16%;" class="text-end">Credit</th>
-                        <th style="width: 16%;" class="text-end">Balance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Opening balance row -->
-                    <tr class="table-secondary fw-bold">
-                        <td class="small" th:text="${#temporals.format(statement.fromDate, 'yyyy-MM-dd')}">2026-01-01</td>
-                        <td class="small text-muted"></td>
-                        <td class="small fw-bold">Opening Balance</td>
-                        <td class="text-end font-monospace small"></td>
-                        <td class="text-end font-monospace small"></td>
-                        <td class="text-end font-monospace fw-bold"
-                            th:text="'₱' + ${#numbers.formatDecimal(statement.openingBalance, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                    </tr>
-
-                    <!-- No transactions message -->
-                    <tr th:if="${statement.rows == null or statement.rows.empty}">
-                        <td colspan="6" class="text-center text-muted py-3 fst-italic">
-                            No transactions in this period.
-                        </td>
-                    </tr>
-
-                    <!-- Transaction rows -->
-                    <tr th:each="row : ${statement.rows}">
-                        <td class="small" th:text="${row.date != null ? #temporals.format(row.date, 'yyyy-MM-dd') : ''}">2026-01-01</td>
-                        <td class="small">
-                            <span th:if="${row.type == 'Invoice'}" class="badge bg-primary-subtle text-primary border border-primary-subtle">Invoice</span>
-                            <span th:unless="${row.type == 'Invoice'}" class="badge bg-success-subtle text-success border border-success-subtle">Payment</span>
-                        </td>
-                        <td class="small font-monospace" style="white-space: nowrap;">
-                            <!-- Invoice row: link to order detail -->
-                            <a th:if="${row.type == 'Invoice' and isAdmin and row.orderId != null}"
-                               th:href="@{/admin/orders/{id}(id=${row.orderId})}"
-                               th:text="${row.reference}" class="text-decoration-none">REF</a>
-                            <a th:if="${row.type == 'Invoice' and !isAdmin and row.orderId != null}"
-                               th:href="@{/portal/orders/{id}(id=${row.orderId})}"
-                               th:text="${row.reference}" class="text-decoration-none">REF</a>
-                            <!-- Payment row: link to receipt -->
-                            <a th:if="${row.type != 'Invoice' and isAdmin and row.paymentId != null}"
-                               th:href="@{/admin/payments/{id}/receipt(id=${row.paymentId})}"
-                               th:text="${row.reference}" class="text-decoration-none">REF</a>
-                            <a th:if="${row.type != 'Invoice' and !isAdmin and row.paymentId != null}"
-                               th:href="@{/portal/payments/{id}/receipt(id=${row.paymentId})}"
-                               th:text="${row.reference}" class="text-decoration-none">REF</a>
-                        </td>
-                        <td class="text-end font-monospace small text-dark"
-                            th:if="${row.debit != null}"
-                            th:text="'₱' + ${#numbers.formatDecimal(row.debit, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                        <td class="text-end font-monospace small text-muted" th:if="${row.debit != null}">–</td>
-
-                        <td class="text-end font-monospace small text-muted" th:if="${row.credit != null}">–</td>
-                        <td class="text-end font-monospace small text-success"
-                            th:if="${row.credit != null}"
-                            th:text="'₱' + ${#numbers.formatDecimal(row.credit, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-
-                        <td class="text-end font-monospace small fw-semibold"
-                            th:classappend="${row.balance != null and row.balance.signum() > 0 ? 'text-danger' : 'text-dark'}"
-                            th:text="${row.balance != null ? '₱' + #numbers.formatDecimal(row.balance, 1, 'COMMA', 2, 'POINT') : ''}">₱0.00</td>
-                    </tr>
-
-                    <!-- Closing balance row -->
-                    <tr class="table-secondary fw-bold">
-                        <td class="small" th:text="${#temporals.format(statement.toDate, 'yyyy-MM-dd')}">2026-01-31</td>
-                        <td class="small text-muted"></td>
-                        <td class="small fw-bold">Closing Balance</td>
-                        <td class="text-end font-monospace small"></td>
-                        <td class="text-end font-monospace small"></td>
-                        <td class="text-end font-monospace fw-bold"
-                            th:classappend="${statement.closingBalance.signum() > 0 ? 'text-danger' : 'text-dark'}"
-                            th:text="'₱' + ${#numbers.formatDecimal(statement.closingBalance, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Footer -->
-        <div class="invoice-footer mt-5 pt-3 border-top text-center text-muted small"
-             th:if="${company != null and company.footer != null and !#strings.isEmpty(company.footer)}"
-             th:text="${company.footer}">
-        </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

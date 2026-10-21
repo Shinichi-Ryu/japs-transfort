@@ -313,6 +313,8 @@ a {
     opacity: 1 !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    position: relative;
+    isolation: isolate;
 }
 
 .card-header,
@@ -747,6 +749,8 @@ textarea:focus {
     opacity: 1 !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    position: relative;
+    isolation: isolate;
 }
 
 .kpi .k {
@@ -928,6 +932,8 @@ textarea:focus {
     flex: 1;
     min-width: 0;
     position: relative;
+    z-index: 1;           /* establishes stacking context above .bgfx (z-index:0) */
+    isolation: isolate;   /* belt-and-suspenders: no fixed descendants bleed through */
     display: flex;
     flex-direction: column;
 }
@@ -1521,6 +1527,8 @@ main {
     padding: 26px;
     box-sizing: border-box;
     min-width: 0;
+    position: relative;
+    isolation: isolate;
 }
 
 .table-responsive,

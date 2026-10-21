@@ -1093,8 +1093,8 @@ textarea:focus {
     gap: 10px;
     align-items: center;
     color: #fff;
-    font-weight: 800;
-    font-size: 17px;
+    font-weight: 700;
+    font-size: 16px;
     text-decoration: none;
     background: transparent !important;
     background-color: transparent !important;
@@ -1103,9 +1103,17 @@ textarea:focus {
     padding: 0;
     min-height: 0;
     border-radius: 0;
-    overflow: hidden;
-    flex: 1;
+    overflow: visible;
+    flex: 1 1 auto;
     min-width: 0;
+}
+
+.sbh .brand .lb2 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: visible;
 }
 
 .sbh .brand:hover {
@@ -1658,12 +1666,27 @@ main {
     inset: 0;
     background: rgba(5, 15, 25, 0.5);
     z-index: 1040;
+    cursor: pointer;
     transition: opacity 150ms ease;
 }
 
 @media (max-width: 991.98px) {
+    .mw {
+        isolation: auto;
+    }
+
+    .tb {
+        position: sticky;
+        top: 12px;
+        z-index: 1045;
+        margin: 12px 14px 0 !important;
+    }
+
     .tb-menu-btn {
         display: inline-flex !important;
+        position: relative;
+        z-index: 1046;
+        pointer-events: auto !important;
     }
 
     .sb {
@@ -1675,7 +1698,7 @@ main {
         margin: 0 !important;
         border-radius: 0 24px 24px 0 !important;
         z-index: 1050 !important;
-        width: 260px !important;
+        width: min(86vw, 320px) !important;
         transform: translateX(-105%);
         transition: transform 200ms ease !important;
         overflow-x: hidden;
@@ -1735,35 +1758,59 @@ main {
 
     .sbh {
         flex-direction: row !important;
-        padding: 6px 4px 14px 8px !important;
+        padding: 6px 6px 14px 8px !important;
         justify-content: space-between !important;
+        align-items: center !important;
         gap: 8px !important;
+        box-sizing: border-box !important;
     }
 
     .sbh .brand {
+        display: flex !important;
+        align-items: center !important;
         justify-content: flex-start !important;
+        gap: 10px !important;
         width: auto !important;
-        flex: 1 !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+    }
+
+    .sbh .brand .lb2 {
+        display: inline !important;
+        overflow: visible !important;
+        white-space: nowrap !important;
+        font-size: 16px !important;
+        font-weight: 700 !important;
     }
 
     .sbh .brand .lgo {
         width: 36px !important;
         height: 36px !important;
+        flex: none !important;
     }
 
     .sbt {
         margin: 0 !important;
     }
 
+    html.sb-open .sb,
+    html[data-drawer="open"] .sb,
     .app.sb-open .sb {
         transform: translateX(0) !important;
     }
 
+    html.sb-open .sb-backdrop,
+    html[data-drawer="open"] .sb-backdrop,
     .app.sb-open .sb-backdrop {
         display: block !important;
     }
 
     /* Lock body scroll when drawer is open */
+    html.sb-open,
+    html.sb-open body,
+    html[data-drawer="open"],
+    html[data-drawer="open"] body,
     body.sb-locked,
     .app.sb-open body,
     body:has(.app.sb-open) {

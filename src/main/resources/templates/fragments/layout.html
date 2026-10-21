@@ -167,7 +167,7 @@
 
     <!-- Topbar Fragment -->
     <header th:fragment="topbar(pageTitle, roleName)" class="tb">
-        <button type="button" class="tb-menu-btn" onclick="window.jtToggleDrawer(true)" aria-label="Open navigation drawer" aria-expanded="false" aria-controls="main-sidebar">
+        <button type="button" class="tb-menu-btn" onclick="window.jtToggleDrawer()" aria-label="Toggle navigation drawer" aria-expanded="false" aria-controls="main-sidebar">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <b class="tb-title" th:text="${pageTitle}">Dashboard</b>
@@ -401,36 +401,42 @@
                         window.jtToggleDrawer(false);
                         return;
                     }
-                    var app = document.querySelector('.app');
-                    var isMini = app ? app.classList.contains('mini') : document.documentElement.classList.contains('mini');
+                    var isMini = document.documentElement.getAttribute('data-sidebar') === 'mini' ||
+                                 document.documentElement.classList.contains('mini');
                     window.jt.setSidebar(isMini ? 'full' : 'mini');
                 };
 
                 window.jtToggleDrawer = function(open) {
+                    var doc = document.documentElement;
+                    var isOpen = doc.classList.contains('sb-open');
+                    var willOpen = typeof open === 'boolean' ? open : !isOpen;
+
                     var app = document.querySelector('.app');
-                    if (!app) return;
                     var btn = document.querySelector('.tb-menu-btn');
                     var sidebar = document.getElementById('main-sidebar');
-                    var willOpen = typeof open === 'boolean' ? open : !app.classList.contains('sb-open');
 
                     if (willOpen) {
-                        window.__jtLastFocus = document.activeElement;
-                        app.classList.add('sb-open');
+                        try { window.__jtLastFocus = document.activeElement; } catch(e) {}
+                        doc.classList.add('sb-open');
+                        doc.setAttribute('data-drawer', 'open');
+                        if (app) app.classList.add('sb-open');
                         document.body.classList.add('sb-locked');
                         if (btn) btn.setAttribute('aria-expanded', 'true');
                         if (sidebar) {
-                            var firstLink = sidebar.querySelector('.sb-nav a, .sbh a');
-                            if (firstLink) firstLink.focus();
+                            var firstNav = sidebar.querySelector('.sb-nav a');
+                            if (firstNav) firstNav.focus();
                         }
                     } else {
-                        app.classList.remove('sb-open');
+                        doc.classList.remove('sb-open');
+                        doc.removeAttribute('data-drawer');
+                        if (app) app.classList.remove('sb-open');
                         document.body.classList.remove('sb-locked');
                         if (btn) btn.setAttribute('aria-expanded', 'false');
                         if (window.__jtLastFocus && typeof window.__jtLastFocus.focus === 'function') {
-                            window.__jtLastFocus.focus();
+                            try { window.__jtLastFocus.focus(); } catch(e) {}
                             window.__jtLastFocus = null;
                         } else if (btn) {
-                            btn.focus();
+                            try { btn.focus(); } catch(e) {}
                         }
                     }
                 };
@@ -645,10 +651,13 @@
                     mql.addListener(handleBreakpoint);
                 }
 
-                // Throttled resize handler setting .resizing on html for ~150ms
+                // Throttled resize handler setting .resizing on html for ~150ms and resetting mobile drawer if desktop width reached
                 var resizeTimer;
                 window.addEventListener('resize', function() {
                     document.documentElement.classList.add('resizing');
+                    if (window.innerWidth >= 992 && document.documentElement.classList.contains('sb-open')) {
+                        window.jtToggleDrawer(false);
+                    }
                     clearTimeout(resizeTimer);
                     resizeTimer = setTimeout(function() {
                         document.documentElement.classList.remove('resizing');
@@ -680,6 +689,13 @@
                             }
                         });
                     }
+
+                    // Delegated click on backdrop for mobile drawer closing
+                    document.addEventListener('click', function(e) {
+                        if (e.target.closest('.sb-backdrop')) {
+                            window.jtToggleDrawer(false);
+                        }
+                    });
                 });
             })();
         </script>

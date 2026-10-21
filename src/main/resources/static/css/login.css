@@ -402,3 +402,230 @@ body.jt-login *::after {
         filter: none !important;
     }
 }
+
+/* ===================================================================
+   Register Page Extensions
+   Shares all jt-login- classes from above; these additions widen
+   the card, add the 2-col field grid, and style the checklist panel.
+   =================================================================== */
+
+/* Wider right-side scroll area for the register card */
+.jt-reg-form-side {
+    align-items: flex-start;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+/* The register card is wider than the login card */
+.jt-reg-card {
+    max-width: 720px;
+}
+
+/* The card header on register wraps icon + text in a row then column */
+.jt-reg-card .jt-login-card-header {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.jt-reg-card .jt-login-card-title {
+    font-size: 22px;
+}
+
+.jt-reg-card .jt-login-card-subtitle {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 4px;
+}
+
+/* 2-column field grid */
+.jt-reg-form {
+    gap: 0;
+}
+
+.jt-reg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+    margin-bottom: 16px;
+}
+
+/* Required asterisk */
+.jt-reg-required {
+    color: #D64533;
+}
+
+/* Server-side field error */
+.jt-reg-error {
+    font-size: 12px;
+    color: #D64533;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+/* Icon prefix button (non-interactive, purely decorative) */
+.jt-reg-icon-prefix {
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    border-radius: 12px !important;
+    border: 1px solid var(--jt-login-line) !important;
+    background-color: var(--jt-login-soft) !important;
+    color: var(--jt-login-mu) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Inputs inside the icon-prefix groups: keep rounded corners */
+.jt-reg-grid .jt-login-input-group .jt-login-input {
+    border-radius: 12px !important;
+}
+
+/* Highlight border on server-side invalid field */
+.jt-reg-invalid {
+    border-color: #D64533 !important;
+}
+
+.jt-reg-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(214, 69, 51, 0.2) !important;
+}
+
+/* Password Requirements panel — full width, 2-col rules */
+.jt-reg-checklist {
+    width: 100%;
+    background-color: var(--jt-login-soft);
+    border: 1px solid var(--jt-login-line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+
+.jt-reg-checklist-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--jt-login-mu);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+}
+
+.jt-reg-checklist-rules {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12.5px;
+}
+
+.jt-reg-checklist-rules .rule-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    transition: color 0.15s ease-in-out;
+    margin: 0;
+}
+
+.jt-reg-checklist-rules .rule-item.text-success {
+    color: #2E8B4A !important;
+}
+
+.jt-reg-checklist-rules .rule-item.text-danger {
+    color: #D64533 !important;
+}
+
+/* Live match indicator under Confirm Password */
+.jt-reg-match-indicator {
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 4px;
+    min-height: 18px;
+}
+
+/* Disabled submit state */
+.jt-login-btn-primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    filter: none;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+
+/* Tablet: single-column grid at 768px */
+@media (max-width: 900px) {
+    /* The banner is already hidden by the parent rule. On register we
+       show a slim top bar with the logo instead. */
+    .jt-reg-container .jt-login-banner {
+        display: flex !important;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 0;
+        padding: 14px 20px;
+        gap: 12px;
+        /* Reset the full-height banner to a slim bar */
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Hide the large SVG background & banner text content on mobile bar */
+    .jt-reg-container .jt-login-banner-content,
+    .jt-reg-container .jt-login-route-bg {
+        display: none;
+    }
+
+    /* Reposition brand to be inline (not absolute) inside the bar */
+    .jt-reg-container .jt-login-brand-top {
+        position: static;
+        top: auto;
+        left: auto;
+    }
+
+    .jt-reg-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+
+    .jt-reg-form-side {
+        padding-top: 24px;
+        padding-bottom: 40px;
+        align-items: flex-start;
+        /* Safe area insets for notched phones */
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+        padding-bottom: max(40px, env(safe-area-inset-bottom));
+    }
+
+    .jt-reg-card {
+        max-width: 100%;
+        padding: 28px 20px;
+    }
+
+    .jt-reg-card .jt-login-card-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Phone: single-column field grid */
+@media (max-width: 560px) {
+    .jt-reg-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .jt-reg-checklist-rules {
+        grid-template-columns: 1fr;
+    }
+
+    .jt-reg-card {
+        padding: 24px 16px;
+    }
+}

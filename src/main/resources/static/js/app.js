@@ -9,6 +9,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         initPasswordToggles();
         initPasswordChecklist();
+        initRegisterSubmit();
         initCatalogMultiSelect();
         initCartCheckboxes();
     });
@@ -144,6 +145,69 @@
 
         // Initialize state on page load
         updateRules();
+    }
+
+    /**
+     * Register page: keep the Submit button disabled until all password
+     * rules pass AND both password fields match.
+     * Only activates when the register form (#jt-reg-form) is present.
+     */
+    function initRegisterSubmit() {
+        var form = document.getElementById('jt-reg-form');
+        var submitBtn = document.getElementById('jt-reg-submit');
+        var pwdInput = document.getElementById('password');
+        var confirmInput = document.getElementById('confirmPassword');
+
+        if (!form || !submitBtn || !pwdInput || !confirmInput) {
+            return;
+        }
+
+        function hasSpecialChar(val) {
+            for (var i = 0; i < val.length; i++) {
+                var code = val.charCodeAt(i);
+                var char = val.charAt(i);
+                if (code >= 33 && code <= 126 && !/[a-zA-Z0-9]/.test(char)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function isAllPrintableAscii(val) {
+            if (val.length === 0) return false;
+            for (var i = 0; i < val.length; i++) {
+                var code = val.charCodeAt(i);
+                if (code < 32 || code > 126) return false;
+            }
+            return true;
+        }
+
+        function allRulesPassed(val) {
+            if (!val || val.length === 0) return false;
+            return (
+                val.length >= 8 && val.length <= 64 &&
+                /[A-Z]/.test(val) &&
+                /[a-z]/.test(val) &&
+                /[0-9]/.test(val) &&
+                hasSpecialChar(val) &&
+                !/\s/.test(val) &&
+                isAllPrintableAscii(val)
+            );
+        }
+
+        function syncSubmit() {
+            var pwdVal = pwdInput.value || '';
+            var confirmVal = confirmInput.value || '';
+            var ready = allRulesPassed(pwdVal) && confirmVal.length > 0 && confirmVal === pwdVal;
+            submitBtn.disabled = !ready;
+        }
+
+        pwdInput.addEventListener('input', syncSubmit);
+        confirmInput.addEventListener('input', syncSubmit);
+
+        // Initialize on page load (keep disabled unless server round-trip
+        // left values populated — e.g. validation error preserving input).
+        syncSubmit();
     }
 
     /**

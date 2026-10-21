@@ -369,27 +369,33 @@ td .jt-thumb {
     border-radius: 8px;
 }
 
-.jt-btn-p {
-    background-color: var(--navy);
-    border-color: var(--navy);
-    color: #fff !important;
+.jt-btn-p,
+.jt-btn-amber {
+    background-color: var(--amber) !important;
+    border-color: var(--amber) !important;
+    color: #2F2100 !important;
+    font-weight: 700;
 }
 
-.jt-btn-p:hover {
-    background-color: var(--n2);
-    border-color: var(--n2);
-    color: #fff !important;
-}
-
-[data-theme="dark"] .jt-btn-p {
-    background-color: var(--amber);
-    border-color: var(--amber);
+.jt-btn-p:hover,
+.jt-btn-amber:hover {
+    background-color: var(--amber) !important;
+    border-color: var(--amber) !important;
+    filter: brightness(1.06);
     color: #2F2100 !important;
 }
 
-[data-theme="dark"] .jt-btn-p:hover {
-    background-color: var(--amber);
-    border-color: var(--amber);
+[data-theme="dark"] .jt-btn-p,
+[data-theme="dark"] .jt-btn-amber {
+    background-color: var(--amber) !important;
+    border-color: var(--amber) !important;
+    color: #2F2100 !important;
+}
+
+[data-theme="dark"] .jt-btn-p:hover,
+[data-theme="dark"] .jt-btn-amber:hover {
+    background-color: var(--amber) !important;
+    border-color: var(--amber) !important;
     filter: brightness(1.06);
     color: #2F2100 !important;
 }
@@ -759,6 +765,392 @@ td .jt-thumb {
     }
 }
 
+/* ===================================================================
+   Shared Building Blocks (prefixed jt-)
+   Reused by list views, form views, detail pages, reports & portal
+   =================================================================== */
+
+/* Card Header Total Badge */
+.jt-badge-total {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+    background-color: var(--soft);
+    color: var(--mu);
+    border: 1px solid var(--line);
+    margin-left: 8px;
+}
+
+/* Form Section Cards */
+.jt-section-card,
+.jt-form-card {
+    background-color: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    box-shadow: var(--sh);
+    color: var(--tx);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.jt-section-card .jt-card-body,
+.jt-form-card .jt-card-body {
+    padding: 24px;
+}
+
+.jt-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--tx);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.jt-section-desc {
+    font-size: 13px;
+    color: var(--mu);
+    margin-top: 4px;
+    margin-bottom: 0;
+}
+
+/* Form Fields & Controls */
+.jt-field {
+    margin-bottom: 18px;
+}
+
+.jt-label,
+.jt-field label,
+.form-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tx);
+}
+
+.jt-control,
+.jt-field input[type="text"],
+.jt-field input[type="password"],
+.jt-field input[type="number"],
+.jt-field input[type="email"],
+.jt-field input[type="tel"],
+.jt-field input[type="date"],
+.jt-field input[type="file"],
+.jt-field select,
+.form-control,
+.form-select {
+    height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0 14px;
+    background-color: var(--card);
+    color: var(--tx);
+    font-family: inherit;
+    font-size: 13.5px;
+    transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.jt-field textarea,
+textarea.form-control {
+    height: auto;
+    min-height: 96px;
+    padding: 12px 14px;
+}
+
+.jt-control:focus,
+.jt-field input:focus,
+.jt-field select:focus,
+.jt-field textarea:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: 0;
+    border-color: var(--amber);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 25%, transparent);
+}
+
+/* Control Error State */
+.jt-control.is-invalid,
+.form-control.is-invalid,
+.form-select.is-invalid,
+.jt-field.has-error .form-control,
+.jt-field.has-error .form-select {
+    border-color: var(--c-r) !important;
+}
+
+.jt-control.is-invalid:focus,
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-r) 25%, transparent) !important;
+}
+
+.invalid-feedback,
+.jt-error {
+    color: var(--rt) !important;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Info Rows (Label + Value) */
+.jt-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+    gap: 12px;
+}
+
+.jt-info-row:last-child {
+    border-bottom: 0;
+}
+
+.jt-info-label {
+    color: var(--mu);
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.jt-info-value {
+    color: var(--tx);
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Tabs */
+.jt-tabs {
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 22px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.jt-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.jt-tab {
+    padding: 10px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--mu);
+    border: 0;
+    border-bottom: 2px solid transparent;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    background: transparent;
+    transition: color 140ms ease, border-color 140ms ease;
+}
+
+.jt-tab:hover {
+    color: var(--tx);
+}
+
+.jt-tab.active,
+.jt-tab.on {
+    color: var(--tx);
+    border-bottom-color: var(--amber);
+}
+
+/* Vertical Status Timeline */
+.jt-timeline {
+    position: relative;
+    padding-left: 28px;
+}
+
+.jt-timeline::before {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background-color: var(--line);
+}
+
+.jt-timeline-step {
+    position: relative;
+    margin-bottom: 22px;
+}
+
+.jt-timeline-step:last-child {
+    margin-bottom: 0;
+}
+
+.jt-timeline-dot {
+    position: absolute;
+    left: -28px;
+    top: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--card);
+    border: 2px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--mu);
+}
+
+.jt-timeline-step.completed .jt-timeline-dot {
+    border-color: var(--c-g);
+    background-color: var(--gb);
+    color: var(--gt);
+}
+
+.jt-timeline-step.active .jt-timeline-dot {
+    border-color: var(--amber);
+    background-color: var(--amber);
+    color: #2F2100;
+}
+
+.jt-timeline-title {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--tx);
+}
+
+.jt-timeline-time {
+    font-size: 12px;
+    color: var(--mu);
+    margin-top: 2px;
+}
+
+/* Horizontal Steps (Order Tracking) */
+.jt-steps-h {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin: 20px 0;
+}
+
+.jt-steps-h::before {
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: 24px;
+    right: 24px;
+    height: 2px;
+    background-color: var(--line);
+    z-index: 1;
+}
+
+.jt-step-h-item {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+}
+
+.jt-step-h-node {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--card);
+    border: 2px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--mu);
+    margin-bottom: 6px;
+}
+
+.jt-step-h-item.completed .jt-step-h-node {
+    border-color: var(--c-g);
+    background-color: var(--gb);
+    color: var(--gt);
+}
+
+.jt-step-h-item.active .jt-step-h-node {
+    border-color: var(--amber);
+    background-color: var(--amber);
+    color: #2F2100;
+}
+
+.jt-step-h-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mu);
+}
+
+.jt-step-h-item.active .jt-step-h-label,
+.jt-step-h-item.completed .jt-step-h-label {
+    color: var(--tx);
+}
+
+/* Empty State */
+.jt-empty {
+    padding: 48px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.jt-empty-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background-color: var(--soft);
+    color: var(--mu);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 14px;
+}
+
+.jt-empty-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--tx);
+    margin-bottom: 6px;
+}
+
+.jt-empty-desc {
+    font-size: 13.5px;
+    color: var(--mu);
+    max-width: 380px;
+    margin-bottom: 18px;
+    line-height: 1.45;
+}
+
+/* Additional Alert Types */
+.jt-alert-warning {
+    background-color: var(--yb);
+    color: var(--yt);
+    border: 1px solid color-mix(in srgb, var(--amber) 25%, transparent);
+}
+
+.jt-alert-info {
+    background-color: var(--bb);
+    color: var(--bt);
+    border: 1px solid color-mix(in srgb, var(--c-o) 25%, transparent);
+}
+
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -766,6 +1158,11 @@ td .jt-thumb {
     *::after {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
+    }
+    .mapg,
+    .pulse,
+    .mp-route {
+        animation: none !important;
     }
 }
 

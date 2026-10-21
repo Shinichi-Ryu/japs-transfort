@@ -18,7 +18,7 @@
     --soft: #EDF1F6;
     --tx: #13202E;
     --mu: #5A6B7D;
-    --r: 14px;
+    --r: 16px;
     --sh: 0 1px 3px rgba(11, 34, 57, 0.08);
 
     --c-o: #2F6FB0;
@@ -46,7 +46,7 @@
     --bs-card-color: var(--tx);
     --bs-card-cap-bg: transparent;
     --bs-card-border-color: var(--line);
-    --bs-card-border-radius: 14px;
+    --bs-card-border-radius: var(--r);
     --bs-border-color: var(--line);
     --bs-table-bg: transparent;
     --bs-table-color: var(--tx);
@@ -183,7 +183,7 @@
     --bs-card-color: var(--tx);
     --bs-card-cap-bg: transparent;
     --bs-card-border-color: var(--line);
-    --bs-card-border-radius: 14px;
+    --bs-card-border-radius: var(--r);
     --bs-border-color: var(--line);
     --bs-table-bg: transparent;
     --bs-table-color: var(--tx);
@@ -363,32 +363,42 @@ a {
 }
 
 .btn-primary,
-.btn.p {
-    background-color: var(--navy);
-    border-color: var(--navy);
-    color: #fff;
+.btn.p,
+.jt-btn-p,
+.jt-btn-amber {
+    background-color: var(--amber) !important;
+    border-color: var(--amber) !important;
+    color: #2F2100 !important;
+    font-weight: 700;
 }
 
 .btn-primary:hover,
-.btn.p:hover {
-    background-color: var(--n2);
-    border-color: var(--n2);
-    color: #fff;
+.btn.p:hover,
+.jt-btn-p:hover,
+.jt-btn-amber:hover {
+    filter: brightness(1.06);
+    background-color: var(--amber) !important;
+    border-color: var(--amber) !important;
+    color: #2F2100 !important;
 }
 
 [data-theme="dark"] .btn-primary,
-[data-theme="dark"] .btn.p {
-    background-color: var(--amber);
-    border-color: var(--amber);
-    color: #2F2100;
+[data-theme="dark"] .btn.p,
+[data-theme="dark"] .jt-btn-p,
+[data-theme="dark"] .jt-btn-amber {
+    background-color: var(--amber) !important;
+    border-color: var(--amber) !important;
+    color: #2F2100 !important;
 }
 
 [data-theme="dark"] .btn-primary:hover,
-[data-theme="dark"] .btn.p:hover {
+[data-theme="dark"] .btn.p:hover,
+[data-theme="dark"] .jt-btn-p:hover,
+[data-theme="dark"] .jt-btn-amber:hover {
     filter: brightness(1.06);
-    background-color: var(--amber);
-    border-color: var(--amber);
-    color: #2F2100;
+    background-color: var(--amber) !important;
+    border-color: var(--amber) !important;
+    color: #2F2100 !important;
 }
 
 .btn-outline-primary {

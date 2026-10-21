@@ -14,16 +14,19 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Theme CSS -->
     <link rel="stylesheet" th:href="@{/css/theme.css}" href="/css/theme.css">
+    <link rel="stylesheet" th:href="@{/css/lists.css}" href="/css/lists.css">
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
     <!-- Inline appearance script before first paint to prevent flash -->
     <script>
         (function() {
             try {
-                var theme = localStorage.getItem('jt.theme') || 'light';
-                var pal = localStorage.getItem('jt.pal') || 'teal';
-                var bg = localStorage.getItem('jt.bg') || 'map';
-                var motion = localStorage.getItem('jt.motion') || 'animated';
-                var sidebar = localStorage.getItem('jt.sidebar') || 'full';
+                var s = null;
+                try { s = JSON.parse(localStorage.getItem('jt') || '{}'); } catch(e) { s = {}; }
+                var theme = (s && s.t) || localStorage.getItem('jt.theme') || 'light';
+                var pal = (s && s.p) || localStorage.getItem('jt.pal') || 'teal';
+                var bg = (s && s.b) || localStorage.getItem('jt.bg') || 'map';
+                var motion = (s && s.m) || localStorage.getItem('jt.motion') || 'animated';
+                var sidebar = (s && s.s) || localStorage.getItem('jt.sidebar') || 'full';
                 var doc = document.documentElement;
                 doc.setAttribute('data-theme', theme);
                 doc.setAttribute('data-bs-theme', theme);
@@ -232,25 +235,47 @@
                     settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'
                 };
 
-                // Appearance API
+                // Appearance API & Unified Storage
+                function getSettings() {
+                    try { return JSON.parse(localStorage.getItem('jt') || '{}'); } catch(e) { return {}; }
+                }
+                function saveSettings(s) {
+                    try {
+                        localStorage.setItem('jt', JSON.stringify(s));
+                        if (s.t) localStorage.setItem('jt.theme', s.t);
+                        if (s.p) localStorage.setItem('jt.pal', s.p);
+                        if (s.b) localStorage.setItem('jt.bg', s.b);
+                        if (s.m) localStorage.setItem('jt.motion', s.m);
+                        if (s.s) localStorage.setItem('jt.sidebar', s.s);
+                    } catch(e) {}
+                }
+
                 window.jt = {
                     setTheme: function(theme) {
                         document.documentElement.setAttribute('data-theme', theme);
                         document.documentElement.setAttribute('data-bs-theme', theme);
-                        localStorage.setItem('jt.theme', theme);
+                        var s = getSettings();
+                        s.t = theme;
+                        saveSettings(s);
                     },
                     setPal: function(pal) {
                         document.documentElement.setAttribute('data-pal', pal);
-                        localStorage.setItem('jt.pal', pal);
+                        var s = getSettings();
+                        s.p = pal;
+                        saveSettings(s);
                     },
                     setBg: function(bg) {
                         document.documentElement.setAttribute('data-bg', bg);
-                        localStorage.setItem('jt.bg', bg);
+                        var s = getSettings();
+                        s.b = bg;
+                        saveSettings(s);
                         window.jtApplyBg(bg);
                     },
                     setMotion: function(motion) {
                         document.documentElement.setAttribute('data-motion', motion);
-                        localStorage.setItem('jt.motion', motion);
+                        var s = getSettings();
+                        s.m = motion;
+                        saveSettings(s);
                         var isStill = motion === 'still';
                         if (isStill) {
                             document.documentElement.classList.add('still');
@@ -271,7 +296,9 @@
                     },
                     setSidebar: function(sidebar) {
                         document.documentElement.setAttribute('data-sidebar', sidebar);
-                        localStorage.setItem('jt.sidebar', sidebar);
+                        var s = getSettings();
+                        s.s = sidebar;
+                        saveSettings(s);
                         var app = document.querySelector('.app');
                         if (sidebar === 'mini') {
                             document.documentElement.classList.add('mini');
@@ -284,10 +311,38 @@
                 };
 
                 window.jtToggleMotion = function() {
-                    var cur = localStorage.getItem('jt.motion') || 'animated';
+                    var s = getSettings();
+                    var cur = s.m || localStorage.getItem('jt.motion') || 'animated';
                     var next = (cur === 'animated') ? 'still' : 'animated';
                     window.jt.setMotion(next);
                 };
+
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'jt' || e.key === 'jt.theme' || e.key === 'jt.pal' || e.key === 'jt.sidebar' || e.key === 'jt.motion' || e.key === 'jt.bg') {
+                        var s = getSettings();
+                        var theme = s.t || localStorage.getItem('jt.theme') || 'light';
+                        var pal = s.p || localStorage.getItem('jt.pal') || 'teal';
+                        var bg = s.b || localStorage.getItem('jt.bg') || 'map';
+                        var motion = s.m || localStorage.getItem('jt.motion') || 'animated';
+                        var sidebar = s.s || localStorage.getItem('jt.sidebar') || 'full';
+                        document.documentElement.setAttribute('data-theme', theme);
+                        document.documentElement.setAttribute('data-bs-theme', theme);
+                        document.documentElement.setAttribute('data-pal', pal);
+                        document.documentElement.setAttribute('data-bg', bg);
+                        document.documentElement.setAttribute('data-motion', motion);
+                        document.documentElement.setAttribute('data-sidebar', sidebar);
+                        if (sidebar === 'mini') {
+                            document.documentElement.classList.add('mini');
+                            var app = document.querySelector('.app');
+                            if (app) app.classList.add('mini');
+                        } else {
+                            document.documentElement.classList.remove('mini');
+                            var app = document.querySelector('.app');
+                            if (app) app.classList.remove('mini');
+                        }
+                        window.jtApplyBg(bg);
+                    }
+                });
 
                 var cachedMapSvg = null;
                 function getMapSvg() {

@@ -1,53 +1,68 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
-<head>
+<head th:replace="~{fragments/layout :: htmlHead('Account Settings')}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Settings - Japs Transfort</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/theme.css}" href="/css/theme.css">
+    <link rel="stylesheet" th:href="@{/css/lists.css}" href="/css/lists.css">
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
 </head>
 <body>
-    <!-- Navbar Fragment depending on role -->
-    <div sec:authorize="hasRole('RESELLER')">
-        <div th:replace="~{fragments/navbar :: resellerNav('account')}"></div>
-    </div>
-    <div sec:authorize="!hasRole('RESELLER')">
-        <div th:replace="~{fragments/navbar :: headerNav('account')}"></div>
-    </div>
+    <div class="app">
+        <!-- Mobile Drawer Backdrop -->
+        <div class="sb-backdrop" onclick="window.jtToggleDrawer(false)" aria-hidden="true"></div>
 
-    <div class="container py-4">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-10 col-lg-8">
+        <!-- Sidebar (dynamically wired to reseller or admin menu) -->
+        <aside th:replace="~{fragments/layout :: sidebar('account', ${isReseller ? 'reseller' : 'admin'})}"></aside>
+
+        <!-- Main Content Area -->
+        <div class="mw">
+            <!-- Background effects -->
+            <div th:replace="~{fragments/layout :: bgfx}"></div>
+
+            <!-- Sticky Topbar -->
+            <header th:replace="~{fragments/layout :: topbar('Account Settings', ${isReseller ? 'reseller' : 'admin'})}"></header>
+
+            <main>
                 <!-- Page Header -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="jt-ph">
                     <div>
-                        <h4 class="fw-bold mb-0">Account Settings</h4>
-                        <p class="text-muted small mb-0">Manage your profile details and security credentials</p>
+                        <h1>Account Settings</h1>
+                        <div class="jt-sub">Manage your profile details, security credentials, and display preferences</div>
+                    </div>
+                    <div class="jt-ph-actions">
+                        <span class="pill b" th:if="${isReseller}"><i class="bi bi-shield-check me-1"></i> Reseller Account</span>
+                        <span class="pill b" th:unless="${isReseller}"><i class="bi bi-shield-lock me-1"></i> Administrator</span>
                     </div>
                 </div>
 
                 <!-- Profile Success Alert -->
-                <div th:if="${profileSuccessMessage}" class="alert alert-success alert-dismissible fade show small mb-3" role="alert">
-                    <i class="bi bi-check-circle-fill me-1"></i>
-                    <span th:text="${profileSuccessMessage}">Profile updated successfully.</span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div th:if="${profileSuccessMessage}" class="jt-alert jt-alert-success alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <span th:text="${profileSuccessMessage}">Profile updated successfully.</span>
+                    </div>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
                 <!-- Password Success Alert -->
-                <div th:if="${passwordSuccessMessage}" class="alert alert-success alert-dismissible fade show small mb-3" role="alert">
-                    <i class="bi bi-check-circle-fill me-1"></i>
-                    <span th:text="${passwordSuccessMessage}">Password changed successfully.</span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div th:if="${passwordSuccessMessage}" class="jt-alert jt-alert-success alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <span th:text="${passwordSuccessMessage}">Password changed successfully.</span>
+                    </div>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
                 <!-- SECTION 1: PROFILE SECTION -->
-                <div class="card table-card mb-4 shadow-sm">
-                    <div class="card-header table-header">
-                        <h6 class="fw-bold mb-0">
-                            <i class="bi bi-person-circle me-1"></i> Profile Information
+                <div class="card jt-card mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="fw-bold mb-0" style="color: var(--tx);">
+                            <i class="bi bi-person-circle me-1" style="color: var(--navy);"></i> Profile Information
                         </h6>
                     </div>
                     <div class="card-body p-4">
@@ -55,7 +70,7 @@
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
                             <!-- Global Profile Errors -->
-                            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger py-2 small mb-3">
+                            <div th:if="${#fields.hasGlobalErrors()}" class="jt-alert jt-alert-danger alert py-2 mb-3">
                                 <ul class="mb-0 ps-3">
                                     <li th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</li>
                                 </ul>
@@ -64,50 +79,50 @@
                             <!-- RESELLER PROFILE FIELDS -->
                             <div th:if="${isReseller}">
                                 <!-- Read-only Reseller Information -->
-                                <h6 class="fw-semibold text-primary border-bottom pb-2 mb-3">Account Overview (Read-Only)</h6>
-                                <div class="row g-3 mb-3">
+                                <h6 class="fw-semibold pb-2 mb-3" style="color: var(--navy); border-bottom: 1px solid var(--line);">Account Overview (Read-Only)</h6>
+                                <div class="row g-3 mb-4">
                                     <div class="col-12 col-md-6">
-                                        <label class="form-label small fw-medium text-muted">Email (Login ID)</label>
-                                        <input type="text" class="form-control bg-light" th:value="${user.email}" readonly disabled>
+                                        <label class="form-label small fw-medium" style="color: var(--mu);">Email (Login ID)</label>
+                                        <input type="text" class="form-control" style="background-color: var(--soft);" th:value="${user.email}" readonly disabled>
                                     </div>
                                     <div class="col-12 col-md-6">
-                                        <label class="form-label small fw-medium text-muted">Assigned Tier &amp; Discount</label>
-                                        <input type="text" class="form-control bg-light"
+                                        <label class="form-label small fw-medium" style="color: var(--mu);">Assigned Tier &amp; Discount</label>
+                                        <input type="text" class="form-control" style="background-color: var(--soft);"
                                                th:value="${reseller != null && reseller.tier != null ? reseller.tier.tierName + ' (' + #numbers.formatDecimal(reseller.tier.discountPct, 1, 2) + '%)' : 'None (0.00%)'}"
                                                readonly disabled>
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label class="form-label small fw-medium text-muted">Credit Limit</label>
+                                        <label class="form-label small fw-medium" style="color: var(--mu);">Credit Limit</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light">₱</span>
-                                            <input type="text" class="form-control bg-light font-monospace"
+                                            <span class="input-group-text" style="background-color: var(--soft);">₱</span>
+                                            <input type="text" class="form-control font-monospace" style="background-color: var(--soft);"
                                                    th:value="${reseller != null && reseller.creditLimit != null ? #numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT') : '0.00'}"
                                                    readonly disabled>
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label class="form-label small fw-medium text-muted">Current Balance</label>
+                                        <label class="form-label small fw-medium" style="color: var(--mu);">Current Balance</label>
                                         <div class="input-group">
-                                            <span class="input-group-text bg-light">₱</span>
-                                            <input type="text" class="form-control bg-light font-monospace"
+                                            <span class="input-group-text" style="background-color: var(--soft);">₱</span>
+                                            <input type="text" class="form-control font-monospace text-danger" style="background-color: var(--soft);"
                                                    th:value="${reseller != null && reseller.balance != null ? #numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT') : '0.00'}"
                                                    readonly disabled>
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label class="form-label small fw-medium text-muted">Status</label>
-                                        <input type="text" class="form-control bg-light text-capitalize"
+                                        <label class="form-label small fw-medium" style="color: var(--mu);">Status</label>
+                                        <input type="text" class="form-control text-capitalize" style="background-color: var(--soft);"
                                                th:value="${reseller != null && reseller.status != null ? reseller.status : 'Active'}"
                                                readonly disabled>
                                     </div>
                                 </div>
 
                                 <!-- Editable Reseller Fields -->
-                                <h6 class="fw-semibold text-primary border-bottom pb-2 mb-3 mt-4">Editable Details</h6>
+                                <h6 class="fw-semibold pb-2 mb-3 mt-4" style="color: var(--navy); border-bottom: 1px solid var(--line);">Editable Details</h6>
                                 <div class="row g-3">
                                     <!-- Business Name -->
                                     <div class="col-12 col-md-6">
-                                        <label for="businessName" class="form-label small fw-medium">Business / Enterprise Name <span class="text-danger">*</span></label>
+                                        <label for="businessName" class="form-label small fw-medium" style="color: var(--tx);">Business / Enterprise Name <span class="text-danger">*</span></label>
                                         <input type="text"
                                                class="form-control"
                                                id="businessName"
@@ -123,7 +138,7 @@
 
                                     <!-- Contact Person (users.full_name) -->
                                     <div class="col-12 col-md-6">
-                                        <label for="resellerFullName" class="form-label small fw-medium">Contact Person (Full Name) <span class="text-danger">*</span></label>
+                                        <label for="resellerFullName" class="form-label small fw-medium" style="color: var(--tx);">Contact Person (Full Name) <span class="text-danger">*</span></label>
                                         <input type="text"
                                                class="form-control"
                                                id="resellerFullName"
@@ -139,7 +154,7 @@
 
                                     <!-- Contact Number -->
                                     <div class="col-12 col-md-6">
-                                        <label for="contactNo" class="form-label small fw-medium">Contact Number</label>
+                                        <label for="contactNo" class="form-label small fw-medium" style="color: var(--tx);">Contact Number</label>
                                         <input type="text"
                                                class="form-control"
                                                id="contactNo"
@@ -154,7 +169,7 @@
 
                                     <!-- City/Location (territory column) -->
                                     <div class="col-12 col-md-6">
-                                        <label for="territory" class="form-label small fw-medium">City/Location</label>
+                                        <label for="territory" class="form-label small fw-medium" style="color: var(--tx);">City/Location</label>
                                         <input type="text"
                                                class="form-control"
                                                id="territory"
@@ -169,7 +184,7 @@
 
                                     <!-- Address -->
                                     <div class="col-12">
-                                        <label for="address" class="form-label small fw-medium">Address</label>
+                                        <label for="address" class="form-label small fw-medium" style="color: var(--tx);">Address</label>
                                         <textarea class="form-control"
                                                   id="address"
                                                   rows="2"
@@ -188,13 +203,13 @@
                                 <div class="row g-3">
                                     <!-- Read-only Email -->
                                     <div class="col-12 col-md-6">
-                                        <label class="form-label small fw-medium text-muted">Email (Read-only)</label>
-                                        <input type="text" class="form-control bg-light" th:value="${user.email}" readonly disabled>
+                                        <label class="form-label small fw-medium" style="color: var(--mu);">Email (Read-only)</label>
+                                        <input type="text" class="form-control" style="background-color: var(--soft);" th:value="${user.email}" readonly disabled>
                                     </div>
 
                                     <!-- Editable Full Name -->
                                     <div class="col-12 col-md-6">
-                                        <label for="adminFullName" class="form-label small fw-medium">Full Name <span class="text-danger">*</span></label>
+                                        <label for="adminFullName" class="form-label small fw-medium" style="color: var(--tx);">Full Name <span class="text-danger">*</span></label>
                                         <input type="text"
                                                class="form-control"
                                                id="adminFullName"
@@ -210,8 +225,8 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex justify-content-end mt-4 pt-3 border-top">
-                                <button type="submit" class="btn btn-primary btn-sm">
+                            <div class="d-flex justify-content-end mt-4 pt-3 border-top" style="border-color: var(--line) !important;">
+                                <button type="submit" class="jt-btn jt-btn-p">
                                     <i class="bi bi-check-lg me-1"></i> Save Profile
                                 </button>
                             </div>
@@ -220,10 +235,10 @@
                 </div>
 
                 <!-- SECTION 2: CHANGE PASSWORD SECTION -->
-                <div class="card table-card shadow-sm">
-                    <div class="card-header table-header">
-                        <h6 class="fw-bold mb-0">
-                            <i class="bi bi-shield-lock me-1"></i> Change Password
+                <div class="card jt-card mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="fw-bold mb-0" style="color: var(--tx);">
+                            <i class="bi bi-shield-lock me-1" style="color: var(--navy);"></i> Change Password
                         </h6>
                     </div>
                     <div class="card-body p-4">
@@ -231,7 +246,7 @@
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
                             <!-- Global Password Errors -->
-                            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger py-2 small mb-3">
+                            <div th:if="${#fields.hasGlobalErrors()}" class="jt-alert jt-alert-danger alert py-2 mb-3">
                                 <ul class="mb-0 ps-3">
                                     <li th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</li>
                                 </ul>
@@ -240,7 +255,7 @@
                             <div class="row g-3">
                                 <!-- Current Password -->
                                 <div class="col-12">
-                                    <label for="currentPassword" class="form-label small fw-medium">
+                                    <label for="currentPassword" class="form-label small fw-medium" style="color: var(--tx);">
                                         Current Password <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
@@ -263,7 +278,7 @@
 
                                 <!-- New Password -->
                                 <div class="col-12 col-md-6">
-                                    <label for="password" class="form-label small fw-medium">
+                                    <label for="password" class="form-label small fw-medium" style="color: var(--tx);">
                                         New Password <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
@@ -286,28 +301,28 @@
                                     </div>
 
                                     <!-- Live Checklist -->
-                                    <div class="password-checklist mt-2 p-2 border rounded bg-light" id="passwordChecklist">
-                                        <div class="text-muted fw-semibold mb-1" style="font-size: 0.75rem;">Password Requirements:</div>
-                                        <ul class="list-unstyled mb-0" style="font-size: 0.8rem;">
-                                            <li class="rule-item text-muted" data-rule="length">
+                                    <div class="password-checklist mt-2 p-3 rounded" id="passwordChecklist" style="background-color: var(--soft); border: 1px solid var(--line);">
+                                        <div class="fw-semibold mb-2" style="font-size: 0.78rem; color: var(--tx);">Password Requirements:</div>
+                                        <ul class="list-unstyled mb-0 d-flex flex-column gap-1" style="font-size: 0.8rem; color: var(--mu);">
+                                            <li class="rule-item" data-rule="length">
                                                 <i class="bi bi-circle me-1"></i> 8 to 64 characters
                                             </li>
-                                            <li class="rule-item text-muted" data-rule="upper">
+                                            <li class="rule-item" data-rule="upper">
                                                 <i class="bi bi-circle me-1"></i> At least one uppercase letter (A-Z)
                                             </li>
-                                            <li class="rule-item text-muted" data-rule="lower">
+                                            <li class="rule-item" data-rule="lower">
                                                 <i class="bi bi-circle me-1"></i> At least one lowercase letter (a-z)
                                             </li>
-                                            <li class="rule-item text-muted" data-rule="digit">
+                                            <li class="rule-item" data-rule="digit">
                                                 <i class="bi bi-circle me-1"></i> At least one digit (0-9)
                                             </li>
-                                            <li class="rule-item text-muted" data-rule="special">
+                                            <li class="rule-item" data-rule="special">
                                                 <i class="bi bi-circle me-1"></i> At least one special character
                                             </li>
-                                            <li class="rule-item text-muted" data-rule="whitespace">
+                                            <li class="rule-item" data-rule="whitespace">
                                                 <i class="bi bi-circle me-1"></i> No spaces or whitespace
                                             </li>
-                                            <li class="rule-item text-muted" data-rule="ascii">
+                                            <li class="rule-item" data-rule="ascii">
                                                 <i class="bi bi-circle me-1"></i> Printable ASCII characters only
                                             </li>
                                         </ul>
@@ -316,7 +331,7 @@
 
                                 <!-- Confirm New Password -->
                                 <div class="col-12 col-md-6">
-                                    <label for="confirmPassword" class="form-label small fw-medium">
+                                    <label for="confirmPassword" class="form-label small fw-medium" style="color: var(--tx);">
                                         Confirm New Password <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
@@ -339,8 +354,8 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex justify-content-end mt-4 pt-3 border-top">
-                                <button type="submit" class="btn btn-primary btn-sm">
+                            <div class="d-flex justify-content-end mt-4 pt-3 border-top" style="border-color: var(--line) !important;">
+                                <button type="submit" class="jt-btn jt-btn-p">
                                     <i class="bi bi-key me-1"></i> Update Password
                                 </button>
                             </div>
@@ -348,11 +363,145 @@
                     </div>
                 </div>
 
-            </div>
+                <!-- SECTION 3: APPEARANCE & PREFERENCES (Unified Storage, Zero Backend) -->
+                <div class="card jt-card mb-4" id="appearanceSection">
+                    <div class="card-header py-3">
+                        <h6 class="fw-bold mb-0" style="color: var(--tx);">
+                            <i class="bi bi-palette me-1" style="color: var(--navy);"></i> Appearance &amp; Display Preferences
+                        </h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <!-- Theme Mode: Light / Dark -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-label small fw-semibold d-block mb-2" style="color: var(--tx);">Theme Mode</label>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="jt-btn jt-btn-s flex-grow-1 justify-content-center" id="themeBtnLight" onclick="window.setThemeMode('light')">
+                                        <i class="bi bi-sun me-1"></i> Light
+                                    </button>
+                                    <button type="button" class="jt-btn jt-btn-s flex-grow-1 justify-content-center" id="themeBtnDark" onclick="window.setThemeMode('dark')">
+                                        <i class="bi bi-moon-stars me-1"></i> Dark
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Color Palette: Teal, Navy, Indigo, Forest -->
+                            <div class="col-12 col-md-5">
+                                <label class="form-label small fw-semibold d-block mb-2" style="color: var(--tx);">Accent Palette</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="jt-btn jt-btn-s" id="palBtnTeal" onclick="window.setColorPal('teal')">
+                                        <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#0D9488; margin-right:4px;"></span> Teal
+                                    </button>
+                                    <button type="button" class="jt-btn jt-btn-s" id="palBtnNavy" onclick="window.setColorPal('navy')">
+                                        <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#1E3A8A; margin-right:4px;"></span> Navy
+                                    </button>
+                                    <button type="button" class="jt-btn jt-btn-s" id="palBtnIndigo" onclick="window.setColorPal('indigo')">
+                                        <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#4338CA; margin-right:4px;"></span> Indigo
+                                    </button>
+                                    <button type="button" class="jt-btn jt-btn-s" id="palBtnForest" onclick="window.setColorPal('forest')">
+                                        <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#166534; margin-right:4px;"></span> Forest
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Motion Animation Toggle -->
+                            <div class="col-12 col-md-3">
+                                <label class="form-label small fw-semibold d-block mb-2" style="color: var(--tx);">Motion Effects</label>
+                                <div class="form-check form-switch pt-1">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="motionSwitch" onchange="window.toggleMotionPref(this.checked)">
+                                    <label class="form-check-label small" for="motionSwitch" id="motionSwitchLabel" style="color: var(--tx);">Map animation active</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
+
+        <!-- Command Palette -->
+        <div th:replace="~{fragments/layout :: commandPalette(${isReseller ? 'reseller' : 'admin'})}"></div>
     </div>
 
+    <!-- Bootstrap 5 JS & App JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/app.js}" src="/js/app.js"></script>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+
+    <!-- Appearance Controller Script -->
+    <script>
+        (function() {
+            function updateAppearanceUI() {
+                var s = {};
+                try { s = JSON.parse(localStorage.getItem('jt') || '{}'); } catch(e) { s = {}; }
+                var theme = s.t || localStorage.getItem('jt.theme') || 'light';
+                var pal = s.p || localStorage.getItem('jt.pal') || 'teal';
+                var motion = s.m || localStorage.getItem('jt.motion') || 'animated';
+
+                var bLight = document.getElementById('themeBtnLight');
+                var bDark = document.getElementById('themeBtnDark');
+                if (bLight && bDark) {
+                    if (theme === 'dark') {
+                        bDark.classList.add('jt-btn-p');
+                        bDark.classList.remove('jt-btn-ghost');
+                        bLight.classList.remove('jt-btn-p');
+                        bLight.classList.add('jt-btn-ghost');
+                    } else {
+                        bLight.classList.add('jt-btn-p');
+                        bLight.classList.remove('jt-btn-ghost');
+                        bDark.classList.remove('jt-btn-p');
+                        bDark.classList.add('jt-btn-ghost');
+                    }
+                }
+
+                ['teal', 'navy', 'indigo', 'forest'].forEach(function(p) {
+                    var btn = document.getElementById('palBtn' + p.charAt(0).toUpperCase() + p.slice(1));
+                    if (btn) {
+                        if (pal === p) {
+                            btn.classList.add('jt-btn-p');
+                            btn.classList.remove('jt-btn-ghost');
+                        } else {
+                            btn.classList.remove('jt-btn-p');
+                            btn.classList.add('jt-btn-ghost');
+                        }
+                    }
+                });
+
+                var mSwitch = document.getElementById('motionSwitch');
+                var mLabel = document.getElementById('motionSwitchLabel');
+                if (mSwitch) {
+                    var isAnimated = (motion !== 'still');
+                    mSwitch.checked = isAnimated;
+                    if (mLabel) {
+                        mLabel.textContent = isAnimated ? 'Map animation active' : 'Reduced motion (still)';
+                    }
+                }
+            }
+
+            window.setThemeMode = function(mode) {
+                if (window.jt && window.jt.setTheme) {
+                    window.jt.setTheme(mode);
+                }
+                updateAppearanceUI();
+            };
+
+            window.setColorPal = function(pal) {
+                if (window.jt && window.jt.setPal) {
+                    window.jt.setPal(pal);
+                }
+                updateAppearanceUI();
+            };
+
+            window.toggleMotionPref = function(checked) {
+                var nextMotion = checked ? 'animated' : 'still';
+                if (window.jt && window.jt.setMotion) {
+                    window.jt.setMotion(nextMotion);
+                }
+                updateAppearanceUI();
+            };
+
+            document.addEventListener('DOMContentLoaded', updateAppearanceUI);
+            window.addEventListener('storage', updateAppearanceUI);
+        })();
+    </script>
 </body>
 </html>

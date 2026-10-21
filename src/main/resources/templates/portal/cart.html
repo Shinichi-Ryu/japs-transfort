@@ -1,219 +1,240 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
-<head>
+<head th:replace="~{fragments/layout :: htmlHead('Shopping Cart')}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart - Japs Transfort</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/theme.css}" href="/css/theme.css">
+    <link rel="stylesheet" th:href="@{/css/lists.css}" href="/css/lists.css">
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
 </head>
 <body>
-    <!-- Reseller Navigation Bar Fragment -->
-    <div th:replace="~{fragments/navbar :: resellerNav('cart')}"></div>
+    <div class="app">
+        <!-- Mobile Drawer Backdrop -->
+        <div class="sb-backdrop" onclick="window.jtToggleDrawer(false)" aria-hidden="true"></div>
 
-    <div class="container-fluid px-4 py-4">
-        <!-- Page Header -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="fw-bold mb-1 text-dark">Shopping Cart</h3>
-                <p class="text-muted mb-0 small">Review your items and place wholesale orders against your credit line.</p>
-            </div>
-            <a th:href="@{/portal/catalog}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i> Continue Shopping
-            </a>
-        </div>
+        <!-- Sidebar -->
+        <aside th:replace="~{fragments/layout :: sidebar('cart', 'reseller')}"></aside>
 
-        <!-- Flash Messages -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show small mb-4 shadow-sm" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <span th:text="${successMessage}">Success message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show small mb-4 shadow-sm" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <span th:text="${errorMessage}">Error message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <!-- Main Content Area -->
+        <div class="mw">
+            <!-- Background effects -->
+            <div th:replace="~{fragments/layout :: bgfx}"></div>
 
-        <!-- Empty Cart State -->
-        <div th:if="${cartRows == null or cartRows.empty}" class="card border-0 shadow-sm rounded-3 p-5 text-center">
-            <div class="my-4">
-                <div class="stat-icon bg-secondary-subtle text-secondary mx-auto mb-3" style="width: 64px; height: 64px; font-size: 2rem;">
-                    <i class="bi bi-cart-x"></i>
-                </div>
-                <h4 class="fw-bold text-dark">Your cart is empty</h4>
-                <p class="text-muted mb-4">You have not added any products to your cart yet.</p>
-                <a th:href="@{/portal/catalog}" class="btn btn-primary">
-                    <i class="bi bi-grid me-1"></i> Browse Catalog
-                </a>
-            </div>
-        </div>
+            <!-- Sticky Topbar -->
+            <header th:replace="~{fragments/layout :: topbar('Shopping Cart', 'reseller')}"></header>
 
-        <!-- Cart Items & Order Summary -->
-        <div th:if="${cartRows != null and not cartRows.empty}" class="row g-4">
-            <!-- Items Table (Left column) -->
-            <div class="col-12 col-lg-8">
-                <div class="card table-card shadow-sm">
-                    <div class="card-header table-header d-flex justify-content-between align-items-center">
-                        <h6 class="fw-bold mb-0"><i class="bi bi-cart3 me-1"></i> Cart Items</h6>
-                        <span class="badge bg-secondary" th:text="${cartRows.size()} + ' item(s)'">0 item(s)</span>
+            <main>
+                <!-- Page Header -->
+                <div class="jt-ph">
+                    <div>
+                        <h1>Shopping Cart</h1>
+                        <div class="jt-sub">Review your items and place wholesale orders against your credit line</div>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th scope="col" class="ps-3" style="width: 42px;">
-                                            <input class="form-check-input" type="checkbox" id="selectAll" checked title="Select all">
-                                        </th>
-                                        <th scope="col">Product</th>
-                                        <th scope="col">Unit</th>
-                                        <th scope="col" class="text-end">Tier Price</th>
-                                        <th scope="col" class="text-center" style="width: 170px;">Quantity</th>
-                                        <th scope="col" class="text-end">Line Total</th>
-                                        <th scope="col" class="text-end pe-3" style="width: 60px;">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- data-line-total: plain decimal, no commas, for JS arithmetic -->
-                                    <tr th:each="row : ${cartRows}"
-                                        th:data-line-total="${row.lineTotal}">
-                                        <td class="ps-3">
-                                            <input class="form-check-input row-check"
-                                                   type="checkbox"
-                                                   th:value="${row.product.productId}"
-                                                   checked>
-                                        </td>
-                                        <td>
-                                            <div class="fw-semibold text-dark" th:text="${row.product.name}">Product Name</div>
-                                            <div class="small text-muted font-monospace" th:text="${row.product.sku}">SKU-001</div>
-                                        </td>
-                                        <td class="small text-muted" th:text="${row.product.unit}">pc</td>
-                                        <td class="text-end font-monospace">
-                                            <span class="fw-bold text-dark" th:text="'₱' + ${#numbers.formatDecimal(row.unitPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <form th:action="@{/portal/cart/update}" method="post" class="d-inline-flex align-items-center gap-1 justify-content-center">
-                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                                <input type="hidden" name="productId" th:value="${row.product.productId}">
-                                                <input type="number" name="quantity" th:value="${row.quantity}" min="1" class="form-control form-control-sm text-center" style="width: 70px;" required>
-                                                <button type="submit" class="btn btn-outline-secondary btn-sm" title="Update Quantity">
-                                                    <i class="bi bi-arrow-repeat"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                        <td class="text-end font-monospace">
-                                            <span class="fw-bold text-success fs-6" th:text="'₱' + ${#numbers.formatDecimal(row.lineTotal, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
-                                        </td>
-                                        <td class="text-end pe-3">
-                                            <form th:action="@{/portal/cart/remove}" method="post" class="d-inline">
-                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                                <input type="hidden" name="productId" th:value="${row.product.productId}">
-                                                <button type="submit" class="btn btn-outline-danger btn-sm border-0" title="Remove item">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="jt-ph-actions">
+                        <a th:href="@{/portal/catalog}" class="jt-btn jt-btn-s jt-btn-ghost">
+                            <i class="bi bi-arrow-left me-1"></i> Continue Shopping
+                        </a>
                     </div>
                 </div>
-            </div>
 
-            <!-- Order Summary & Place Order (Right column) -->
-            <div class="col-12 col-lg-4">
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-receipt me-1"></i> Order Summary</h6>
+                <!-- Feedback Alert Messages -->
+                <div th:if="${successMessage}" class="jt-alert jt-alert-success alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <span th:text="${successMessage}">Operation successful</span>
                     </div>
-                    <div class="card-body">
-                        <!-- Selection counter -->
-                        <div class="text-muted small mb-2">
-                            <i class="bi bi-check2-square me-1"></i>
-                            <span id="cartSelectionCount">0 of 0 items selected</span>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div th:if="${errorMessage}" class="jt-alert jt-alert-danger alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span th:text="${errorMessage}">An error occurred</span>
+                    </div>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Empty Cart State -->
+                <div th:if="${cartRows == null or cartRows.empty}" class="card jt-card p-5 text-center my-4">
+                    <div class="my-4">
+                        <div class="stat-icon mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle"
+                             style="width: 64px; height: 64px; font-size: 2rem; background: var(--soft); color: var(--mu);">
+                            <i class="bi bi-cart-x"></i>
                         </div>
-
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Subtotal:</span>
-                            <span class="font-monospace fw-semibold" id="summarySubtotal">₱0.00</span>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="fw-bold text-dark fs-5">Total:</span>
-                            <span class="font-monospace fw-bold text-primary fs-5" id="summaryTotal">₱0.00</span>
-                        </div>
-
-                        <!-- Credit Information -->
-                        <div class="bg-light rounded p-3 mb-3 small">
-                            <div class="fw-semibold text-secondary mb-2">
-                                <i class="bi bi-credit-card me-1"></i> Credit Account Status
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-muted">Credit Limit:</span>
-                                <span class="font-monospace fw-medium" th:text="'₱' + ${reseller != null && reseller.creditLimit != null ? #numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Current Balance:</span>
-                                <span class="font-monospace fw-medium text-danger" th:text="'₱' + ${reseller != null && reseller.balance != null ? #numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</span>
-                            </div>
-                        </div>
-
-                        <!-- Place Order Form — selected IDs injected by app.js initCartCheckboxes -->
-                        <form id="placeOrderForm" th:action="@{/portal/cart/place-order}" method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                            <div id="selectedIdsContainer"></div>
-
-                            <!-- Payment Method Selection -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold text-dark small mb-2">
-                                    <i class="bi bi-wallet2 me-1"></i> Payment Method <span class="text-danger">*</span>
-                                </label>
-
-                                <!-- Cash on delivery -->
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pmCod" value="COD" required>
-                                    <label class="form-check-label text-dark small" for="pmCod">
-                                        Cash on delivery
-                                    </label>
-                                </div>
-
-                                <!-- Online payment (GCash / bank transfer) - DISABLED -->
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pmOnline" value="ONLINE" disabled>
-                                    <label class="form-check-label text-muted small" for="pmOnline">
-                                        Online payment (GCash / bank transfer)
-                                        <span class="badge bg-secondary ms-1">Coming soon</span>
-                                    </label>
-                                    <div class="text-muted small ps-1" style="font-size: 0.75rem;">Online payment is a work in progress</div>
-                                </div>
-
-                                <!-- On account (credit) - shown ONLY if credit_limit > 0 -->
-                                <div class="form-check mb-2" th:if="${reseller != null and reseller.creditLimit != null and reseller.creditLimit.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="pmCredit" value="CREDIT" required>
-                                    <label class="form-check-label text-dark small" for="pmCredit">
-                                        On account (credit)
-                                    </label>
-                                </div>
-                            </div>
-
-                            <button type="submit" id="placeOrderBtn" class="btn btn-primary w-100 py-2 fw-semibold">
-                                <i class="bi bi-check2-circle me-1"></i> Place Order
-                            </button>
-                        </form>
+                        <h3 class="fw-bold mb-2" style="color: var(--tx);">Your cart is empty</h3>
+                        <p class="mb-4" style="color: var(--mu);">You have not added any products to your cart yet.</p>
+                        <a th:href="@{/portal/catalog}" class="jt-btn jt-btn-p d-inline-flex align-items-center">
+                            <i class="bi bi-grid me-1"></i> Browse Catalog
+                        </a>
                     </div>
                 </div>
-            </div>
+
+                <!-- Cart Items & Order Summary -->
+                <div th:if="${cartRows != null and not cartRows.empty}" class="row g-4 mb-4">
+                    <!-- Items Table Card (Left column) -->
+                    <div class="col-12 col-lg-8">
+                        <div class="jt-table-wrap">
+                            <div class="jt-table-header d-flex justify-content-between align-items-center">
+                                <h6><i class="bi bi-cart3 me-1"></i> Cart Items</h6>
+                                <span class="pill b" th:text="${cartRows.size()} + ' item(s)'">0 item(s)</span>
+                            </div>
+                            <div class="jt-table-scroll">
+                                <table class="jt-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" style="width: 44px; text-align: center;">
+                                                <input class="form-check-input m-0" type="checkbox" id="selectAll" checked title="Select all" aria-label="Select all items">
+                                            </th>
+                                            <th scope="col">Product</th>
+                                            <th scope="col">Unit</th>
+                                            <th scope="col" class="n">Tier Price</th>
+                                            <th scope="col" style="text-align: center; width: 150px;">Quantity</th>
+                                            <th scope="col" class="n">Line Total</th>
+                                            <th scope="col" class="n" style="width: 60px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- data-line-total: plain decimal, no commas, for JS arithmetic -->
+                                        <tr th:each="row : ${cartRows}"
+                                            th:data-line-total="${row.lineTotal}">
+                                            <td style="text-align: center;">
+                                                <input class="form-check-input row-check m-0"
+                                                       type="checkbox"
+                                                       th:value="${row.product.productId}"
+                                                       checked
+                                                       aria-label="Select item">
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold" style="color: var(--tx);" th:text="${row.product.name}">Product Name</div>
+                                                <div class="small fw-mono" style="color: var(--mu);" th:text="${row.product.sku}">SKU-001</div>
+                                            </td>
+                                            <td style="color: var(--mu);" th:text="${row.product.unit}">pc</td>
+                                            <td class="n font-monospace fw-semibold" th:text="'₱' + ${#numbers.formatDecimal(row.unitPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                            <td style="text-align: center;">
+                                                <form th:action="@{/portal/cart/update}" method="post" class="d-inline-flex align-items-center gap-1 justify-content-center m-0">
+                                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                                    <input type="hidden" name="productId" th:value="${row.product.productId}">
+                                                    <input type="number" name="quantity" th:value="${row.quantity}" min="1" class="form-control form-control-sm text-center" style="width: 65px;" required aria-label="Quantity">
+                                                    <button type="submit" class="jt-btn jt-btn-s jt-btn-icon" title="Update Quantity">
+                                                        <i class="bi bi-arrow-repeat"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                            <td class="n font-monospace fw-bold" style="color: var(--gt, #16a34a);" th:text="'₱' + ${#numbers.formatDecimal(row.lineTotal, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                            <td class="n">
+                                                <form th:action="@{/portal/cart/remove}" method="post" class="d-inline m-0">
+                                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                                    <input type="hidden" name="productId" th:value="${row.product.productId}">
+                                                    <button type="submit" class="jt-btn jt-btn-s jt-btn-icon jt-btn-d" title="Remove item">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary & Place Order (Right column sticky solid card) -->
+                    <div class="col-12 col-lg-4">
+                        <div class="card jt-card sticky-top" style="top: 80px; z-index: 10;">
+                            <div class="card-header py-3">
+                                <h6 class="fw-bold mb-0" style="color: var(--tx);"><i class="bi bi-receipt me-1"></i> Order Summary</h6>
+                            </div>
+                            <div class="card-body p-4">
+                                <!-- Selection counter -->
+                                <div class="small mb-3 d-flex align-items-center gap-1" style="color: var(--mu);">
+                                    <i class="bi bi-check2-square me-1"></i>
+                                    <span id="cartSelectionCount">0 of 0 items selected</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span style="color: var(--mu);">Subtotal:</span>
+                                    <span class="font-monospace fw-semibold" style="color: var(--tx);" id="summarySubtotal">₱0.00</span>
+                                </div>
+                                <hr class="my-3" style="border-color: var(--line);">
+                                <div class="d-flex justify-content-between align-items-baseline mb-4">
+                                    <span class="fw-bold fs-5" style="color: var(--tx);">Total:</span>
+                                    <span class="font-monospace fw-bold fs-4" style="color: var(--navy);" id="summaryTotal">₱0.00</span>
+                                </div>
+
+                                <!-- Credit Information -->
+                                <div class="rounded p-3 mb-4 small" style="background: var(--soft); border: 1px solid var(--line);">
+                                    <div class="fw-semibold mb-2" style="color: var(--tx);">
+                                        <i class="bi bi-credit-card me-1 text-primary"></i> Credit Account Status
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span style="color: var(--mu);">Credit Limit:</span>
+                                        <span class="font-monospace fw-medium" th:text="'₱' + ${reseller != null && reseller.creditLimit != null ? #numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span style="color: var(--mu);">Current Balance:</span>
+                                        <span class="font-monospace fw-medium text-danger" th:text="'₱' + ${reseller != null && reseller.balance != null ? #numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</span>
+                                    </div>
+                                </div>
+
+                                <!-- Place Order Form — selected IDs injected by app.js initCartCheckboxes -->
+                                <form id="placeOrderForm" th:action="@{/portal/cart/place-order}" method="post">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <div id="selectedIdsContainer"></div>
+
+                                    <!-- Payment Method Selection -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold small mb-2 d-block" style="color: var(--tx);">
+                                            <i class="bi bi-wallet2 me-1"></i> Payment Method <span class="text-danger">*</span>
+                                        </label>
+
+                                        <!-- Cash on delivery -->
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="pmCod" value="COD" required>
+                                            <label class="form-check-label small" for="pmCod" style="color: var(--tx);">
+                                                Cash on delivery
+                                            </label>
+                                        </div>
+
+                                        <!-- Online payment (GCash / bank transfer) - DISABLED -->
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="pmOnline" value="ONLINE" disabled>
+                                            <label class="form-check-label small" for="pmOnline" style="color: var(--mu);">
+                                                Online payment (GCash / bank transfer)
+                                                <span class="pill gr ms-1" style="font-size: 10px;">Coming soon</span>
+                                            </label>
+                                            <div class="small ps-1" style="font-size: 0.75rem; color: var(--mu);">Online payment is a work in progress</div>
+                                        </div>
+
+                                        <!-- On account (credit) - shown ONLY if credit_limit > 0 -->
+                                        <div class="form-check mb-2" th:if="${reseller != null and reseller.creditLimit != null and reseller.creditLimit.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="pmCredit" value="CREDIT" required>
+                                            <label class="form-check-label small" for="pmCredit" style="color: var(--tx);">
+                                                On account (credit)
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" id="placeOrderBtn" class="jt-btn jt-btn-p w-100 py-2 fw-semibold justify-content-center">
+                                        <i class="bi bi-check2-circle me-1"></i> Place Order
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
+
+        <!-- Command Palette -->
+        <div th:replace="~{fragments/layout :: commandPalette('reseller')}"></div>
     </div>
 
-    <!-- Bootstrap 5 JS -->
+    <!-- Bootstrap 5 JS & App JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Shared app JS (includes initCartCheckboxes) -->
     <script th:src="@{/js/app.js}" src="/js/app.js"></script>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>
 </html>

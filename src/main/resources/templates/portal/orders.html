@@ -1,167 +1,189 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
-<head>
+<head th:replace="~{fragments/layout :: htmlHead('My Orders')}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders - Japs Transfort</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/theme.css}" href="/css/theme.css">
+    <link rel="stylesheet" th:href="@{/css/lists.css}" href="/css/lists.css">
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
 </head>
 <body>
-    <!-- Reseller Navigation Bar Fragment -->
-    <div th:replace="~{fragments/navbar :: resellerNav('orders')}"></div>
+    <div class="app">
+        <!-- Mobile Drawer Backdrop -->
+        <div class="sb-backdrop" onclick="window.jtToggleDrawer(false)" aria-hidden="true"></div>
 
-    <div class="container-fluid px-4 py-4">
-        <!-- Page Header -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="fw-bold mb-1 text-dark">My Orders</h3>
-                <p class="text-muted mb-0 small">View and track all your wholesale orders placed with Japs Transfort.</p>
-            </div>
-            <a th:href="@{/portal/catalog}" class="btn btn-outline-primary btn-sm">
-                <i class="bi bi-cart-plus me-1"></i> New Order
-            </a>
-        </div>
+        <!-- Sidebar -->
+        <aside th:replace="~{fragments/layout :: sidebar('orders', 'reseller')}"></aside>
 
-        <!-- Flash Messages -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show small mb-4 shadow-sm" role="alert">
-            <i class="bi bi-check-circle-fill me-2 fs-6"></i>
-            <span class="fw-medium" th:text="${successMessage}">Order placed successfully!</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show small mb-4 shadow-sm" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <span th:text="${errorMessage}">Error message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <!-- Main Content Area -->
+        <div class="mw">
+            <!-- Background effects -->
+            <div th:replace="~{fragments/layout :: bgfx}"></div>
 
-        <!-- Orders Table Card -->
-        <div class="card table-card shadow-sm">
-            <div class="card-header table-header d-flex justify-content-between align-items-center">
-                <h6 class="fw-bold mb-0"><i class="bi bi-receipt me-1"></i> Order History</h6>
-                <span class="badge bg-secondary" th:text="${orders != null ? orders.size() : 0} + ' orders'">0 orders</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col" class="ps-3">Order No</th>
-                                <th scope="col">Date Placed</th>
-                                <th scope="col">Status</th>
-                                <th scope="col" class="text-center">Payment</th>
-                                <th scope="col" class="text-center">Method</th>
-                                <th scope="col" class="text-center">Items</th>
-                                <th scope="col" class="text-end">Total Amount</th>
-                                <th scope="col" class="text-end pe-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:if="${orders == null or orders.empty}">
-                                <td colspan="8" class="text-center text-muted py-5">
-                                    <div class="mb-2"><i class="bi bi-receipt text-secondary" style="font-size: 2rem;"></i></div>
-                                    <div>You haven't placed any orders yet.</div>
-                                    <div class="mt-2">
-                                        <a th:href="@{/portal/catalog}" class="btn btn-primary btn-sm">
-                                             <i class="bi bi-grid me-1"></i> Browse Catalog
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr th:each="order : ${orders}">
-                                <td class="ps-3 fw-mono fw-semibold text-primary">
-                                    <a th:href="@{/portal/orders/{id}(id=${order.orderId})}"
-                                       class="text-primary text-decoration-none"
-                                       th:text="${order.orderNo}">ORD-20261013-0001</a>
-                                </td>
-                                <td class="text-muted small" th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-10-13 10:00</td>
-                                <td>
-                                    <span class="badge text-uppercase"
-                                          th:classappend="${order.status.name() == 'pending' ? 'bg-warning text-dark' :
-                                                           (order.status.name() == 'approved' ? 'bg-info text-dark' :
-                                                           (order.status.name() == 'packed' ? 'bg-primary' :
-                                                           (order.status.name() == 'shipped' ? 'bg-primary' :
-                                                           (order.status.name() == 'delivered' ? 'bg-success' :
-                                                           (order.status.name() == 'cancelled' ? 'bg-danger' : 'bg-secondary')))))}"
-                                          th:text="${order.status}">
-                                        pending
-                                    </span>
-                                    <!-- Shipment info for shipped/delivered -->
-                                    <div th:if="${(order.status.name() == 'shipped' or order.status.name() == 'delivered') and order.shipment != null}"
-                                         class="small text-muted mt-1">
-                                        <i class="bi bi-truck me-1"></i>
-                                        <span th:text="${order.shipment.courier}"></span>
-                                        <span th:if="${order.shipment.trackingNo != null}" class="ms-1 font-monospace"
-                                              th:text="'#' + ${order.shipment.trackingNo}"></span>
-                                    </div>
-                                    <!-- Cancellation info shown inline -->
-                                    <div th:if="${order.status.name() == 'cancelled' and order.cancelReason != null}"
-                                         class="small text-muted mt-1">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        <span th:text="${order.cancelReason}"></span>
-                                        <span class="ms-1 fst-italic"
-                                              th:if="${order.cancelledBy != null}"
-                                              th:text="'— by ' + ${order.cancelledBy}"></span>
-                                        <span class="ms-1 text-secondary"
-                                              th:if="${order.cancelledAt != null}"
-                                              th:text="'on ' + ${#temporals.format(order.cancelledAt, 'yyyy-MM-dd HH:mm')}"></span>
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge text-uppercase"
-                                          th:classappend="${order.paymentStatus != null and order.paymentStatus.name() == 'unpaid' ? 'bg-secondary' :
-                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'bg-info text-dark' :
-                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'bg-success' :
-                                                           (order.paymentStatus != null and order.paymentStatus.name() == 'refunded' ? 'bg-dark' : 'bg-secondary')))}"
-                                          th:text="${order.paymentStatus}">
-                                        unpaid
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge"
-                                          th:classappend="${order.paymentMethod != null and order.paymentMethod.name() == 'COD' ? 'bg-primary-subtle text-primary border border-primary-subtle' :
-                                                           (order.paymentMethod != null and order.paymentMethod.name() == 'ONLINE' ? 'bg-info-subtle text-info border border-info-subtle' :
-                                                           'bg-secondary-subtle text-secondary border border-secondary-subtle')}"
-                                          th:text="${order.paymentMethod != null ? (order.paymentMethod.name() == 'COD' ? 'Cash on delivery' : (order.paymentMethod.name() == 'ONLINE' ? 'Online' : 'On account')) : 'On account'}">
-                                        On account
-                                    </span>
-                                </td>
-                                <td class="text-center fw-semibold text-secondary"
-                                    th:text="${order.items != null ? order.items.size() : 0}">0</td>
-                                <td class="text-end font-monospace fw-bold text-dark" th:text="'₱' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                                <td class="text-end pe-3">
-                                    <a th:href="@{/portal/orders/{id}(id=${order.orderId})}"
-                                       class="btn btn-outline-secondary btn-sm me-1">
-                                        <i class="bi bi-eye me-1"></i> View
-                                    </a>
-                                    <!-- Cancel button only for pending / approved -->
-                                    <button th:if="${order.status.name() == 'pending' or order.status.name() == 'approved'}"
-                                            type="button"
-                                            class="btn btn-outline-danger btn-sm"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#cancelModal"
-                                            th:data-order-id="${order.orderId}"
-                                            th:data-order-no="${order.orderNo}"
-                                            data-from-detail="false">
-                                        <i class="bi bi-x-circle me-1"></i> Cancel
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- Sticky Topbar -->
+            <header th:replace="~{fragments/layout :: topbar('My Orders', 'reseller')}"></header>
+
+            <main>
+                <!-- Page Header -->
+                <div class="jt-ph">
+                    <div>
+                        <h1>My Orders</h1>
+                        <div class="jt-sub">View and track all your wholesale orders placed with Japs Transfort</div>
+                    </div>
+                    <div class="jt-ph-actions">
+                        <a th:href="@{/portal/catalog}" class="jt-btn jt-btn-p">
+                            <i class="bi bi-cart-plus me-1"></i> New Order
+                        </a>
+                    </div>
                 </div>
-            </div>
+
+                <!-- Feedback Alert Messages -->
+                <div th:if="${successMessage}" class="jt-alert jt-alert-success alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <span th:text="${successMessage}">Order placed successfully!</span>
+                    </div>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div th:if="${errorMessage}" class="jt-alert jt-alert-danger alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span th:text="${errorMessage}">An error occurred</span>
+                    </div>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Orders Table Card -->
+                <div class="jt-table-wrap mb-4">
+                    <div class="jt-table-header d-flex justify-content-between align-items-center">
+                        <h6><i class="bi bi-receipt me-1"></i> Order History</h6>
+                        <span class="pill b" th:text="${orders != null ? orders.size() : 0} + ' orders'">0 orders</span>
+                    </div>
+                    <div class="jt-table-scroll">
+                        <table class="jt-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Order No</th>
+                                    <th scope="col">Date Placed</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col" style="text-align: center;">Payment</th>
+                                    <th scope="col" style="text-align: center;">Method</th>
+                                    <th scope="col" style="text-align: center;">Items</th>
+                                    <th scope="col" class="n">Total Amount</th>
+                                    <th scope="col" class="n">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${orders == null or orders.empty}">
+                                    <td colspan="8" class="text-center py-5" style="color: var(--mu);">
+                                        <div class="mb-2"><i class="bi bi-receipt" style="font-size: 2rem;"></i></div>
+                                        <div>You haven't placed any orders yet.</div>
+                                        <div class="mt-3">
+                                            <a th:href="@{/portal/catalog}" class="jt-btn jt-btn-p jt-btn-s">
+                                                 <i class="bi bi-grid me-1"></i> Browse Catalog
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:each="order : ${orders}">
+                                    <td class="fw-mono fw-semibold">
+                                        <a th:href="@{/portal/orders/{id}(id=${order.orderId})}"
+                                           style="color: var(--navy);"
+                                           th:text="${order.orderNo}">ORD-20261013-0001</a>
+                                    </td>
+                                    <td class="small" style="color: var(--mu);" th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-10-13 10:00</td>
+                                    <td>
+                                        <span class="pill"
+                                              th:classappend="${order.status.name() == 'pending' ? 'y' :
+                                                               (order.status.name() == 'approved' ? 'b' :
+                                                               (order.status.name() == 'packed' ? 'b' :
+                                                               (order.status.name() == 'shipped' ? 'b' :
+                                                               (order.status.name() == 'delivered' ? 'g' :
+                                                               (order.status.name() == 'cancelled' ? 'r' : 'gr')))))}"
+                                              th:text="${order.status}">
+                                            pending
+                                        </span>
+                                        <!-- Shipment info for shipped/delivered -->
+                                        <div th:if="${(order.status.name() == 'shipped' or order.status.name() == 'delivered') and order.shipment != null}"
+                                             class="small mt-1" style="color: var(--mu);">
+                                            <i class="bi bi-truck me-1"></i>
+                                            <span th:text="${order.shipment.courier}"></span>
+                                            <span th:if="${order.shipment.trackingNo != null}" class="ms-1 font-monospace"
+                                                  th:text="'#' + ${order.shipment.trackingNo}"></span>
+                                        </div>
+                                        <!-- Cancellation info shown inline -->
+                                        <div th:if="${order.status.name() == 'cancelled' and order.cancelReason != null}"
+                                             class="small mt-1" style="color: var(--mu);">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            <span th:text="${order.cancelReason}"></span>
+                                            <span class="ms-1 fst-italic"
+                                                  th:if="${order.cancelledBy != null}"
+                                                  th:text="'— by ' + ${order.cancelledBy}"></span>
+                                            <span class="ms-1"
+                                                  th:if="${order.cancelledAt != null}"
+                                                  th:text="'on ' + ${#temporals.format(order.cancelledAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="pill"
+                                              th:classappend="${order.paymentStatus != null and order.paymentStatus.name() == 'unpaid' ? 'gr' :
+                                                               (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'b' :
+                                                               (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'g' :
+                                                               (order.paymentStatus != null and order.paymentStatus.name() == 'refunded' ? 'gr' : 'gr')))}"
+                                              th:text="${order.paymentStatus}">
+                                            unpaid
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="pill b"
+                                              th:text="${order.paymentMethod != null ? (order.paymentMethod.name() == 'COD' ? 'Cash on delivery' : (order.paymentMethod.name() == 'ONLINE' ? 'Online' : 'On account')) : 'On account'}">
+                                            On account
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center; color: var(--mu);"
+                                        th:text="${order.items != null ? order.items.size() : 0}">0</td>
+                                    <td class="n font-monospace fw-bold" style="color: var(--tx);" th:text="'₱' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                    <td class="n">
+                                        <div class="jt-action-group justify-content-end">
+                                            <a th:href="@{/portal/orders/{id}(id=${order.orderId})}"
+                                               class="jt-btn jt-btn-s jt-btn-ghost">
+                                                <i class="bi bi-eye me-1"></i> View
+                                            </a>
+                                            <!-- Cancel button only for pending / approved -->
+                                            <button th:if="${order.status.name() == 'pending' or order.status.name() == 'approved'}"
+                                                    type="button"
+                                                    class="jt-btn jt-btn-s jt-btn-d"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#cancelModal"
+                                                    th:data-order-id="${order.orderId}"
+                                                    th:data-order-no="${order.orderNo}"
+                                                    data-from-detail="false">
+                                                <i class="bi bi-x-circle me-1"></i> Cancel
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
         </div>
+
+        <!-- Command Palette -->
+        <div th:replace="~{fragments/layout :: commandPalette('reseller')}"></div>
     </div>
 
     <!-- Cancel Order Modal -->
     <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header border-bottom">
+                <div class="modal-header">
                     <h5 class="modal-title fw-bold" id="cancelModalLabel">
                         <i class="bi bi-x-octagon-fill text-danger me-2"></i> Cancel Order
                     </h5>
@@ -169,13 +191,14 @@
                 </div>
                 <form id="cancelForm" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <div class="modal-body">
-                        <p class="text-muted small mb-3">
-                            You are about to cancel order <strong id="cancelOrderNo"></strong>.
+                    <input type="hidden" name="fromDetail" id="fromDetailInput" value="false">
+                    <div class="modal-body p-4">
+                        <p class="small mb-3" style="color: var(--mu);">
+                            You are about to cancel order <strong id="cancelOrderNo" style="color: var(--tx);"></strong>.
                             This action cannot be undone.
                         </p>
                         <div class="mb-3">
-                            <label for="cancelReason" class="form-label fw-semibold">Reason for cancellation <span class="text-danger">*</span></label>
+                            <label for="cancelReasonSelect" class="form-label fw-semibold small" style="color: var(--tx);">Reason for cancellation <span class="text-danger">*</span></label>
                             <select class="form-select" id="cancelReasonSelect" required>
                                 <option value="" disabled selected>Select a reason…</option>
                                 <option value="Ordered by mistake">Ordered by mistake</option>
@@ -187,15 +210,15 @@
                             </select>
                         </div>
                         <div class="mb-3 d-none" id="otherReasonGroup">
-                            <label for="otherReasonText" class="form-label fw-semibold">Please specify <span class="text-danger">*</span></label>
+                            <label for="otherReasonText" class="form-label fw-semibold small" style="color: var(--tx);">Please specify <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="otherReasonText" rows="3" maxlength="255"
                                       placeholder="Describe your reason (max 255 characters)…"></textarea>
                             <div class="form-text text-end"><span id="charCount">0</span>/255</div>
                         </div>
                     </div>
-                    <div class="modal-footer border-top">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Order</button>
-                        <button type="submit" class="btn btn-danger fw-semibold" id="confirmCancelBtn">
+                    <div class="modal-footer">
+                        <button type="button" class="jt-btn jt-btn-s jt-btn-ghost" data-bs-dismiss="modal">Keep Order</button>
+                        <button type="submit" class="jt-btn jt-btn-s jt-btn-d fw-semibold" id="confirmCancelBtn">
                             <i class="bi bi-x-circle me-1"></i> Confirm Cancellation
                         </button>
                     </div>
@@ -204,8 +227,9 @@
         </div>
     </div>
 
-    <!-- Bootstrap 5 JS -->
+    <!-- Bootstrap 5 JS & Layout scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
     <script th:inline="javascript">
     (function () {
         var cancelModal = document.getElementById('cancelModal');

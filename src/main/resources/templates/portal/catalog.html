@@ -1,278 +1,260 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
-<head>
+<head th:replace="~{fragments/layout :: htmlHead('Product Catalog')}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Catalog - Japs Transfort</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/theme.css}" href="/css/theme.css">
+    <link rel="stylesheet" th:href="@{/css/lists.css}" href="/css/lists.css">
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
 </head>
 <body>
-    <!-- Reseller Navigation Bar Fragment -->
-    <div th:replace="~{fragments/navbar :: resellerNav('catalog')}"></div>
+    <div class="app">
+        <!-- Mobile Drawer Backdrop -->
+        <div class="sb-backdrop" onclick="window.jtToggleDrawer(false)" aria-hidden="true"></div>
 
-    <div class="container-fluid px-4 py-4">
-        <!-- Page Header with Tier Info at the Top -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-            <div>
-                <h3 class="fw-bold mb-0 text-dark">Product Catalog</h3>
-                <p class="text-muted small mb-0">Browse wholesale products with your exclusive reseller pricing</p>
-            </div>
-            <div class="badge bg-light text-dark border p-2 px-3 small">
-                <i class="bi bi-award text-warning me-1"></i>
-                <span>Tier: <strong class="text-primary" th:text="${tierName}">Tier</strong></span>
-                <span class="mx-1">&bull;</span>
-                <span>Discount: <strong class="text-success" th:text="${discountPct != null ? #numbers.formatDecimal(discountPct, 1, 2) : '0.00'} + '%'">0.00%</strong></span>
-            </div>
-        </div>
+        <!-- Sidebar -->
+        <aside th:replace="~{fragments/layout :: sidebar('catalog', 'reseller')}"></aside>
 
-        <!-- Tier Pricing Info Banner at the Top -->
-        <div class="alert alert-info py-2 px-3 small mb-4 d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <i class="bi bi-info-circle-fill me-2"></i>
-                <span>Current Tier: <strong th:text="${tierName}">Tier</strong> &bull; Exclusive Discount: <strong th:text="${discountPct != null ? #numbers.formatDecimal(discountPct, 1, 2) : '0.00'} + '%'">0.00%</strong> off SRP.</span>
-            </div>
-            <span class="badge bg-primary" th:text="${tierName} + ' (' + ${discountPct != null ? #numbers.formatDecimal(discountPct, 1, 2) : '0.00'} + '%)'" >Tier (0%)</span>
-        </div>
+        <!-- Main Content Area -->
+        <div class="mw">
+            <!-- Background effects -->
+            <div th:replace="~{fragments/layout :: bgfx}"></div>
 
-        <!-- Flash Messages -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show small mb-3 shadow-sm" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <span th:text="${successMessage}">Success message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show small mb-3 shadow-sm" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <span th:text="${errorMessage}">Error message</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+            <!-- Sticky Topbar -->
+            <header th:replace="~{fragments/layout :: topbar('Product Catalog', 'reseller')}"></header>
 
-        <!-- Filter & Search Card (matching templates/products/list.html style) -->
-        <div class="card table-card mb-4">
-            <div class="card-body p-3">
-                <form th:action="@{/portal/catalog}" method="get" class="row g-2 align-items-center">
-                    <!-- Search Input -->
-                    <div class="col-12 col-md-5">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text"
-                                   class="form-control"
-                                   name="search"
-                                   th:value="${search}"
-                                   placeholder="Search by name or SKU...">
+            <main>
+                <!-- Page Header -->
+                <div class="jt-ph">
+                    <div>
+                        <h1>Product Catalog</h1>
+                        <div class="jt-sub">Browse wholesale products with your exclusive reseller pricing</div>
+                    </div>
+                    <div class="jt-ph-actions">
+                        <div class="pill b">
+                            <i class="bi bi-award me-1"></i>
+                            <span>Tier: <strong th:text="${tierName}">Tier</strong></span>
+                            <span class="mx-1">&bull;</span>
+                            <span>Discount: <strong th:text="${discountPct != null ? #numbers.formatDecimal(discountPct, 1, 2) : '0.00'} + '%'">0.00%</strong></span>
                         </div>
                     </div>
-
-                    <!-- Category Filter Dropdown -->
-                    <div class="col-12 col-sm-6 col-md-4">
-                        <select name="categoryId" class="form-select form-select-sm">
-                            <option value="">All Categories</option>
-                            <option th:each="cat : ${categories}"
-                                    th:value="${cat.categoryId}"
-                                    th:text="${cat.name}"
-                                    th:selected="${categoryId != null && categoryId == cat.categoryId}">Category</option>
-                        </select>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="col-12 col-sm-6 col-md-3 d-flex gap-2">
-                        <button type="submit" class="btn btn-secondary btn-sm flex-grow-1">
-                            <i class="bi bi-funnel me-1"></i> Filter
-                        </button>
-                        <a th:href="@{/portal/catalog}" class="btn btn-outline-secondary btn-sm" title="Clear Filters">
-                            Reset
-                        </a>
-                    </div>
-
-                    <!-- Preserve current sort parameters -->
-                    <input type="hidden" name="sort" th:value="${sort}">
-                    <input type="hidden" name="dir" th:value="${dir}">
-                </form>
-            </div>
-        </div>
-
-        <!-- Catalog Products Table Card (matching templates/products/list.html style) -->
-        <div class="card table-card">
-            <div class="card-header table-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <div class="d-flex align-items-center gap-2">
-                    <h6 class="fw-bold mb-0"><i class="bi bi-grid me-1"></i> Available Products</h6>
-                    <span class="badge bg-secondary" th:text="${productsPage.totalElements} + ' total'">0 total</span>
                 </div>
-                <div>
-                    <form id="bulkAddForm" th:action="@{/portal/cart/add-selected}" method="post" class="d-inline">
-                        <input type="hidden" name="search" th:value="${search}">
-                        <input type="hidden" name="categoryId" th:value="${categoryId}">
+
+                <!-- Feedback Alert Messages -->
+                <div th:if="${successMessage}" class="jt-alert jt-alert-success alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <span th:text="${successMessage}">Operation successful</span>
+                    </div>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div th:if="${errorMessage}" class="jt-alert jt-alert-danger alert alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span th:text="${errorMessage}">An error occurred</span>
+                    </div>
+                    <button type="button" class="btn-close jt-alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Filter & Search Card (1 row on wide, 2 cols on tablet, 1 col below) -->
+                <div class="jt-filter mb-4">
+                    <form th:action="@{/portal/catalog}" method="get">
+                        <!-- Search Input -->
+                        <div class="jt-filter-search">
+                            <span class="jt-search-icon"><i class="bi bi-search"></i></span>
+                            <input type="text"
+                                   name="search"
+                                   th:value="${search}"
+                                   placeholder="Search by name or SKU"
+                                   aria-label="Search by name or SKU">
+                        </div>
+
+                        <!-- Category Filter Dropdown -->
+                        <div class="jt-filter-select">
+                            <select name="categoryId" aria-label="Category filter">
+                                <option value="">All categories</option>
+                                <option th:each="cat : ${categories}"
+                                        th:value="${cat.categoryId}"
+                                        th:text="${cat.name}"
+                                        th:selected="${categoryId != null && categoryId == cat.categoryId}">Category</option>
+                            </select>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="jt-filter-actions">
+                            <button type="submit" class="jt-btn jt-btn-s">
+                                <i class="bi bi-funnel me-1"></i> Filter
+                            </button>
+                            <a th:href="@{/portal/catalog}" class="jt-btn jt-btn-s jt-btn-ghost" title="Clear Filters">
+                                Reset
+                            </a>
+                        </div>
+
+                        <!-- Preserve sort parameters -->
                         <input type="hidden" name="sort" th:value="${sort}">
                         <input type="hidden" name="dir" th:value="${dir}">
-                        <input type="hidden" name="page" th:value="${productsPage.number}">
-                        <div id="bulkSelectedContainer"></div>
-                        <button type="submit" id="addSelectedBtn" class="btn btn-primary btn-sm" disabled>
-                            <i class="bi bi-cart-plus me-1"></i> Add selected to cart (<span id="selectedCount">0</span>)
-                        </button>
                     </form>
                 </div>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="ps-3" style="width: 42px;">
-                                    <input class="form-check-input" type="checkbox" id="selectAllCatalog" title="Select all on this page" aria-label="Select all on this page">
-                                </th>
-                                <!-- Thumbnail column -->
-                                <th scope="col" style="width: 76px;">Photo</th>
-                                <th scope="col">
-                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
-                                       th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort='sku', dir=${sort == 'sku' ? reverseDir : 'asc'})}">
-                                       SKU
-                                        <i class="bi ms-1" th:classappend="${sort == 'sku' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
-                                    </a>
-                                </th>
-                                <th scope="col">
-                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
-                                       th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort='name', dir=${sort == 'name' ? reverseDir : 'asc'})}">
-                                        Product Name
-                                        <i class="bi ms-1" th:classappend="${sort == 'name' ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
-                                    </a>
-                                </th>
-                                <th scope="col">Category</th>
-                                <th scope="col">Unit</th>
-                                <th scope="col" class="text-end">
-                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
-                                       th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort='price', dir=${(sort == 'price' or sort == 'srp') ? reverseDir : 'asc'})}">
-                                        SRP
-                                        <i class="bi ms-1" th:classappend="${(sort == 'price' or sort == 'srp') ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
-                                    </a>
-                                </th>
-                                <th scope="col" class="text-end">
-                                    <a class="text-decoration-none text-muted d-inline-flex align-items-center"
-                                       th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort='price', dir=${(sort == 'price' or sort == 'srp') ? reverseDir : 'asc'})}">
-                                        Your Price
-                                        <i class="bi ms-1" th:classappend="${(sort == 'price' or sort == 'srp') ? (dir == 'asc' ? 'bi-arrow-up' : 'bi-arrow-down') : 'bi-arrow-down-up opacity-25'}"></i>
-                                    </a>
-                                </th>
-                                <th scope="col" class="text-end pe-3" style="width: 170px;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:if="${productsPage.empty}">
-                                <td colspan="9" class="text-center text-muted py-4">
-                                    No products found matching the criteria.
-                                </td>
-                            </tr>
-                            <tr th:each="product : ${productsPage.content}"
-                                th:with="meta=${imageMetas != null ? imageMetas[product.productId] : null}">
-                                <td class="ps-3">
-                                    <input class="form-check-input catalog-row-check"
-                                           type="checkbox"
-                                           th:value="${product.productId}"
-                                           aria-label="Select product">
-                                </td>
-                                <!-- Thumbnail cell with click-to-enlarge -->
-                                <td>
-                                    <img th:if="${meta != null and meta.hasImage}"
-                                         th:src="@{/products/{id}/image(id=${product.productId},v=${meta.version})}"
-                                         th:alt="${product.name}"
-                                         th:data-product-name="${product.name}"
-                                         th:data-product-id="${product.productId}"
-                                         th:data-version="${meta.version}"
-                                         class="product-thumb-catalog rounded"
-                                         width="64" height="64"
-                                         loading="lazy"
-                                         decoding="async"
-                                         style="cursor:pointer;"
-                                         data-bs-toggle="modal"
-                                         data-bs-target="#photoModal">
-                                    <!-- Placeholder (inline SVG) -->
-                                    <span th:unless="${meta != null and meta.hasImage}"
-                                          class="product-thumb-placeholder-catalog"
-                                          aria-label="No photo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="#adb5bd" viewBox="0 0 16 16">
-                                            <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                                            <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
-                                        </svg>
-                                    </span>
-                                </td>
-                                <td class="fw-mono small fw-semibold text-secondary" th:text="${product.sku}">SKU-001</td>
-                                <td class="fw-medium text-dark" th:text="${product.name}">Product Name</td>
-                                <td>
-                                    <span class="badge bg-light text-dark border"
-                                          th:text="${product.category != null ? product.category.name : 'Uncategorized'}">
-                                        Category
-                                    </span>
-                                </td>
-                                <td class="small text-muted" th:text="${product.unit}">pc</td>
-                                <td class="text-end font-monospace">
-                                    <del class="text-muted" th:text="'₱' + ${#numbers.formatDecimal(product.srp, 1, 'COMMA', 2, 'POINT')}">₱0.00</del>
-                                </td>
-                                <td class="text-end font-monospace">
-                                    <span class="fw-bold text-success fs-6" th:text="'₱' + ${#numbers.formatDecimal(product.yourPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
-                                </td>
-                                <td class="text-end pe-3">
-                                    <form th:action="@{/portal/cart/add}" method="post" class="d-inline-flex align-items-center justify-content-end gap-1">
+
+                <!-- Bulk Selection Action Bar -->
+                <div class="card jt-card mb-4 p-3 d-flex flex-row flex-wrap justify-content-between align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="form-check m-0 d-flex align-items-center gap-2">
+                            <input class="form-check-input" type="checkbox" id="selectAllCatalog" title="Select all on this page" aria-label="Select all on this page">
+                            <label class="form-check-label fw-semibold small" for="selectAllCatalog">Select all</label>
+                        </div>
+                        <span class="pill b" th:text="${productsPage.totalElements} + ' products'">0 products</span>
+                    </div>
+                    <div>
+                        <form id="bulkAddForm" th:action="@{/portal/cart/add-selected}" method="post" class="d-inline">
+                            <input type="hidden" name="search" th:value="${search}">
+                            <input type="hidden" name="categoryId" th:value="${categoryId}">
+                            <input type="hidden" name="sort" th:value="${sort}">
+                            <input type="hidden" name="dir" th:value="${dir}">
+                            <input type="hidden" name="page" th:value="${productsPage.number}">
+                            <div id="bulkSelectedContainer"></div>
+                            <button type="submit" id="addSelectedBtn" class="jt-btn jt-btn-p" disabled>
+                                <i class="bi bi-cart-plus me-1"></i> Add selected to cart (<span id="selectedCount">0</span>)
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Responsive Grid of Solid Product Cards (4 cols on wide, 2 cols on tablet, 1 col on mobile) -->
+                <!-- Wrapped in semantic table/tbody so app.js closest('tr') sync continues to function -->
+                <table class="w-100 mb-4" style="display: block; border: 0; background: transparent;">
+                    <tbody class="row g-3" style="display: flex; flex-wrap: wrap; border: 0; background: transparent; padding: 0; margin: 0;">
+                        <tr th:if="${productsPage.empty}" class="col-12 text-center py-5" style="display: block; border: 0; background: transparent;">
+                            <td style="display: block; border: 0; color: var(--mu);">
+                                No products found matching the criteria.
+                            </td>
+                        </tr>
+                        <tr th:each="product : ${productsPage.content}"
+                            th:with="meta=${imageMetas != null ? imageMetas[product.productId] : null}"
+                            class="col-12 col-sm-6 col-lg-3 d-flex"
+                            style="display: flex !important; border: 0; background: transparent; padding: 0.5rem;">
+                            <td class="w-100 p-0" style="display: flex; flex-direction: column; border: 0; background: transparent;">
+                                <div class="card jt-card h-100 p-3 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <!-- Top row: Selection Checkbox & Availability / Category -->
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <input class="form-check-input catalog-row-check"
+                                                   type="checkbox"
+                                                   th:value="${product.productId}"
+                                                   aria-label="Select product">
+                                            <span class="pill g" th:if="${product.isActive}">Available</span>
+                                            <span class="pill x" th:unless="${product.isActive}">Unavailable</span>
+                                        </div>
+
+                                        <!-- Photo Thumbnail -->
+                                        <div class="text-center my-3">
+                                            <img th:if="${meta != null and meta.hasImage}"
+                                                 th:src="@{/products/{id}/image(id=${product.productId},v=${meta.version})}"
+                                                 th:alt="${product.name}"
+                                                 th:data-product-name="${product.name}"
+                                                 th:data-product-id="${product.productId}"
+                                                 th:data-version="${meta.version}"
+                                                 class="product-thumb-catalog rounded"
+                                                 width="120" height="120"
+                                                 loading="lazy"
+                                                 decoding="async"
+                                                 style="cursor: pointer; width: 120px; height: 120px; object-fit: cover;"
+                                                 data-bs-toggle="modal"
+                                                 data-bs-target="#photoModal">
+                                            <span th:unless="${meta != null and meta.hasImage}"
+                                                  class="product-thumb-placeholder-catalog mx-auto d-flex align-items-center justify-content-center rounded"
+                                                  style="width: 120px; height: 120px; background-color: var(--soft);"
+                                                  aria-label="No photo">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" fill="currentColor" opacity="0.3" viewBox="0 0 16 16">
+                                                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                                    <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                                                </svg>
+                                            </span>
+                                        </div>
+
+                                        <!-- SKU & Name -->
+                                        <div class="fw-mono small mb-1" style="color: var(--mu);" th:text="${product.sku}">SKU-001</div>
+                                        <div class="fw-bold mb-1" style="font-size: 15px; color: var(--tx);" th:text="${product.name}">Product Name</div>
+                                        <div class="small mb-2" style="color: var(--mu);">
+                                            <span th:text="${product.category != null ? product.category.name : 'General'}">Category</span>
+                                            <span> &bull; </span>
+                                            <span th:text="${product.unit}">pc</span>
+                                        </div>
+
+                                        <!-- Pricing Display -->
+                                        <div class="mt-2 pt-2 border-top">
+                                            <div class="d-flex align-items-baseline justify-content-between">
+                                                <span class="small" style="color: var(--mu);">SRP:</span>
+                                                <del class="small" style="color: var(--mu);" th:text="'₱' + ${#numbers.formatDecimal(product.srp, 1, 'COMMA', 2, 'POINT')}">₱0.00</del>
+                                            </div>
+                                            <div class="d-flex align-items-baseline justify-content-between">
+                                                <span class="small fw-semibold" style="color: var(--tx);">Your Price:</span>
+                                                <span class="fs-6 fw-bold" style="color: var(--gt, #16a34a);" th:text="'₱' + ${#numbers.formatDecimal(product.yourPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Per-product Add-to-Cart Form -->
+                                    <form th:action="@{/portal/cart/add}" method="post" class="mt-3 d-flex gap-2 align-items-center">
                                         <input type="hidden" name="productId" th:value="${product.productId}">
-                                        <input type="number" name="quantity" value="1" min="1" max="9999" class="form-control form-control-sm text-center catalog-item-qty" style="width: 65px;" required>
-                                        <button type="submit" class="btn btn-primary btn-sm text-nowrap">
+                                        <input type="number" name="quantity" value="1" min="1" max="9999" class="form-control form-control-sm text-center catalog-item-qty" style="width: 65px;" required aria-label="Quantity">
+                                        <button type="submit" class="jt-btn jt-btn-p flex-grow-1 text-nowrap">
                                             <i class="bi bi-cart-plus me-1"></i> Add
                                         </button>
                                     </form>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination Footer -->
+                <div class="jt-pager mt-3" th:if="${productsPage.totalPages > 0}">
+                    <div>
+                        Showing <span style="font-weight: 700; color: var(--tx);" th:text="${productsPage.empty ? 0 : productsPage.number * productsPage.size + 1}">1</span>
+                        to <span style="font-weight: 700; color: var(--tx);" th:text="${productsPage.number * productsPage.size + productsPage.numberOfElements}">10</span>
+                        of <span style="font-weight: 700; color: var(--tx);" th:text="${productsPage.totalElements}">25</span> products
+                    </div>
+
+                    <!-- Page navigation -->
+                    <nav th:if="${productsPage.totalPages > 1}" aria-label="Catalog pagination">
+                        <ul class="jt-pager-links">
+                            <!-- Previous button -->
+                            <li th:classappend="${productsPage.first ? 'disabled' : ''}">
+                                <a th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort=${sort}, dir=${dir}, page=${productsPage.number - 1})}" aria-label="Previous">
+                                    &laquo;
+                                </a>
+                            </li>
+
+                            <!-- Page numbers -->
+                            <li th:each="i : ${#numbers.sequence(0, productsPage.totalPages - 1)}"
+                                th:classappend="${i == productsPage.number ? 'active' : ''}">
+                                <a th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort=${sort}, dir=${dir}, page=${i})}"
+                                   th:text="${i + 1}">1</a>
+                            </li>
+
+                            <!-- Next button -->
+                            <li th:classappend="${productsPage.last ? 'disabled' : ''}">
+                                <a th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort=${sort}, dir=${dir}, page=${productsPage.number + 1})}" aria-label="Next">
+                                    &raquo;
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
-                <div class="px-3 py-2 border-top bg-light text-muted small">
-                    <i class="bi bi-info-circle me-1"></i> Selection applies to the current page only.
-                </div>
-            </div>
-
-            <!-- Pagination Footer (matching templates/products/list.html style) -->
-            <div class="card-footer bg-white border-top d-flex flex-wrap justify-content-between align-items-center py-2"
-                 th:if="${productsPage.totalPages > 0}">
-                <div class="small text-muted mb-2 mb-sm-0">
-                    Showing <span class="fw-semibold" th:text="${productsPage.empty ? 0 : productsPage.number * productsPage.size + 1}">1</span>
-                    to <span class="fw-semibold" th:text="${productsPage.number * productsPage.size + productsPage.numberOfElements}">10</span>
-                    of <span class="fw-semibold" th:text="${productsPage.totalElements}">25</span> products
-                </div>
-
-                <!-- Page navigation -->
-                <nav th:if="${productsPage.totalPages > 1}" aria-label="Catalog pagination">
-                    <ul class="pagination pagination-sm mb-0">
-                        <!-- Previous button -->
-                        <li class="page-item" th:classappend="${productsPage.first ? 'disabled' : ''}">
-                            <a class="page-link"
-                               th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort=${sort}, dir=${dir}, page=${productsPage.number - 1})}">
-                                &laquo;
-                            </a>
-                        </li>
-
-                        <!-- Page number items -->
-                        <li class="page-item"
-                            th:each="i : ${#numbers.sequence(0, productsPage.totalPages - 1)}"
-                            th:classappend="${i == productsPage.number ? 'active' : ''}">
-                            <a class="page-link"
-                               th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort=${sort}, dir=${dir}, page=${i})}"
-                               th:text="${i + 1}">1</a>
-                        </li>
-
-                        <!-- Next button -->
-                        <li class="page-item" th:classappend="${productsPage.last ? 'disabled' : ''}">
-                            <a class="page-link"
-                               th:href="@{/portal/catalog(search=${search}, categoryId=${categoryId}, sort=${sort}, dir=${dir}, page=${productsPage.number + 1})}">
-                                &raquo;
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
+            </main>
         </div>
+
+        <!-- Command Palette -->
+        <div th:replace="~{fragments/layout :: commandPalette('reseller')}"></div>
     </div>
 
-    <!-- Photo Modal: click thumbnail to show 800px image with product name -->
+    <!-- Photo Modal -->
     <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -287,9 +269,10 @@
         </div>
     </div>
 
-    <!-- Bootstrap 5 JS -->
+    <!-- Bootstrap 5 JS & App JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/app.js}" src="/js/app.js"></script>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
     <script>
         // Populate photo modal when a thumbnail is clicked
         (function () {

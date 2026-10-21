@@ -31,15 +31,15 @@
             <!-- Sticky Topbar -->
             <header th:replace="~{fragments/layout :: topbar('Reseller Portal', 'reseller')}"></header>
 
-            <main class="container-fluid px-4 py-4">
+            <main>
                 <!-- Page Title & Greeting -->
                 <div class="ph mb-4">
                     <div>
-                        <h1 class="fw-bold mb-1 text-dark">Reseller Portal</h1>
+                        <h1 class="fw-bold mb-1">Reseller Portal</h1>
                         <div class="sub">Welcome back, <span class="fw-semibold text-primary" th:text="${currentUser != null ? currentUser.fullName : 'Partner'}">Partner</span>! Here is your reseller account overview.</div>
                     </div>
                     <div class="pill g">
-                        <i class="bi bi-shield-check me-1"></i> Reseller Account Active
+                        Reseller Account Active
                     </div>
                 </div>
 
@@ -47,83 +47,60 @@
         <div class="row g-3 mb-4">
             <!-- Business Name Card -->
             <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card stat-card shadow-sm p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-medium text-uppercase">Business Name</span>
-                            <h4 class="fw-bold mb-0 text-dark" th:text="${reseller != null ? reseller.businessName : 'N/A'}">Business Name</h4>
-                        </div>
-                        <div class="stat-icon bg-primary-subtle text-primary">
-                            <i class="bi bi-building"></i>
-                        </div>
+                <div class="card kpi h-100">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="k">Business Name</div>
+                        <span class="ic"><i class="bi bi-building"></i></span>
                     </div>
-                    <div class="mt-3 pt-2 border-top small text-muted">
-                        <span class="fw-medium">City/Location:</span>
-                        <span th:text="${reseller != null && reseller.territory != null ? reseller.territory : 'N/A'}">City/Location</span>
+                    <div class="v" style="font-size: 20px; line-height: 1.3;" th:text="${reseller != null ? reseller.businessName : 'N/A'}">Business Name</div>
+                    <div class="sub text-truncate">
+                        <span>Location: </span><span th:text="${reseller != null && reseller.territory != null ? reseller.territory : 'N/A'}">City/Location</span>
                     </div>
                 </div>
             </div>
 
             <!-- Tier Name with Discount % Card -->
             <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card stat-card shadow-sm p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-medium text-uppercase">Tier &amp; Discount</span>
-                            <h4 class="fw-bold mb-0 text-dark"
-                                th:text="${reseller != null && reseller.tier != null ? reseller.tier.tierName + ' (' + #numbers.formatDecimal(reseller.tier.discountPct, 1, 2) + '%)' : 'None (0.00%)'}">
-                                Tier (0.00%)
-                            </h4>
-                        </div>
-                        <div class="stat-icon bg-warning-subtle text-warning">
-                            <i class="bi bi-award"></i>
-                        </div>
+                <div class="card kpi h-100">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="k">Tier &amp; Discount</div>
+                        <span class="ic"><i class="bi bi-award"></i></span>
                     </div>
-                    <div class="mt-3 pt-2 border-top small text-muted">
-                        Applied discount rate
+                    <div class="v" style="font-size: 20px; line-height: 1.3;"
+                         th:text="${reseller != null && reseller.tier != null ? reseller.tier.tierName + ' (' + #numbers.formatDecimal(reseller.tier.discountPct, 1, 2) + '%)' : 'None (0.00%)'}">
+                        Tier (0.00%)
                     </div>
+                    <div class="sub">Applied discount rate</div>
                 </div>
             </div>
 
             <!-- Credit Limit Card -->
             <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card stat-card shadow-sm p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-medium text-uppercase">Credit Limit</span>
-                            <h4 class="fw-bold mb-0 text-dark font-monospace"
-                                th:text="${reseller != null && reseller.creditLimit != null ? '₱' + #numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">
-                                ₱0.00
-                            </h4>
-                        </div>
-                        <div class="stat-icon bg-info-subtle text-info">
-                            <i class="bi bi-credit-card"></i>
-                        </div>
+                <div class="card kpi h-100">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="k">Credit Limit</div>
+                        <span class="ic"><i class="bi bi-credit-card"></i></span>
                     </div>
-                    <div class="mt-3 pt-2 border-top small text-muted">
-                        Approved purchasing limit
+                    <div class="v font-monospace"
+                         th:text="${reseller != null && reseller.creditLimit != null ? '₱' + #numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">
+                        ₱0.00
                     </div>
+                    <div class="sub">Approved purchasing limit</div>
                 </div>
             </div>
 
             <!-- Current Balance Card -->
             <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card stat-card shadow-sm p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-medium text-uppercase">Current Balance</span>
-                            <h4 class="fw-bold mb-0 text-dark font-monospace"
-                                th:text="${reseller != null && reseller.balance != null ? '₱' + #numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">
-                                ₱0.00
-                            </h4>
-                        </div>
-                        <div class="stat-icon bg-success-subtle text-success">
-                            <i class="bi bi-cash-stack"></i>
-                        </div>
+                <div class="card kpi h-100">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="k">Current Balance</div>
+                        <span class="ic"><i class="bi bi-cash-stack"></i></span>
                     </div>
-                    <div class="mt-3 pt-2 border-top small text-muted">
-                        Outstanding account balance
+                    <div class="v font-monospace"
+                         th:text="${reseller != null && reseller.balance != null ? '₱' + #numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">
+                        ₱0.00
                     </div>
+                    <div class="sub">Outstanding account balance</div>
                 </div>
             </div>
         </div>
@@ -131,9 +108,9 @@
         <!-- Account Profile Details Card -->
         <div class="row g-3">
             <div class="col-12 col-lg-8">
-                <div class="card border-0 shadow-sm rounded-3">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h5 class="fw-bold mb-0 text-dark">
+                <div class="card h-100">
+                    <div class="card-header py-3">
+                        <h5 class="fw-bold mb-0">
                             <i class="bi bi-briefcase me-2 text-primary"></i>Reseller Profile Details
                         </h5>
                     </div>
@@ -141,34 +118,34 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="small text-muted fw-medium d-block">Business Name</label>
-                                <span class="fw-semibold text-dark" th:text="${reseller != null ? reseller.businessName : '-'}">-</span>
+                                <span class="fw-semibold" th:text="${reseller != null ? reseller.businessName : '-'}">-</span>
                             </div>
                             <div class="col-md-6">
                                 <label class="small text-muted fw-medium d-block">Assigned Tier</label>
-                                <span class="badge bg-light text-dark border"
+                                <span class="pill b"
                                       th:text="${reseller != null && reseller.tier != null ? reseller.tier.tierName + ' (' + #numbers.formatDecimal(reseller.tier.discountPct, 1, 2) + '%)' : 'Unassigned'}">Tier</span>
                             </div>
                             <div class="col-md-6">
                                 <label class="small text-muted fw-medium d-block">City/Location</label>
-                                <span class="text-dark" th:text="${reseller != null && reseller.territory != null ? reseller.territory : '-'}">-</span>
+                                <span th:text="${reseller != null && reseller.territory != null ? reseller.territory : '-'}">-</span>
                             </div>
                             <div class="col-md-6">
                                 <label class="small text-muted fw-medium d-block">Contact Number</label>
-                                <span class="text-dark" th:text="${reseller != null && reseller.contactNo != null ? reseller.contactNo : '-'}">-</span>
+                                <span th:text="${reseller != null && reseller.contactNo != null ? reseller.contactNo : '-'}">-</span>
                             </div>
                             <div class="col-md-6">
                                 <label class="small text-muted fw-medium d-block">Credit Limit</label>
-                                <span class="text-dark font-monospace"
+                                <span class="font-monospace"
                                       th:text="${reseller != null && reseller.creditLimit != null ? '₱' + #numbers.formatDecimal(reseller.creditLimit, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</span>
                             </div>
                             <div class="col-md-6">
                                 <label class="small text-muted fw-medium d-block">Current Balance</label>
-                                <span class="text-dark font-monospace"
+                                <span class="font-monospace"
                                       th:text="${reseller != null && reseller.balance != null ? '₱' + #numbers.formatDecimal(reseller.balance, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</span>
                             </div>
                             <div class="col-12">
                                 <label class="small text-muted fw-medium d-block">Business Address</label>
-                                <span class="text-dark" th:text="${reseller != null && reseller.address != null ? reseller.address : '-'}">-</span>
+                                <span th:text="${reseller != null && reseller.address != null ? reseller.address : '-'}">-</span>
                             </div>
                         </div>
                     </div>
@@ -177,9 +154,9 @@
 
             <!-- Quick Links / Shortcuts -->
             <div class="col-12 col-lg-4">
-                <div class="card border-0 shadow-sm rounded-3 h-100">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h5 class="fw-bold mb-0 text-dark">
+                <div class="card h-100">
+                    <div class="card-header py-3">
+                        <h5 class="fw-bold mb-0">
                             <i class="bi bi-lightning-charge me-2 text-warning"></i>Quick Actions
                         </h5>
                     </div>

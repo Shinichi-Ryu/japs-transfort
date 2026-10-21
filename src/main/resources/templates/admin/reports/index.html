@@ -1,100 +1,102 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
-<head>
+<head th:replace="~{fragments/layout :: htmlHead('Reports')}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - Japs Transfort</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: headerNav('reports')}"></div>
+    <div class="app">
+        <!-- Drawer backdrop for mobile screens -->
+        <div class="sb-backdrop" onclick="window.jtToggleDrawer(false)" aria-hidden="true"></div>
 
-    <div class="container-fluid px-4 py-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="fw-bold mb-0">Reports</h3>
-                <p class="text-muted small mb-0">Administrative analytics and export tools</p>
-            </div>
+        <!-- Sidebar -->
+        <aside th:replace="~{fragments/layout :: sidebar('reports', 'admin')}"></aside>
+
+        <!-- Main Content Area -->
+        <div class="mw">
+            <!-- Background effects -->
+            <div th:replace="~{fragments/layout :: bgfx}"></div>
+
+            <!-- Sticky Topbar -->
+            <header th:replace="~{fragments/layout :: topbar('Reports', 'admin')}"></header>
+
+            <main>
+                <!-- Page Header -->
+                <div class="jt-ph">
+                    <div>
+                        <h1>Reports</h1>
+                        <div class="jt-sub">Administrative analytics and export tools</div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Sales Report -->
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="card kpi h-100 p-4">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h5 class="fw-bold mb-0" style="color: var(--tx);">Sales</h5>
+                                <span class="ic c-g"><i class="bi bi-graph-up"></i></span>
+                            </div>
+                            <p class="small mb-4" style="color: var(--mu); flex-grow: 1;">Gross sales, collections, breakdowns by reseller, product, payment method, and daily totals for any date range.</p>
+                            <a th:href="@{/admin/reports/sales}" class="jt-btn jt-btn-s w-100 justify-content-center">
+                                Open Sales Report <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Receivables Report -->
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="card kpi h-100 p-4">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h5 class="fw-bold mb-0" style="color: var(--tx);">Receivables</h5>
+                                <span class="ic c-o"><i class="bi bi-wallet2"></i></span>
+                            </div>
+                            <p class="small mb-4" style="color: var(--mu); flex-grow: 1;">Outstanding balances per reseller with aging buckets (0–30, 31–60, 61–90, 90+ days) and credit limit status.</p>
+                            <a th:href="@{/admin/reports/receivables}" class="jt-btn jt-btn-s w-100 justify-content-center">
+                                Open Receivables Report <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Stock Report -->
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="card kpi h-100 p-4">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h5 class="fw-bold mb-0" style="color: var(--tx);">Stock</h5>
+                                <span class="ic c-p"><i class="bi bi-boxes"></i></span>
+                            </div>
+                            <p class="small mb-4" style="color: var(--mu); flex-grow: 1;">Inventory levels per product and warehouse with stock values at cost and SRP, plus stock movement summaries.</p>
+                            <a th:href="@{/admin/reports/stock}" class="jt-btn jt-btn-s w-100 justify-content-center">
+                                Open Stock Report <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Commissions Report -->
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="card kpi h-100 p-4">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h5 class="fw-bold mb-0" style="color: var(--tx);">Commissions</h5>
+                                <span class="ic c-s"><i class="bi bi-cash-stack"></i></span>
+                            </div>
+                            <p class="small mb-4" style="color: var(--mu); flex-grow: 1;">Commission totals by reseller for a date range, with pending and paid breakdown and status filter.</p>
+                            <a th:href="@{/admin/reports/commissions}" class="jt-btn jt-btn-s w-100 justify-content-center">
+                                Open Commissions Report <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
 
-        <div class="row g-4">
-            <!-- Sales Report -->
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="stat-icon bg-success-subtle text-success me-3">
-                                <i class="bi bi-graph-up"></i>
-                            </div>
-                            <h5 class="fw-bold mb-0">Sales</h5>
-                        </div>
-                        <p class="text-muted small mb-4">Gross sales, collections, breakdowns by reseller, product, payment method, and daily totals for any date range.</p>
-                        <a th:href="@{/admin/reports/sales}" class="btn btn-success btn-sm w-100 fw-semibold">
-                            <i class="bi bi-arrow-right-circle me-1"></i> Open Sales Report
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Receivables Report -->
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="stat-icon bg-warning-subtle text-warning me-3">
-                                <i class="bi bi-wallet2"></i>
-                            </div>
-                            <h5 class="fw-bold mb-0">Receivables</h5>
-                        </div>
-                        <p class="text-muted small mb-4">Outstanding balances per reseller with aging buckets (0–30, 31–60, 61–90, 90+ days) and credit limit status.</p>
-                        <a th:href="@{/admin/reports/receivables}" class="btn btn-warning btn-sm w-100 fw-semibold">
-                            <i class="bi bi-arrow-right-circle me-1"></i> Open Receivables Report
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stock Report -->
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="stat-icon bg-info-subtle text-info me-3">
-                                <i class="bi bi-boxes"></i>
-                            </div>
-                            <h5 class="fw-bold mb-0">Stock</h5>
-                        </div>
-                        <p class="text-muted small mb-4">Inventory levels per product and warehouse with stock values at cost and SRP, plus stock movement summaries.</p>
-                        <a th:href="@{/admin/reports/stock}" class="btn btn-info btn-sm w-100 fw-semibold">
-                            <i class="bi bi-arrow-right-circle me-1"></i> Open Stock Report
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Commissions Report -->
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="stat-icon bg-primary-subtle text-primary me-3">
-                                <i class="bi bi-cash-stack"></i>
-                            </div>
-                            <h5 class="fw-bold mb-0">Commissions</h5>
-                        </div>
-                        <p class="text-muted small mb-4">Commission totals by reseller for a date range, with pending and paid breakdown and status filter.</p>
-                        <a th:href="@{/admin/reports/commissions}" class="btn btn-primary btn-sm w-100 fw-semibold">
-                            <i class="bi bi-arrow-right-circle me-1"></i> Open Commissions Report
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Command Palette -->
+        <div th:replace="~{fragments/layout :: commandPalette('admin')}"></div>
     </div>
 
+    <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>
 </html>

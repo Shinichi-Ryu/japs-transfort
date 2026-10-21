@@ -796,6 +796,7 @@ textarea:focus {
     color: var(--tx);
     line-height: 1.15;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
 
 [data-theme="dark"] .kpi .v {
@@ -833,6 +834,113 @@ textarea:focus {
 .kpi.hi .ic {
     background: rgba(255, 255, 255, 0.14) !important;
     color: #fff !important;
+}
+
+/* ===================================================================
+   Dashboard KPI Summary Cards Grid
+   3 rows on desktop (4 cards, 4 cards, 3 cards)
+   2 columns on tablet and mobile
+   =================================================================== */
+.dashboard-kpi-grid {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+}
+
+.dashboard-kpi-grid .kpi {
+    min-width: 0;
+    height: 100%;
+    margin-bottom: 0;
+}
+
+.dashboard-kpi-grid .kpi .v {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: clamp(1.2rem, 1.8vw, 1.95rem);
+}
+
+/* Desktop layout (3 rows: Row 1 = 4 cards, Row 2 = 4 cards, Row 3 = 3 wider cards) */
+@media (min-width: 1024px) {
+    .dashboard-kpi-grid {
+        grid-template-columns: repeat(12, 1fr);
+        gap: 16px;
+    }
+
+    .dashboard-kpi-grid .kpi {
+        grid-column: span 3;
+    }
+
+    .dashboard-kpi-grid .kpi.kpi-wide {
+        grid-column: span 4;
+    }
+}
+
+/* 1024px to 1199.98px: Slightly compact padding to ensure tidy spacing at medium desktop */
+@media (min-width: 1024px) and (max-width: 1199.98px) {
+    .dashboard-kpi-grid {
+        gap: 12px;
+    }
+
+    .dashboard-kpi-grid .kpi {
+        padding: 16px 14px;
+    }
+
+    .dashboard-kpi-grid .kpi .v {
+        font-size: clamp(1.1rem, 1.55vw, 1.65rem);
+    }
+}
+
+/* Tablet layout (768px to 1023.98px / 1199.98px): 2 columns */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+    .dashboard-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .dashboard-kpi-grid .kpi,
+    .dashboard-kpi-grid .kpi.kpi-wide {
+        grid-column: span 1;
+    }
+
+    .dashboard-kpi-grid .kpi .v {
+        font-size: clamp(1.25rem, 2.4vw, 1.85rem);
+    }
+}
+
+/* Mobile layout (below 768px): 2 columns with smaller padding and fonts (no single huge cards) */
+@media (max-width: 767.98px) {
+    .dashboard-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .dashboard-kpi-grid .kpi,
+    .dashboard-kpi-grid .kpi.kpi-wide {
+        grid-column: span 1;
+        padding: 12px 10px;
+    }
+
+    .dashboard-kpi-grid .kpi .k {
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    .dashboard-kpi-grid .kpi .ic {
+        width: 30px;
+        height: 30px;
+        font-size: 15px;
+        border-radius: 8px;
+    }
+
+    .dashboard-kpi-grid .kpi .v {
+        font-size: clamp(0.92rem, 3.8vw, 1.3rem);
+        margin: 2px 0 4px;
+    }
+
+    .dashboard-kpi-grid .kpi a {
+        font-size: 11.5px;
+    }
 }
 
 /* Stat card subtle badges and icons */

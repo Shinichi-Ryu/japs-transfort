@@ -40,141 +40,108 @@
                     </div>
                 </div>
 
-        <!-- Operational Cards -->
-        <div class="row g-3 mb-4">
-            <!-- Pending Orders Card (Highlighted First KPI) -->
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
-                <div class="card kpi hi h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="k">Pending orders</div>
-                        <span class="ic"><i class="bi bi-clock-history"></i></span>
-                    </div>
-                    <div class="v" th:text="${pendingOrders}">0</div>
-                    <a th:href="@{/admin/orders(status='pending')}">Review orders <i class="bi bi-arrow-right"></i></a>
+        <!-- Summary Cards Grid (3 Rows) -->
+        <div class="dashboard-kpi-grid mb-4">
+            <!-- Row 1: Pending Orders, To Pack, To Ship, Low Stock Items -->
+            <div class="card kpi hi h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">Pending orders</div>
+                    <span class="ic"><i class="bi bi-clock-history"></i></span>
                 </div>
+                <div class="v" th:text="${pendingOrders}">0</div>
+                <a th:href="@{/admin/orders(status='pending')}">Review orders <i class="bi bi-arrow-right"></i></a>
             </div>
 
-            <!-- To Pack (Approved) Card -->
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
-                <div class="card kpi h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="k">To pack</div>
-                        <span class="ic c-o"><i class="bi bi-box-seam"></i></span>
-                    </div>
-                    <div class="v" th:text="${toPackOrders}">0</div>
-                    <a th:href="@{/admin/orders(status='approved')}">To pack <i class="bi bi-arrow-right"></i></a>
+            <div class="card kpi h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">To pack</div>
+                    <span class="ic c-o"><i class="bi bi-box-seam"></i></span>
                 </div>
+                <div class="v" th:text="${toPackOrders}">0</div>
+                <a th:href="@{/admin/orders(status='approved')}">To pack <i class="bi bi-arrow-right"></i></a>
             </div>
 
-            <!-- To Ship (Packed) Card -->
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
-                <div class="card kpi h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="k">To ship</div>
-                        <span class="ic c-s"><i class="bi bi-truck"></i></span>
-                    </div>
-                    <div class="v" th:text="${toShipOrders}">0</div>
-                    <a th:href="@{/admin/orders(status='packed')}">To ship <i class="bi bi-arrow-right"></i></a>
+            <div class="card kpi h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">To ship</div>
+                    <span class="ic c-s"><i class="bi bi-truck"></i></span>
                 </div>
+                <div class="v" th:text="${toShipOrders}">0</div>
+                <a th:href="@{/admin/orders(status='packed')}">To ship <i class="bi bi-arrow-right"></i></a>
             </div>
 
-            <!-- Low Stock Items Card -->
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
-                <div class="card kpi h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="k">Low stock items</div>
-                        <span class="ic c-r"><i class="bi bi-exclamation-triangle"></i></span>
-                    </div>
-                    <div class="v" th:text="${lowStockItems}">0</div>
-                    <a th:href="@{/admin/inventory}">Restock now <i class="bi bi-arrow-right"></i></a>
+            <div class="card kpi h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">Low stock items</div>
+                    <span class="ic c-r"><i class="bi bi-exclamation-triangle"></i></span>
                 </div>
+                <div class="v" th:text="${lowStockItems}">0</div>
+                <a th:href="@{/admin/inventory}">Restock now <i class="bi bi-arrow-right"></i></a>
             </div>
 
-            <!-- Unpaid Balances Card -->
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
-                <div class="card kpi h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="k">Unpaid balances</div>
-                        <span class="ic c-r"><i class="bi bi-wallet2"></i></span>
-                    </div>
-                    <div class="v" th:text="'₱' + ${#numbers.formatDecimal(unpaidBalances, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
-                    <a th:href="@{/admin/resellers}">View receivables <i class="bi bi-arrow-right"></i></a>
+            <!-- Row 2: Unpaid Balances, Pending Commissions, New Applications, Products -->
+            <div class="card kpi h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">Unpaid balances</div>
+                    <span class="ic c-r"><i class="bi bi-wallet2"></i></span>
                 </div>
+                <div class="v" th:text="'₱' + ${#numbers.formatDecimal(unpaidBalances, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                <a th:href="@{/admin/resellers}">View receivables <i class="bi bi-arrow-right"></i></a>
             </div>
 
-            <!-- Pending Commissions Card -->
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-2">
-                <div class="card kpi h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="k">Pending commissions</div>
-                        <span class="ic c-s"><i class="bi bi-cash-stack"></i></span>
-                    </div>
-                    <div class="v" th:text="'₱' + ${#numbers.formatDecimal(pendingCommissions, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
-                    <a th:href="@{/admin/commissions(status='pending')}">Review <i class="bi bi-arrow-right"></i></a>
+            <div class="card kpi h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">Pending commissions</div>
+                    <span class="ic c-s"><i class="bi bi-cash-stack"></i></span>
                 </div>
-            </div>
-        </div>
-
-        <!-- Metric Stat Cards -->
-        <div class="row g-3 mb-4">
-            <!-- Pending Applications Card -->
-            <div class="col-12 col-sm-6 col-xl">
-                <div class="card kpi h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="k">New applications</div>
-                        <span class="ic c-p"><i class="bi bi-person-lines-fill"></i></span>
-                    </div>
-                    <div class="v" th:text="${pendingApplications}">0</div>
-                    <a th:href="@{/admin/resellers(status='pending')}">Review applications <i class="bi bi-arrow-right"></i></a>
-                </div>
+                <div class="v" th:text="'₱' + ${#numbers.formatDecimal(pendingCommissions, 1, 'COMMA', 2, 'POINT')}">₱0.00</div>
+                <a th:href="@{/admin/commissions(status='pending')}">Review <i class="bi bi-arrow-right"></i></a>
             </div>
 
-            <!-- Products Card -->
-            <div class="col-12 col-sm-6 col-xl">
-                <div class="card kpi h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="k">Products</div>
-                        <span class="ic c-o"><i class="bi bi-boxes"></i></span>
-                    </div>
-                    <div class="v" th:text="${totalProducts}">0</div>
-                    <a th:href="@{/admin/products}">Manage <i class="bi bi-arrow-right"></i></a>
+            <div class="card kpi h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">New applications</div>
+                    <span class="ic c-p"><i class="bi bi-person-lines-fill"></i></span>
                 </div>
+                <div class="v" th:text="${pendingApplications}">0</div>
+                <a th:href="@{/admin/resellers(status='pending')}">Review applications <i class="bi bi-arrow-right"></i></a>
             </div>
 
-            <!-- Resellers Card -->
-            <div class="col-12 col-sm-6 col-xl">
-                <div class="card kpi h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="k">Resellers</div>
-                        <span class="ic c-p"><i class="bi bi-people"></i></span>
-                    </div>
-                    <div class="v" th:text="${totalResellers}">0</div>
-                    <a th:href="@{/admin/resellers}">Manage <i class="bi bi-arrow-right"></i></a>
+            <div class="card kpi h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">Products</div>
+                    <span class="ic c-o"><i class="bi bi-boxes"></i></span>
                 </div>
+                <div class="v" th:text="${totalProducts}">0</div>
+                <a th:href="@{/admin/products}">Manage <i class="bi bi-arrow-right"></i></a>
             </div>
 
-            <!-- Reseller Tiers Card -->
-            <div class="col-12 col-sm-6 col-xl">
-                <div class="card kpi h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="k">Reseller tiers</div>
-                        <span class="ic c-m"><i class="bi bi-award"></i></span>
-                    </div>
-                    <div class="v" th:text="${totalTiers}">0</div>
-                    <a th:href="@{/admin/tiers}">Manage <i class="bi bi-arrow-right"></i></a>
+            <!-- Row 3: Resellers, Reseller Tiers, Categories -->
+            <div class="card kpi kpi-wide h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">Resellers</div>
+                    <span class="ic c-p"><i class="bi bi-people"></i></span>
                 </div>
+                <div class="v" th:text="${totalResellers}">0</div>
+                <a th:href="@{/admin/resellers}">Manage <i class="bi bi-arrow-right"></i></a>
             </div>
 
-            <!-- Categories Card -->
-            <div class="col-12 col-sm-6 col-xl">
-                <div class="card kpi h-100">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="k">Categories</div>
-                        <span class="ic c-s"><i class="bi bi-tag"></i></span>
-                    </div>
-                    <div class="v" th:text="${totalCategories}">0</div>
-                    <a th:href="@{/admin/categories}">Manage <i class="bi bi-arrow-right"></i></a>
+            <div class="card kpi kpi-wide h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">Reseller tiers</div>
+                    <span class="ic c-m"><i class="bi bi-award"></i></span>
                 </div>
+                <div class="v" th:text="${totalTiers}">0</div>
+                <a th:href="@{/admin/tiers}">Manage <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            <div class="card kpi kpi-wide h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">Categories</div>
+                    <span class="ic c-s"><i class="bi bi-tag"></i></span>
+                </div>
+                <div class="v" th:text="${totalCategories}">0</div>
+                <a th:href="@{/admin/categories}">Manage <i class="bi bi-arrow-right"></i></a>
             </div>
         </div>
 

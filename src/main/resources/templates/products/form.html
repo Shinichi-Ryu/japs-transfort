@@ -215,18 +215,19 @@
                                     <div class="col-12">
                                         <div class="jt-field">
                                             <label for="productInfo" class="jt-label">Product Info</label>
-                                            <textarea class="form-control"
+                                             <textarea class="form-control"
                                                       id="productInfo"
                                                       th:field="*{productInfo}"
                                                       placeholder="Specifications, features, and condition"
-                                                      maxlength="1000"
-                                                      rows="4"
+                                                      maxlength="3000"
+                                                      rows="6"
+                                                      style="resize: vertical;"
                                                       th:errorclass="is-invalid"></textarea>
                                             <div class="d-flex justify-content-between mt-1">
                                                 <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('productInfo')}" th:errors="*{productInfo}">
-                                                    Product Info cannot exceed 1000 characters.
+                                                    Product Info cannot exceed 3000 characters.
                                                 </div>
-                                                <div class="form-text ms-auto" style="color: var(--mu); font-size: 12px;" id="productInfoCounter">0/1000</div>
+                                                <div class="form-text ms-auto" style="color: var(--mu); font-size: 12px;" id="productInfoCounter">0/3000</div>
                                             </div>
                                         </div>
                                     </div>
@@ -307,7 +308,7 @@
             var counter  = document.getElementById('productInfoCounter');
             if (!textarea || !counter) return;
             function update() {
-                counter.textContent = textarea.value.length + '/1000';
+                counter.textContent = textarea.value.length + '/3000';
             }
             textarea.addEventListener('input', update);
             update(); // initialise on page load (edit mode)

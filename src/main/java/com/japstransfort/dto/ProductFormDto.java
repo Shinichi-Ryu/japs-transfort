@@ -46,7 +46,7 @@ public class ProductFormDto {
     @Size(max = 100, message = "Brand cannot exceed 100 characters.")
     private String brand;
 
-    @Size(max = 1000, message = "Product Info cannot exceed 1000 characters.")
+    @Size(max = 3000, message = "Product Info cannot exceed 3000 characters.")
     private String productInfo;
 
     public ProductFormDto() {

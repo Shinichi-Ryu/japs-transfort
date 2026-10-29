@@ -230,7 +230,11 @@
                                                   th:action="@{'/admin/products/delete/' + ${product.productId}}"
                                                   method="post"
                                                   class="d-inline m-0 p-0"
-                                                  onsubmit="return confirm('Soft-delete this product? It will be marked inactive.');">
+                                                  data-confirm="true"
+                                                  data-confirm-title="Deactivate product?"
+                                                  data-confirm-message="Soft-delete this product? It will be marked inactive."
+                                                  data-confirm-button="Deactivate"
+                                                  data-confirm-variant="danger">
                                                 <button type="submit" class="jt-btn jt-btn-s jt-btn-icon jt-btn-d" title="Mark Inactive (Soft Delete)">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
@@ -241,7 +245,11 @@
                                                   th:action="@{'/admin/products/restore/' + ${product.productId}}"
                                                   method="post"
                                                   class="d-inline m-0 p-0"
-                                                  onsubmit="return confirm('Restore this product to active status?');">
+                                                  data-confirm="true"
+                                                  data-confirm-title="Restore product?"
+                                                  data-confirm-message="Restore this product to active status?"
+                                                  data-confirm-button="Restore"
+                                                  data-confirm-variant="primary">
                                                 <button type="submit" class="jt-btn jt-btn-s jt-btn-icon" style="color: var(--gt); border-color: var(--gt);" title="Restore Product">
                                                     <i class="bi bi-arrow-counterclockwise"></i>
                                                 </button>
@@ -312,7 +320,7 @@
                 </div>
                 <div class="modal-body">
                     <label class="form-label small text-muted text-uppercase fw-semibold mb-2" style="letter-spacing: 0.5px; font-size: 11px;">Product Info</label>
-                    <div id="piModalInfo" style="white-space: pre-wrap; word-break: break-word; color: var(--tx); font-size: 13.5px; line-height: 1.6; max-height: 360px; overflow-y: auto;"></div>
+                    <div id="piModalInfo" style="white-space: pre-line; word-break: break-word; overflow-wrap: anywhere; color: var(--tx); font-size: 13.5px; line-height: 1.6; max-height: 420px; overflow-y: auto;"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="jt-btn jt-btn-s" data-bs-dismiss="modal">Close</button>

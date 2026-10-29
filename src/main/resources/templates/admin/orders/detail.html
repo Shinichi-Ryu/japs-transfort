@@ -282,7 +282,7 @@
                                             <span class="fw-medium">Brand:</span> <span th:text="${item.product.brand}"></span>
                                         </div>
                                         <div th:if="${item.product != null and item.product.productInfo != null and !#strings.isEmpty(item.product.productInfo)}"
-                                             class="small text-muted" style="color: var(--mu); font-size: 11.5px;"
+                                             class="small text-muted" style="color: var(--mu); font-size: 11.5px; white-space: pre-line; word-break: break-word; overflow-wrap: anywhere; max-height: 100px; overflow-y: auto;"
                                              th:text="${item.product.productInfo}"></div>
                                     </td>
                                     <td style="color: var(--mu);"
@@ -502,10 +502,14 @@
                             </div>
                             <div class="d-flex flex-wrap gap-3 align-items-start">
                                 <!-- Mark as Packed -->
-                                <form th:action="@{'/admin/orders/' + ${order.orderId} + '/pack'}" method="post">
+                                <form th:action="@{'/admin/orders/' + ${order.orderId} + '/pack'}" method="post"
+                                      data-confirm="true"
+                                      data-confirm-title="Mark order as packed?"
+                                      data-confirm-message="Mark this order as packed?"
+                                      data-confirm-button="Mark as Packed"
+                                      data-confirm-variant="primary">
                                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                    <button type="submit" class="jt-btn jt-btn-p jt-btn-s"
-                                            onclick="return confirm('Mark this order as packed?')">
+                                    <button type="submit" class="jt-btn jt-btn-p jt-btn-s">
                                         <i class="bi bi-box-seam me-1"></i> Mark as Packed
                                     </button>
                                 </form>
@@ -570,7 +574,12 @@
                             <div class="jt-alert jt-alert-info mb-3">
                                 <div><i class="bi bi-truck me-2"></i> This order is <strong>shipped</strong>. Mark it as delivered once received by the reseller.</div>
                             </div>
-                            <form th:action="@{'/admin/orders/' + ${order.orderId} + '/deliver'}" method="post">
+                            <form th:action="@{'/admin/orders/' + ${order.orderId} + '/deliver'}" method="post"
+                                  data-confirm="true"
+                                  data-confirm-title="Mark order as delivered?"
+                                  data-confirm-message="Mark this order as delivered?"
+                                  data-confirm-button="Mark as Delivered"
+                                  data-confirm-variant="primary">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <!-- Cash collected checkbox for COD orders -->
                                 <div th:if="${order.paymentMethod != null and order.paymentMethod.name() == 'COD'}" class="form-check mb-3">
@@ -580,8 +589,7 @@
                                     </label>
                                     <div class="form-text" style="color: var(--mu);">Automatically record full cash payment upon delivery.</div>
                                 </div>
-                                <button type="submit" class="jt-btn jt-btn-p jt-btn-s"
-                                        onclick="return confirm('Mark this order as delivered?')">
+                                <button type="submit" class="jt-btn jt-btn-p jt-btn-s">
                                     <i class="bi bi-check2-all me-1"></i> Mark as Delivered
                                 </button>
                             </form>
@@ -633,14 +641,29 @@
     function confirmAdminCancel(form) {
         var select = form.querySelector('select[name="cancelReason"]');
         if (!select || !select.value) {
-            alert('Please select a cancellation reason before proceeding.');
+            window.alertDialog({
+                title: 'Cancellation Reason Required',
+                message: 'Please select a cancellation reason before proceeding.',
+                variant: 'warning'
+            });
             return false;
         }
         var isApproved = form.querySelector('button[type="submit"]').textContent.indexOf('Reverse') !== -1;
+        var title = isApproved ? 'Cancel order & reverse stock?' : 'Cancel order?';
         var msg = isApproved
             ? 'WARNING: Cancelling this approved order will reverse inventory stock and adjust the reseller balance. Are you sure?'
             : 'Are you sure you want to cancel this order?';
-        return confirm(msg);
+        window.confirmDialog({
+            title: title,
+            message: msg,
+            confirmText: isApproved ? 'Cancel & Reverse' : 'Cancel Order',
+            variant: 'danger'
+        }).then(function(confirmed) {
+            if (confirmed) {
+                HTMLFormElement.prototype.submit.call(form);
+            }
+        });
+        return false;
     }
     </script>
 </body>

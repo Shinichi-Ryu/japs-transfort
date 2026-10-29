@@ -198,7 +198,11 @@
                                                 <form th:action="@{'/admin/resellers/reject/' + ${reseller.resellerId}}"
                                                       method="post"
                                                       class="d-inline m-0 p-0"
-                                                      onsubmit="return confirm('Reject this reseller application?');">
+                                                      data-confirm="true"
+                                                      data-confirm-title="Reject application?"
+                                                      data-confirm-message="Reject this reseller application?"
+                                                      data-confirm-button="Reject"
+                                                      data-confirm-variant="danger">
                                                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                                     <button type="submit" class="jt-btn jt-btn-s jt-btn-d" title="Reject Reseller">
                                                         <i class="bi bi-x-lg me-1"></i> Reject
@@ -223,7 +227,11 @@
                                                   th:action="@{'/admin/resellers/delete/' + ${reseller.resellerId}}"
                                                   method="post"
                                                   class="d-inline m-0 p-0"
-                                                  onsubmit="return confirm('Deactivate this reseller? It will be marked inactive.');">
+                                                  data-confirm="true"
+                                                  data-confirm-title="Deactivate reseller?"
+                                                  data-confirm-message="Deactivate this reseller? It will be marked inactive."
+                                                  data-confirm-button="Deactivate"
+                                                  data-confirm-variant="danger">
                                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                                 <button type="submit" class="jt-btn jt-btn-s jt-btn-icon jt-btn-d" title="Deactivate Reseller">
                                                     <i class="bi bi-trash"></i>
@@ -235,7 +243,11 @@
                                                   th:action="@{'/admin/resellers/restore/' + ${reseller.resellerId}}"
                                                   method="post"
                                                   class="d-inline m-0 p-0"
-                                                  onsubmit="return confirm('Restore this reseller to active status?');">
+                                                  data-confirm="true"
+                                                  data-confirm-title="Restore reseller?"
+                                                  data-confirm-message="Restore this reseller to active status?"
+                                                  data-confirm-button="Restore"
+                                                  data-confirm-variant="primary">
                                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                                 <button type="submit" class="jt-btn jt-btn-s jt-btn-icon" style="color: var(--gt); border-color: var(--gt);" title="Restore Reseller">
                                                     <i class="bi bi-arrow-counterclockwise"></i>

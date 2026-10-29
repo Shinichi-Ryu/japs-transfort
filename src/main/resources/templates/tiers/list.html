@@ -178,7 +178,11 @@
                                                     <form th:action="@{'/admin/tiers/delete/' + ${tier.tierId}}"
                                                           method="post"
                                                           class="d-inline m-0 p-0"
-                                                          onsubmit="return confirm('Are you sure you want to delete this tier? Deletion will be rejected if any reseller is assigned to it.');">
+                                                          data-confirm="true"
+                                                          data-confirm-title="Delete tier?"
+                                                          data-confirm-message="Are you sure you want to delete this tier? Deletion will be rejected if any reseller is assigned to it."
+                                                          data-confirm-button="Delete"
+                                                          data-confirm-variant="danger">
                                                         <button type="submit" class="jt-btn jt-btn-s jt-btn-d" title="Delete Tier">
                                                             <i class="bi bi-trash me-1"></i> Delete
                                                         </button>

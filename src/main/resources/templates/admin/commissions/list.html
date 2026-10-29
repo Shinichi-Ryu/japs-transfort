@@ -165,7 +165,11 @@
                                         <form th:if="${comm.status != null and comm.status.equalsIgnoreCase('pending')}"
                                               th:action="@{'/admin/commissions/' + ${comm.commissionId} + '/pay'}"
                                               method="post"
-                                              onsubmit="return confirm('Are you sure you want to mark this commission as paid?');"
+                                              data-confirm="true"
+                                              data-confirm-title="Mark commission as paid?"
+                                              data-confirm-message="Are you sure you want to mark this commission as paid?"
+                                              data-confirm-button="Mark as Paid"
+                                              data-confirm-variant="primary"
                                               class="d-inline m-0 p-0">
                                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                             <button type="submit" class="jt-btn jt-btn-s" style="color: var(--gt); border-color: var(--gt);">

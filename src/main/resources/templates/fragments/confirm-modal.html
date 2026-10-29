@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+    <!-- Themed Japs Transfort Confirmation & Alert Modal Fragment -->
+    <div th:fragment="confirmModal"
+         id="jtConfirmModal"
+         class="jt-confirm-backdrop"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="jtConfirmTitle"
+         aria-describedby="jtConfirmMessage"
+         aria-hidden="true"
+         style="display: none;">
+        <div class="jt-confirm-card" role="document">
+            <!-- Close button (X) -->
+            <button type="button"
+                    class="jt-confirm-close-btn"
+                    id="jtConfirmCloseBtn"
+                    aria-label="Close dialog"
+                    title="Close">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+
+            <!-- Icon badge -->
+            <div class="jt-confirm-icon-wrap" id="jtConfirmIconWrap" aria-hidden="true">
+                <i id="jtConfirmIcon" class="bi bi-trash3-fill"></i>
+            </div>
+
+            <!-- Title -->
+            <h2 class="jt-confirm-title" id="jtConfirmTitle">Confirm Action</h2>
+
+            <!-- Message text -->
+            <p class="jt-confirm-message" id="jtConfirmMessage">Are you sure you want to proceed?</p>
+
+            <!-- Action buttons -->
+            <div class="jt-confirm-actions" id="jtConfirmActions">
+                <button type="button"
+                        class="jt-btn jt-confirm-cancel-btn"
+                        id="jtConfirmCancelBtn">
+                    Cancel
+                </button>
+                <button type="button"
+                        class="jt-btn jt-confirm-submit-btn"
+                        id="jtConfirmSubmitBtn">
+                    <span class="jt-confirm-btn-spinner d-none" aria-hidden="true"></span>
+                    <span class="jt-confirm-btn-text">Confirm</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

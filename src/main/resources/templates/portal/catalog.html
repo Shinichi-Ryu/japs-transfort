@@ -183,7 +183,7 @@
                                         <div th:if="${product.brand != null and !#strings.isEmpty(product.brand)}" class="small mb-1" style="color: var(--mu);">
                                             <span class="fw-medium">Brand:</span> <span th:text="${product.brand}" style="color: var(--tx);"></span>
                                         </div>
-                                        <div th:if="${product.productInfo != null and !#strings.isEmpty(product.productInfo)}" class="small mb-2" style="color: var(--mu); font-size: 12px; line-height: 1.4; white-space: pre-line;" th:text="${product.productInfo}"></div>
+                                        <div th:if="${product.productInfo != null and !#strings.isEmpty(product.productInfo)}" class="small mb-2" style="color: var(--mu); font-size: 12px; line-height: 1.4; white-space: pre-line; word-break: break-word; overflow-wrap: anywhere; max-height: 120px; overflow-y: auto;" th:text="${product.productInfo}"></div>
                                         <div class="small mb-2" style="color: var(--mu);">
                                             <span th:text="${product.category != null ? product.category.name : 'General'}">Category</span>
                                             <span> &bull; </span>

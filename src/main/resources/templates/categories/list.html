@@ -121,7 +121,11 @@
                                                     <form th:action="@{'/admin/categories/delete/' + ${cat.categoryId}}"
                                                           method="post"
                                                           class="d-inline m-0 p-0"
-                                                          onsubmit="return confirm('Are you sure you want to delete this category? Deletion will be rejected if any product belongs to this category.');">
+                                                          data-confirm="true"
+                                                          data-confirm-title="Delete category?"
+                                                          data-confirm-message="Are you sure you want to delete this category? Deletion will be rejected if any product belongs to this category."
+                                                          data-confirm-button="Delete"
+                                                          data-confirm-variant="danger">
                                                         <button type="submit" class="jt-btn jt-btn-s jt-btn-d" title="Delete Category">
                                                             <i class="bi bi-trash me-1"></i> Delete
                                                         </button>

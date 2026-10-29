@@ -16,6 +16,7 @@
     <link rel="stylesheet" th:href="@{/css/theme.css}" href="/css/theme.css">
     <link rel="stylesheet" th:href="@{/css/lists.css(v='4.3')}" href="/css/lists.css?v=4.3">
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
+    <link rel="stylesheet" th:href="@{/css/confirm-modal.css}" href="/css/confirm-modal.css">
     <!-- Inline appearance script before first paint to prevent flash -->
     <script>
         (function() {
@@ -156,7 +157,12 @@
             </a>
 
             <!-- Log out form (POST with CSRF) -->
-            <form th:action="@{/logout}" method="post" class="m-0 p-0" id="sbLogoutForm">
+            <form th:action="@{/logout}" method="post" class="m-0 p-0" id="sbLogoutForm"
+                  data-confirm="true"
+                  data-confirm-title="Log out?"
+                  data-confirm-message="Are you sure you want to end your session and log out?"
+                  data-confirm-button="Log out"
+                  data-confirm-variant="warning">
                 <button type="submit" class="sb-logout-btn" title="Log out" aria-label="Log out">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9"/></svg>
                     <span class="lb2">Log out</span>
@@ -240,6 +246,8 @@
 
     <!-- Scripts Fragment -->
     <div th:fragment="scripts">
+        <div th:replace="~{fragments/confirm-modal :: confirmModal}"></div>
+        <script th:src="@{/js/confirm-modal.js}" src="/js/confirm-modal.js"></script>
         <script th:src="@{/js/table-view.js(v='4.3')}" src="/js/table-view.js?v=4.3"></script>
         <script>
             (function() {

@@ -80,15 +80,25 @@ public class OrderDetailDto {
         private Integer quantity;
         private BigDecimal unitPrice;
         private BigDecimal lineTotal;
+        private String brand;
+        private String productInfo;
 
         public OrderItemDto(String sku, String productName, String unit,
                             Integer quantity, BigDecimal unitPrice, BigDecimal lineTotal) {
+            this(sku, productName, unit, quantity, unitPrice, lineTotal, null, null);
+        }
+
+        public OrderItemDto(String sku, String productName, String unit,
+                            Integer quantity, BigDecimal unitPrice, BigDecimal lineTotal,
+                            String brand, String productInfo) {
             this.sku = sku;
             this.productName = productName;
             this.unit = unit;
             this.quantity = quantity;
             this.unitPrice = unitPrice;
             this.lineTotal = lineTotal;
+            this.brand = brand;
+            this.productInfo = productInfo;
         }
 
         public String getSku() { return sku; }
@@ -97,6 +107,8 @@ public class OrderDetailDto {
         public Integer getQuantity() { return quantity; }
         public BigDecimal getUnitPrice() { return unitPrice; }
         public BigDecimal getLineTotal() { return lineTotal; }
+        public String getBrand() { return brand; }
+        public String getProductInfo() { return productInfo; }
     }
 
     // ── Constructors / builder ────────────────────────────────────────────────

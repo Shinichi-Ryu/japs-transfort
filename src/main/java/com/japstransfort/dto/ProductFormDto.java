@@ -43,6 +43,12 @@ public class ProductFormDto {
 
     private Boolean isActive = true;
 
+    @Size(max = 100, message = "Brand cannot exceed 100 characters.")
+    private String brand;
+
+    @Size(max = 1000, message = "Product Info cannot exceed 1000 characters.")
+    private String productInfo;
+
     public ProductFormDto() {
     }
 
@@ -116,5 +122,21 @@ public class ProductFormDto {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = (brand != null && !brand.trim().isEmpty()) ? brand.trim() : null;
+    }
+
+    public String getProductInfo() {
+        return productInfo;
+    }
+
+    public void setProductInfo(String productInfo) {
+        this.productInfo = (productInfo != null && !productInfo.trim().isEmpty()) ? productInfo.trim() : null;
     }
 }

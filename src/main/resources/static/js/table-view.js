@@ -103,10 +103,21 @@
         var resetBtn = colsMenu ? colsMenu.querySelector('.jt-cols-reset') : null;
 
         var settings = getTableSettings(tableId);
-        var hiddenCols = Array.isArray(settings.hiddenCols) ? settings.hiddenCols.slice() : [];
+        var hasSaved = Array.isArray(settings.hiddenCols);
+        var hiddenCols = hasSaved ? settings.hiddenCols.slice() : [];
 
         // Populate and bind column dropdown
         var ths = table.querySelectorAll('thead th[data-col]');
+        if (!hasSaved) {
+            ths.forEach(function(th) {
+                if (th.getAttribute('data-default-hidden') === 'true' || th.classList.contains('jt-col-hidden')) {
+                    var cid = th.getAttribute('data-col');
+                    if (cid && hiddenCols.indexOf(cid) === -1) {
+                        hiddenCols.push(cid);
+                    }
+                }
+            });
+        }
         if (ths.length > 0 && colsList) {
             colsList.innerHTML = '';
             ths.forEach(function(th) {
@@ -193,17 +204,26 @@
                 e.preventDefault();
                 e.stopPropagation();
                 hiddenCols = [];
-                settings = { hiddenCols: [] };
+                ths.forEach(function(th) {
+                    if (th.getAttribute('data-default-hidden') === 'true' || th.getAttribute('data-default-hidden') === '') {
+                        var cid = th.getAttribute('data-col');
+                        if (cid && hiddenCols.indexOf(cid) === -1) {
+                            hiddenCols.push(cid);
+                        }
+                    }
+                });
+                settings = { hiddenCols: hiddenCols };
                 saveTableSettings(tableId, settings);
 
                 ths.forEach(function(th) {
                     var colId = th.getAttribute('data-col');
-                    if (colId) setColVisibility(table, colId, true);
+                    if (colId) setColVisibility(table, colId, hiddenCols.indexOf(colId) === -1);
                 });
 
                 if (colsList) {
                     colsList.querySelectorAll('input[type="checkbox"]').forEach(function(c) {
-                        c.checked = true;
+                        var cid = c.getAttribute('data-col-id');
+                        c.checked = hiddenCols.indexOf(cid) === -1;
                     });
                 }
             });

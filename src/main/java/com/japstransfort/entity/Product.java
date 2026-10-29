@@ -41,6 +41,12 @@ public class Product {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
+    @Column(name = "brand", length = 100)
+    private String brand;
+
+    @Column(name = "product_info", columnDefinition = "TEXT")
+    private String productInfo;
+
     @Transient
     private BigDecimal yourPrice;
 
@@ -128,6 +134,22 @@ public class Product {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getProductInfo() {
+        return productInfo;
+    }
+
+    public void setProductInfo(String productInfo) {
+        this.productInfo = productInfo;
     }
 
     public BigDecimal getYourPrice() {

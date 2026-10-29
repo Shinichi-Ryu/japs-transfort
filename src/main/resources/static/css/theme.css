@@ -1924,7 +1924,8 @@ main {
         padding-left: max(10px, env(safe-area-inset-left, 0px)) !important;
         padding-right: max(10px, env(safe-area-inset-right, 0px)) !important;
         gap: 8px !important;
-        border-radius: 0 0 14px 14px !important;
+        border-radius: 0 !important;
+        border-bottom: 1px solid var(--line) !important;
         border-top: none !important;
         border-left: none !important;
         border-right: none !important;

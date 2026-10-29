@@ -48,7 +48,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("SELECT p FROM Product p " +
            "WHERE (:search IS NULL OR :search = '' OR " +
            "      LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "      LOWER(p.sku) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "      LOWER(p.sku) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "      LOWER(p.brand) LIKE LOWER(CONCAT('%', :search, '%'))) " +
            "  AND (:categoryId IS NULL OR p.category.categoryId = :categoryId) " +
            "  AND (:isActive IS NULL OR p.isActive = :isActive)")
     Page<Product> findWithFilters(@Param("search") String search,

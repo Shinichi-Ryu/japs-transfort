@@ -275,7 +275,16 @@
                                 <tr th:each="item : ${order.items}">
                                     <td style="padding-left: 20px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--mu);"
                                         th:text="${item.product != null ? item.product.sku : 'N/A'}">SKU-001</td>
-                                    <td><b th:text="${item.product != null ? item.product.name : 'Unknown Product'}">Product Name</b></td>
+                                    <td>
+                                        <b th:text="${item.product != null ? item.product.name : 'Unknown Product'}">Product Name</b>
+                                        <div th:if="${item.product != null and item.product.brand != null and !#strings.isEmpty(item.product.brand)}"
+                                             class="small" style="color: var(--mu); font-size: 11.5px;">
+                                            <span class="fw-medium">Brand:</span> <span th:text="${item.product.brand}"></span>
+                                        </div>
+                                        <div th:if="${item.product != null and item.product.productInfo != null and !#strings.isEmpty(item.product.productInfo)}"
+                                             class="small text-muted" style="color: var(--mu); font-size: 11.5px;"
+                                             th:text="${item.product.productInfo}"></div>
+                                    </td>
                                     <td style="color: var(--mu);"
                                         th:text="${item.product != null and item.product.unit != null ? item.product.unit : 'pc'}">pc</td>
                                     <td class="text-center font-monospace fw-semibold" th:text="${item.quantity}">1</td>

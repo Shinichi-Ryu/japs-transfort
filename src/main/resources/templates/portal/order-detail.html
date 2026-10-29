@@ -309,7 +309,13 @@
                                 </tr>
                                 <tr th:each="item : ${order.items}">
                                     <td class="fw-mono small fw-semibold" style="color: var(--mu);" th:text="${item.sku}">SKU-001</td>
-                                    <td class="fw-medium" style="color: var(--tx);" th:text="${item.productName}">Product Name</td>
+                                    <td>
+                                        <div class="fw-medium" style="color: var(--tx);" th:text="${item.productName}">Product Name</div>
+                                        <div th:if="${item.brand != null and !#strings.isEmpty(item.brand)}" class="small" style="color: var(--mu); font-size: 11.5px;">
+                                            <span class="fw-medium">Brand:</span> <span th:text="${item.brand}"></span>
+                                        </div>
+                                        <div th:if="${item.productInfo != null and !#strings.isEmpty(item.productInfo)}" class="small text-muted" style="color: var(--mu); font-size: 11.5px;" th:text="${item.productInfo}"></div>
+                                    </td>
                                     <td class="small" style="color: var(--mu);" th:text="${item.unit}">pc</td>
                                     <td style="text-align: center;" class="font-monospace fw-semibold" th:text="${item.quantity}">1</td>
                                     <td class="n font-monospace" th:text="'₱' + ${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>

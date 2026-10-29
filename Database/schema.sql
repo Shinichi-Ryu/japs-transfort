@@ -58,7 +58,9 @@ CREATE TABLE products (
   cost_price  NUMERIC(12,2) NOT NULL,
   srp         NUMERIC(12,2) NOT NULL,               -- suggested retail price
   reorder_level INT DEFAULT 10,
-  is_active   BOOLEAN DEFAULT TRUE
+  is_active   BOOLEAN DEFAULT TRUE,
+  brand       VARCHAR(100),
+  product_info TEXT
 );
 
 CREATE TABLE IF NOT EXISTS product_images (

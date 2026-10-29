@@ -194,6 +194,43 @@
                                         </div>
                                     </div>
 
+                                    <!-- Brand -->
+                                    <div class="col-12">
+                                        <div class="jt-field">
+                                            <label for="brand" class="jt-label">Brand</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="brand"
+                                                   th:field="*{brand}"
+                                                   placeholder="e.g. Samsung"
+                                                   maxlength="100"
+                                                   th:errorclass="is-invalid">
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('brand')}" th:errors="*{brand}">
+                                                Brand cannot exceed 100 characters.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Product Info -->
+                                    <div class="col-12">
+                                        <div class="jt-field">
+                                            <label for="productInfo" class="jt-label">Product Info</label>
+                                            <textarea class="form-control"
+                                                      id="productInfo"
+                                                      th:field="*{productInfo}"
+                                                      placeholder="Specifications, features, and condition"
+                                                      maxlength="1000"
+                                                      rows="4"
+                                                      th:errorclass="is-invalid"></textarea>
+                                            <div class="d-flex justify-content-between mt-1">
+                                                <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('productInfo')}" th:errors="*{productInfo}">
+                                                    Product Info cannot exceed 1000 characters.
+                                                </div>
+                                                <div class="form-text ms-auto" style="color: var(--mu); font-size: 12px;" id="productInfoCounter">0/1000</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <!-- Product Photo -->
                                     <div class="col-12">
                                         <div class="jt-field">
@@ -264,6 +301,18 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <div th:replace="~{fragments/layout :: scripts}"></div>
     <script>
+        // Live character counter for Product Info
+        (function () {
+            var textarea = document.getElementById('productInfo');
+            var counter  = document.getElementById('productInfoCounter');
+            if (!textarea || !counter) return;
+            function update() {
+                counter.textContent = textarea.value.length + '/1000';
+            }
+            textarea.addEventListener('input', update);
+            update(); // initialise on page load (edit mode)
+        })();
+
         // Instant photo preview on file selection
         (function () {
             var input = document.getElementById('photoFile');

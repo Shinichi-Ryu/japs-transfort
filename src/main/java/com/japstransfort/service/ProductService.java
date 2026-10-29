@@ -117,6 +117,8 @@ public class ProductService {
         product.setSrp(dto.getSrp());
         product.setReorderLevel(dto.getReorderLevel() != null ? dto.getReorderLevel() : 10);
         product.setIsActive(true);
+        product.setBrand(dto.getBrand());
+        product.setProductInfo(dto.getProductInfo());
 
         return productRepository.save(product);
     }
@@ -155,6 +157,8 @@ public class ProductService {
         product.setCostPrice(dto.getCostPrice());
         product.setSrp(dto.getSrp());
         product.setReorderLevel(dto.getReorderLevel() != null ? dto.getReorderLevel() : 10);
+        product.setBrand(dto.getBrand());
+        product.setProductInfo(dto.getProductInfo());
 
         return productRepository.save(product);
     }

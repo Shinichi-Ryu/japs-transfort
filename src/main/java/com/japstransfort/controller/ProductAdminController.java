@@ -123,6 +123,8 @@ public class ProductAdminController {
         dto.setSrp(product.getSrp());
         dto.setReorderLevel(product.getReorderLevel());
         dto.setIsActive(product.getIsActive());
+        dto.setBrand(product.getBrand());
+        dto.setProductInfo(product.getProductInfo());
 
         ProductImageMeta meta = productService.getImageMeta(id);
 

@@ -370,11 +370,15 @@ public class OrderService {
                 String sku  = p != null ? p.getSku()  : "N/A";
                 String name = p != null ? p.getName() : "Unknown Product";
                 String unit = (p != null && p.getUnit() != null) ? p.getUnit() : "pc";
+                String brand = p != null ? p.getBrand() : null;
+                String productInfo = p != null ? p.getProductInfo() : null;
                 itemDtos.add(new OrderDetailDto.OrderItemDto(
                         sku, name, unit,
                         item.getQuantity(),
                         item.getUnitPrice(),
-                        item.getLineTotal()
+                        item.getLineTotal(),
+                        brand,
+                        productInfo
                 ));
             }
             dto.setItems(itemDtos);

@@ -180,6 +180,10 @@
                                         <!-- SKU & Name -->
                                         <div class="fw-mono small mb-1" style="color: var(--mu);" th:text="${product.sku}">SKU-001</div>
                                         <div class="fw-bold mb-1" style="font-size: 15px; color: var(--tx);" th:text="${product.name}">Product Name</div>
+                                        <div th:if="${product.brand != null and !#strings.isEmpty(product.brand)}" class="small mb-1" style="color: var(--mu);">
+                                            <span class="fw-medium">Brand:</span> <span th:text="${product.brand}" style="color: var(--tx);"></span>
+                                        </div>
+                                        <div th:if="${product.productInfo != null and !#strings.isEmpty(product.productInfo)}" class="small mb-2" style="color: var(--mu); font-size: 12px; line-height: 1.4; white-space: pre-line;" th:text="${product.productInfo}"></div>
                                         <div class="small mb-2" style="color: var(--mu);">
                                             <span th:text="${product.category != null ? product.category.name : 'General'}">Category</span>
                                             <span> &bull; </span>

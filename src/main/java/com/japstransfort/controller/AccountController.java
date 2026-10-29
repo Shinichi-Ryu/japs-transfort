@@ -235,11 +235,13 @@ public class AccountController {
         currentUser.setPasswordHash(passwordEncoder.encode(passwordForm.getNewPassword()));
         userRepository.save(currentUser);
 
-        // Keep user logged in
+        // Keep user logged in.
+        // Pass null as credentials — the 3-arg constructor produces an already-authenticated
+        // token, so storing the hash in the session is unnecessary and a security smell.
         CustomUserDetails userDetails = new CustomUserDetails(currentUser);
         Authentication newAuth = new UsernamePasswordAuthenticationToken(
                 userDetails,
-                currentUser.getPasswordHash(),
+                null,
                 userDetails.getAuthorities()
         );
         SecurityContextHolder.getContext().setAuthentication(newAuth);

@@ -86,6 +86,8 @@ public class ResellerAdminController {
         }
 
         if (bindingResult.hasErrors()) {
+            dto.setPassword(null);
+            dto.setConfirmPassword(null);
             model.addAttribute("tiers", tierService.findAll());
             model.addAttribute("parentResellers", resellerService.findAllActive(null));
             return "resellers/form";
@@ -108,6 +110,8 @@ public class ResellerAdminController {
             }
             model.addAttribute("tiers", tierService.findAll());
             model.addAttribute("parentResellers", resellerService.findAllActive(null));
+            dto.setPassword(null);
+            dto.setConfirmPassword(null);
             return "resellers/form";
         }
     }
@@ -163,6 +167,8 @@ public class ResellerAdminController {
         }
 
         if (bindingResult.hasErrors()) {
+            dto.setPassword(null);
+            dto.setConfirmPassword(null);
             model.addAttribute("tiers", tierService.findAll());
             model.addAttribute("parentResellers", resellerService.findAllActive(id));
             return "resellers/form";
@@ -185,6 +191,8 @@ public class ResellerAdminController {
             }
             model.addAttribute("tiers", tierService.findAll());
             model.addAttribute("parentResellers", resellerService.findAllActive(id));
+            dto.setPassword(null);
+            dto.setConfirmPassword(null);
             return "resellers/form";
         }
     }

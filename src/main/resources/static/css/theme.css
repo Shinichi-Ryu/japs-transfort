@@ -273,6 +273,11 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-padding-top: calc(58px + env(safe-area-inset-top, 0px) + 12px);
+    overflow-x: clip;
+}
+
 body {
     margin: 0;
     background-color: var(--bg);
@@ -282,6 +287,11 @@ body {
     line-height: 1.45;
     font-variant-numeric: tabular-nums;
     min-height: 100vh;
+    overflow-x: clip;
+    max-width: 100vw;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 a {
@@ -911,35 +921,63 @@ textarea:focus {
 /* Mobile layout (below 768px): 2 columns with smaller padding and fonts (no single huge cards) */
 @media (max-width: 767.98px) {
     .dashboard-kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        width: 100% !important;
     }
 
-    .dashboard-kpi-grid .kpi,
-    .dashboard-kpi-grid .kpi.kpi-wide {
-        grid-column: span 1;
-        padding: 12px 10px;
+    .dashboard-kpi-grid > .kpi,
+    .dashboard-kpi-grid > .kpi.kpi-wide {
+        grid-column: span 1 !important;
+        padding: 14px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        height: 100% !important;
+    }
+
+    /* Odd last card spans both columns to eliminate empty hole */
+    .dashboard-kpi-grid > .kpi:last-child:nth-child(odd) {
+        grid-column: 1 / -1 !important;
     }
 
     .dashboard-kpi-grid .kpi .k {
-        font-size: 12px;
-        line-height: 1.25;
+        font-size: 12px !important;
+        line-height: 1.3 !important;
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        hyphens: auto !important;
+        flex: 1 1 auto !important;
     }
 
     .dashboard-kpi-grid .kpi .ic {
-        width: 30px;
-        height: 30px;
-        font-size: 15px;
-        border-radius: 8px;
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 15px !important;
+        border-radius: 8px !important;
+        flex-shrink: 0 !important;
     }
 
     .dashboard-kpi-grid .kpi .v {
-        font-size: clamp(0.92rem, 3.8vw, 1.3rem);
-        margin: 2px 0 4px;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        font-size: clamp(0.98rem, 4vw, 1.35rem) !important;
+        margin: 4px 0 6px !important;
+        line-height: 1.2 !important;
     }
 
     .dashboard-kpi-grid .kpi a {
-        font-size: 11.5px;
+        font-size: 11.5px !important;
+        min-height: 40px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        margin-top: auto !important;
+        white-space: nowrap !important;
     }
 }
 
@@ -1530,8 +1568,10 @@ textarea:focus {
 }
 
 .tb-menu-btn {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
     border-radius: 10px;
     border: 1px solid var(--line);
     background-color: var(--card);
@@ -1549,9 +1589,40 @@ textarea:focus {
     height: 20px;
 }
 
+.tb-search-btn {
+    display: none;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background-color: var(--card);
+    color: var(--mu);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex: none;
+    transition: background-color 150ms, color 150ms;
+}
+
+.tb-search-btn:hover,
+.tb-search-btn:active {
+    background-color: var(--soft);
+    color: var(--tx);
+}
+
+.tb-search-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
 .tb-motion-btn {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
     border-radius: 12px;
     border: 1px solid var(--line);
     background-color: var(--card);
@@ -1587,8 +1658,10 @@ textarea:focus {
 }
 
 .avatar {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
     border-radius: 50%;
     background-color: var(--navy);
     color: #fff;
@@ -1833,6 +1906,202 @@ main {
 }
 
 /* ===================================================================
+   PHONE LAYOUT (< 768px): Target widths 360px, 375px, 412px
+   =================================================================== */
+@media (max-width: 767.98px) {
+    /* Header on phones: ONE row, never wider than the viewport */
+    .tb {
+        position: sticky !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        padding-top: calc(8px + env(safe-area-inset-top, 0px)) !important;
+        padding-bottom: 8px !important;
+        padding-left: max(10px, env(safe-area-inset-left, 0px)) !important;
+        padding-right: max(10px, env(safe-area-inset-right, 0px)) !important;
+        gap: 8px !important;
+        border-radius: 0 0 14px 14px !important;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        z-index: 1045 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+    }
+
+    /* Remove the gap element so content starts cleanly below header */
+    .mw::before {
+        display: none !important;
+    }
+
+    /* Left: hamburger button (flex-shrink: 0) */
+    .tb-menu-btn {
+        display: inline-flex !important;
+        flex-shrink: 0 !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+    }
+
+    /* Middle: page title on ONE line with ellipsis */
+    .tb-title {
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        font-size: 15.5px !important;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+    }
+
+    .tb .sp {
+        display: none !important;
+    }
+
+    .tb .gs {
+        display: none !important;
+    }
+
+    /* Right: search icon button (flex-shrink: 0) */
+    .tb-search-btn {
+        display: inline-flex !important;
+        flex-shrink: 0 !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+    }
+
+    /* Right: motion button (flex-shrink: 0) */
+    .tb-motion-btn {
+        display: inline-flex !important;
+        flex-shrink: 0 !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+    }
+
+    /* Right: profile avatar ALWAYS visible at far right (flex-shrink: 0) */
+    .avatar {
+        display: grid !important;
+        flex-shrink: 0 !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+    }
+
+    /* Page container: reduce padding to 12px, clean spacing below sticky header */
+    main {
+        padding: 12px !important;
+        padding-top: 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .ph {
+        margin-bottom: 12px !important;
+        gap: 8px !important;
+    }
+
+    .ph .sub {
+        font-size: 12.5px !important;
+    }
+
+    /* Card padding: 14px */
+    .card-body.p-4,
+    .card-body {
+        padding: 14px !important;
+    }
+
+    .card-header.py-3,
+    .card-header {
+        padding: 10px 14px !important;
+    }
+
+    /* Fluid typography for headings & text, prevent awkward wrapping */
+    h1, .h1 { font-size: clamp(1.35rem, 5.2vw, 1.75rem) !important; }
+    h2, .h2 { font-size: clamp(1.2rem, 4.5vw, 1.5rem) !important; }
+    h3, .h3 { font-size: clamp(1.1rem, 4vw, 1.35rem) !important; }
+    h4, .h4 { font-size: clamp(1rem, 3.6vw, 1.2rem) !important; }
+    h5, .h5 { font-size: clamp(0.95rem, 3.4vw, 1.15rem) !important; }
+    h6, .h6 { font-size: clamp(0.85rem, 3vw, 1rem) !important; }
+
+    h1, h2, h3, h4, h5, h6,
+    .h1, .h2, .h3, .h4, .h5, .h6 {
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        line-height: 1.3 !important;
+    }
+
+    /* Command Palette mobile overlay */
+    .cp {
+        padding-top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        align-items: start !important;
+    }
+
+    .cp > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 14px !important;
+    }
+
+    .cp input {
+        min-height: 46px !important;
+        padding: 0 14px !important;
+        font-size: 14px !important;
+    }
+
+    .cp #cpl {
+        max-height: 55vh !important;
+    }
+
+    .cp a {
+        min-height: 42px !important;
+        padding: 10px 14px !important;
+        font-size: 13.5px !important;
+    }
+
+    /* Touch target rule: at least 40px */
+    .btn,
+    .jt-btn,
+    .btn-sm,
+    .btn.s,
+    .jt-btn-s,
+    .sbt,
+    .sb a,
+    .sb .sb-logout-btn,
+    .jt-page-link,
+    .page-link,
+    .pagination .page-link {
+        min-height: 40px !important;
+        min-width: 40px !important;
+    }
+
+    /* Overflow protection: never scroll sideways */
+    .app, .mw, main {
+        max-width: 100vw !important;
+        overflow-x: clip !important;
+    }
+
+    .row {
+        --bs-gutter-x: 12px;
+    }
+}
+
+/* ===================================================================
    REDUCED MOTION & PAUSE STATES
    =================================================================== */
 @media (prefers-reduced-motion: reduce) {
@@ -1897,10 +2166,17 @@ html.jt-paused .mp-route,
     overflow: hidden;
 }
 
+.cp-bar {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    background-color: var(--card);
+}
+
 .cp input {
+    flex: 1;
     width: 100%;
     border: 0;
-    border-bottom: 1px solid var(--line);
     border-radius: 0;
     min-height: 54px;
     padding: 0 20px;
@@ -1908,6 +2184,30 @@ html.jt-paused .mp-route,
     background-color: var(--card);
     color: var(--tx);
     outline: none;
+}
+
+.cp-close-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border: none;
+    background: transparent;
+    color: var(--mu);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 6px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    transition: background-color 150ms, color 150ms;
+}
+
+.cp-close-btn:hover {
+    color: var(--tx);
+    background-color: var(--soft);
 }
 
 .cp #cpl {

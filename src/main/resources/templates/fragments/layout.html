@@ -3,7 +3,7 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
 <head th:fragment="htmlHead(pageTitle)">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title th:text="${pageTitle != null ? pageTitle + ' - Japs Transfort' : 'Japs Transfort'}">Japs Transfort</title>
     <!-- Google Fonts: Plus Jakarta Sans with system-ui fallback -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -175,6 +175,9 @@
         <input type="text" class="gs" placeholder="Jump to a page   Ctrl K" aria-label="Jump to a page (Ctrl+K)" readonly
                onclick="window.jtOpenCommandPalette()"
                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.jtOpenCommandPalette();}">
+        <button type="button" class="tb-search-btn" onclick="window.jtOpenCommandPalette()" title="Jump to a page (Ctrl+K)" aria-label="Search pages">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" fill="none"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
         <button type="button" class="tb-motion-btn" id="jtMotionToggle" onclick="window.jtToggleMotion()" title="Toggle motion animation" aria-label="Toggle motion animation">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M10 8l6 4-6 4V8z" fill="currentColor" stroke="none"/></svg>
         </button>
@@ -506,7 +509,12 @@
                     cpModal.setAttribute('aria-label', 'Command Palette');
                     cpModal.style.display = 'none';
                     cpModal.innerHTML = '<div>' +
+                        '<div class="cp-bar">' +
                         '<input type="text" placeholder="Jump to a page..." aria-label="Jump to a page">' +
+                        '<button type="button" class="cp-close-btn" onclick="window.jtCloseCommandPalette()" aria-label="Close search" title="Close">' +
+                        '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' +
+                        '</button>' +
+                        '</div>' +
                         '<div id="cpl" role="listbox"></div>' +
                         '</div>';
                     document.body.appendChild(cpModal);
@@ -516,7 +524,7 @@
 
                     // Delegated click listener on modal
                     cpModal.addEventListener('click', function(e) {
-                        if (e.target === cpModal || e.target.closest('a')) {
+                        if (e.target === cpModal || e.target.closest('a') || e.target.closest('.cp-close-btn')) {
                             window.jtCloseCommandPalette();
                         }
                     });
@@ -605,7 +613,10 @@
                     cpInput.value = '';
                     cpActiveIndex = 0;
                     renderCpList();
-                    cpInput.focus();
+                    try { cpInput.focus(); } catch(e) {}
+                    setTimeout(function() {
+                        try { cpInput.focus(); } catch(e) {}
+                    }, 30);
                 };
 
                 window.jtCloseCommandPalette = function() {

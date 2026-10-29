@@ -200,7 +200,10 @@
                             </thead>
                             <tbody>
                                 <tr th:if="${#lists.isEmpty(stockRows)}">
-                                    <td colspan="8" class="text-center py-4" style="color: var(--mu);">No data for this period</td>
+                                    <td colspan="8" class="text-center py-4" style="color: var(--mu);">
+                                        <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                        <div>No data for this period</div>
+                                    </td>
                                 </tr>
                                 <tr th:each="row : ${stockRows}">
                                     <td data-col="sku" data-label="SKU" style="padding-left: 18px;" class="font-monospace small fw-semibold jt-sku-cell d-none d-lg-table-cell" th:text="${row.sku}">SKU</td>
@@ -252,7 +255,10 @@
                             </thead>
                             <tbody>
                                 <tr th:if="${#lists.isEmpty(movementSummary)}">
-                                    <td colspan="6" class="text-center py-4" style="color: var(--mu);">No data for this period</td>
+                                    <td colspan="6" class="text-center py-4" style="color: var(--mu);">
+                                        <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                        <div>No data for this period</div>
+                                    </td>
                                 </tr>
                                 <tr th:each="m : ${movementSummary}">
                                     <td data-col="sku" data-label="SKU" style="padding-left: 18px;" class="font-monospace small fw-semibold jt-sku-cell d-none d-md-table-cell" th:text="${m.sku}">SKU</td>

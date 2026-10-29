@@ -156,10 +156,11 @@
                             </thead>
                             <tbody>
                                 <tr th:if="${resellersPage.empty}">
-                                    <td colspan="10" style="text-align: center; color: var(--mu); padding: 32px 16px;">
-                                        No resellers found matching the criteria.
-                                    </td>
-                                </tr>
+                                <td colspan="10" style="text-align: center; color: var(--mu); padding: 32px 16px;">
+                                    <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                    <div>No resellers found matching the criteria.</div>
+                                </td>
+                            </tr>
                                 <tr th:each="reseller : ${resellersPage.content}">
                                     <td data-col="businessName" data-label="Business Name">
                                         <b th:text="${reseller.businessName}">Business Name</b>

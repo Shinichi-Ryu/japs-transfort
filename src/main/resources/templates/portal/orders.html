@@ -81,7 +81,7 @@
                             <tbody>
                                 <tr th:if="${orders == null or orders.empty}">
                                     <td colspan="8" class="text-center py-5" style="color: var(--mu);">
-                                        <div class="mb-2"><i class="bi bi-receipt" style="font-size: 2rem;"></i></div>
+                                        <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
                                         <div>You haven't placed any orders yet.</div>
                                         <div class="mt-3">
                                             <a th:href="@{/portal/catalog}" class="jt-btn jt-btn-p jt-btn-s">

@@ -227,3 +227,75 @@ body {
     }
 }
 
+/* ===================================================================
+   Jappy Mascot Shared Styles & Keyframes
+   =================================================================== */
+.j {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto;
+    display: block;
+    flex-shrink: 0;
+}
+
+.bob {
+    animation: bob 2.4s ease-in-out infinite;
+}
+
+@keyframes bob {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.blink {
+    animation: blink 4s infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+@keyframes blink {
+    0%, 92%, 100% {
+        transform: scaleY(1);
+    }
+    96% {
+        transform: scaleY(0.1);
+    }
+}
+
+.wave {
+    animation: wave 1.2s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: 20% 80%;
+}
+
+@keyframes wave {
+    0%, 100% {
+        transform: rotate(0);
+    }
+    50% {
+        transform: rotate(-28deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bob,
+    .blink,
+    .wave {
+        animation: none !important;
+    }
+}
+
+html.still .bob,
+html.still .blink,
+html.still .wave,
+html[data-motion="still"] .bob,
+html[data-motion="still"] .blink,
+html[data-motion="still"] .wave {
+    animation: none !important;
+}
+
+

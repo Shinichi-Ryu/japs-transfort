@@ -61,10 +61,7 @@
                 <!-- Empty Cart State -->
                 <div th:if="${cartRows == null or cartRows.empty}" class="card jt-card p-5 text-center my-4">
                     <div class="my-4">
-                        <div class="stat-icon mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle"
-                             style="width: 64px; height: 64px; font-size: 2rem; background: var(--soft); color: var(--mu);">
-                            <i class="bi bi-cart-x"></i>
-                        </div>
+                        <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
                         <h3 class="fw-bold mb-2" style="color: var(--tx);">Your cart is empty</h3>
                         <p class="mb-4" style="color: var(--mu);">You have not added any products to your cart yet.</p>
                         <a th:href="@{/portal/catalog}" class="jt-btn jt-btn-p d-inline-flex align-items-center">

@@ -19,6 +19,15 @@
         info: 'bi bi-info-circle-fill'
     };
 
+    // Jappy mascot mood mappings per modal variant
+    var VARIANT_MOODS = {
+        danger: 'worried',
+        warning: 'surprised',
+        primary: 'happy',
+        success: 'happy',
+        info: 'happy'
+    };
+
     /**
      * Get or lazy-create the modal DOM element.
      */
@@ -42,9 +51,7 @@
                 '<button type="button" class="jt-confirm-close-btn" id="jtConfirmCloseBtn" aria-label="Close dialog" title="Close">' +
                     '<i class="bi bi-x-lg" aria-hidden="true"></i>' +
                 '</button>' +
-                '<div class="jt-confirm-icon-wrap" id="jtConfirmIconWrap" aria-hidden="true">' +
-                    '<i id="jtConfirmIcon" class="bi bi-trash3-fill"></i>' +
-                '</div>' +
+                '<div class="jt-confirm-jappy-wrap" id="jtConfirmJappyWrap" aria-hidden="true"></div>' +
                 '<h2 class="jt-confirm-title" id="jtConfirmTitle">Confirm Action</h2>' +
                 '<p class="jt-confirm-message" id="jtConfirmMessage">Are you sure you want to proceed?</p>' +
                 '<div class="jt-confirm-actions" id="jtConfirmActions">' +
@@ -146,6 +153,7 @@
             var confirmText = options.confirmText || (isAlert ? 'OK' : (variant === 'danger' ? 'Delete' : 'Confirm'));
             var cancelText = options.cancelText || 'Cancel';
             var iconClass = options.icon || VARIANT_ICONS[variant] || VARIANT_ICONS.primary;
+            var mood = options.mood || VARIANT_MOODS[variant] || 'happy';
 
             // Reset variant classes
             modal.className = 'jt-confirm-backdrop';
@@ -161,12 +169,16 @@
             var submitText = submitBtn ? submitBtn.querySelector('.jt-confirm-btn-text') : null;
             var cancelBtn = modal.querySelector('#jtConfirmCancelBtn');
             var iconEl = modal.querySelector('#jtConfirmIcon');
+            var jappyWrap = modal.querySelector('#jtConfirmJappyWrap');
 
             if (titleEl) titleEl.textContent = title;
             if (msgEl) msgEl.textContent = message;
             if (submitText) submitText.textContent = confirmText;
             if (cancelBtn) cancelBtn.textContent = cancelText;
             if (iconEl) iconEl.className = iconClass;
+            if (jappyWrap && window.Jappy && typeof window.Jappy.svg === 'function') {
+                jappyWrap.innerHTML = window.Jappy.svg(mood, '88px');
+            }
 
             // Display and animate
             modal.style.display = 'flex';
@@ -330,6 +342,7 @@
         var confirmButton = readAttr('data-confirm-button') || (variant === 'danger' ? 'Delete' : 'Confirm');
         var cancelButton = readAttr('data-confirm-cancel') || 'Cancel';
         var icon = readAttr('data-confirm-icon');
+        var mood = readAttr('data-confirm-mood');
 
         return {
             title: title,
@@ -337,7 +350,8 @@
             confirmText: confirmButton,
             cancelText: cancelButton,
             variant: variant,
-            icon: icon
+            icon: icon,
+            mood: mood
         };
     }
 

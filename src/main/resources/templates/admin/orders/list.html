@@ -129,10 +129,11 @@
                             </thead>
                             <tbody>
                                 <tr th:if="${ordersPage.empty}">
-                                    <td colspan="8" style="text-align: center; color: var(--mu); padding: 32px 16px;">
-                                        No orders found matching the criteria.
-                                    </td>
-                                </tr>
+                                <td colspan="8" style="text-align: center; color: var(--mu); padding: 32px 16px;">
+                                    <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                    <div>No orders found matching the criteria.</div>
+                                </td>
+                            </tr>
                                 <tr th:each="ord : ${ordersPage.content}">
                                     <td data-col="orderNo" data-label="Order No">
                                         <a th:href="@{'/admin/orders/' + ${ord.orderId}}"

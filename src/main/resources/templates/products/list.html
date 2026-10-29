@@ -161,10 +161,11 @@
                             </thead>
                             <tbody>
                                 <tr th:if="${productsPage.empty}">
-                                    <td colspan="10" style="text-align: center; color: var(--mu); padding: 32px 16px;">
-                                        No products found matching the criteria.
-                                    </td>
-                                </tr>
+                                     <td colspan="10" style="text-align: center; color: var(--mu); padding: 32px 16px;">
+                                         <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                         <div>No products found matching the criteria.</div>
+                                     </td>
+                                 </tr>
                                 <tr th:each="product : ${productsPage.content}"
                                     th:with="meta=${imageMetas[product.productId]}">
                                     <!-- Thumbnail cell -->

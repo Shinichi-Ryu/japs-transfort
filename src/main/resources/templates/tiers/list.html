@@ -158,10 +158,11 @@
                                     </thead>
                                     <tbody>
                                         <tr th:if="${#lists.isEmpty(tiers)}">
-                                            <td colspan="6" style="text-align: center; color: var(--mu); padding: 32px 16px;">
-                                                No tiers found. Create one using the form.
-                                            </td>
-                                        </tr>
+                                             <td colspan="6" style="text-align: center; color: var(--mu); padding: 32px 16px;">
+                                                 <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                                 <div>No tiers found. Create one using the form.</div>
+                                             </td>
+                                         </tr>
                                         <tr th:each="tier : ${tiers}">
                                             <td data-col="id" data-label="ID" style="font-family: monospace; font-size: 13px; font-weight: 600; color: var(--mu);" th:text="${tier.tierId}">1</td>
                                             <td data-col="tier" data-label="Tier"><b th:text="${tier.tierName}">Bronze</b></td>

@@ -35,7 +35,7 @@
     border-radius: 20px;
     width: min(420px, calc(100vw - 32px));
     max-width: 420px;
-    padding: 26px 24px;
+    padding: 50px 24px 24px;
     box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--line);
     position: relative;
     box-sizing: border-box;
@@ -43,6 +43,7 @@
     text-align: center;
     transform: scale(0.95);
     transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    margin-top: 36px;
 }
 
 .jt-confirm-backdrop.jt-confirm-open .jt-confirm-card {
@@ -81,12 +82,33 @@
     outline-offset: 2px;
 }
 
-/* Round Icon Badge */
+/* Jappy Mascot in Confirmation Modal */
+.jt-confirm-jappy-wrap {
+    position: absolute;
+    top: -46px; /* 88px mascot height: overlaps top edge of card by ~30px, peeking above */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 88px;
+    height: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.jt-confirm-jappy-wrap .j {
+    width: 88px;
+    height: 88px;
+    margin: 0;
+}
+
+/* Legacy Round Icon Badge (hidden if replaced by Jappy) */
 .jt-confirm-icon-wrap {
+    display: none;
     width: 54px;
     height: 54px;
     border-radius: 50%;
-    display: inline-flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 16px auto;
@@ -313,11 +335,24 @@ body.jt-confirm-locked {
 @media (max-width: 420px) {
     .jt-confirm-backdrop {
         padding: 12px;
+        align-items: center;
     }
 
     .jt-confirm-card {
-        padding: 22px 18px 18px 18px;
+        padding: 44px 18px 18px 18px;
         border-radius: 18px;
+        margin-top: 38px;
+    }
+
+    .jt-confirm-jappy-wrap {
+        width: 72px;
+        height: 72px;
+        top: -38px;
+    }
+
+    .jt-confirm-jappy-wrap .j {
+        width: 72px;
+        height: 72px;
     }
 
     .jt-confirm-title {

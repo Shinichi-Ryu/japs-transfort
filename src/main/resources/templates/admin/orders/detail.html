@@ -270,7 +270,10 @@
                             </thead>
                             <tbody>
                                 <tr th:if="${order.items == null or order.items.empty}">
-                                    <td colspan="6" class="text-center py-4" style="color: var(--mu);">No items in this order.</td>
+                                    <td colspan="6" class="text-center py-4" style="color: var(--mu);">
+                                        <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                        <div>No items in this order.</div>
+                                    </td>
                                 </tr>
                                 <tr th:each="item : ${order.items}">
                                     <td style="padding-left: 20px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--mu);"
@@ -370,7 +373,10 @@
                                     </thead>
                                     <tbody>
                                         <tr th:if="${payments == null or payments.empty}">
-                                            <td colspan="6" class="text-center py-3" style="color: var(--mu);">No payments recorded yet for this order.</td>
+                                            <td colspan="6" class="text-center py-4" style="color: var(--mu);">
+                                                <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                                <div>No payments recorded yet for this order.</div>
+                                            </td>
                                         </tr>
                                         <tr th:each="p : ${payments}">
                                             <td style="padding-left: 20px; color: var(--mu);"
@@ -454,7 +460,12 @@
                             </p>
                             <div class="d-flex flex-wrap align-items-center gap-3">
                                 <!-- Approve Form -->
-                                <form th:action="@{'/admin/orders/' + ${order.orderId} + '/approve'}" method="post" class="d-flex align-items-center gap-2 flex-wrap">
+                                <form th:action="@{'/admin/orders/' + ${order.orderId} + '/approve'}" method="post" class="d-flex align-items-center gap-2 flex-wrap"
+                                      data-confirm="true"
+                                      data-confirm-title="Approve order?"
+                                      data-confirm-message="Are you sure you want to approve this order? Stock will be deducted from the selected warehouse."
+                                      data-confirm-button="Approve Order"
+                                      data-confirm-variant="primary">
                                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                     <label for="warehouseSelect" class="jt-label mb-0">Fulfill from Warehouse:</label>
                                     <select name="warehouseId" id="warehouseSelect" class="form-select" required style="width: auto; min-width: 200px;">

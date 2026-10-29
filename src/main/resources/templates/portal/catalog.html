@@ -131,7 +131,8 @@
                     <tbody class="row g-3" style="display: flex; flex-wrap: wrap; border: 0; background: transparent; padding: 0; margin: 0;">
                         <tr th:if="${productsPage.empty}" class="col-12 text-center py-5" style="display: block; border: 0; background: transparent;">
                             <td style="display: block; border: 0; color: var(--mu);">
-                                No products found matching the criteria.
+                                <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                <div>No products found matching the criteria.</div>
                             </td>
                         </tr>
                         <tr th:each="product : ${productsPage.content}"

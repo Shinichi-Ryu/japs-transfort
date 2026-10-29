@@ -165,7 +165,10 @@
                             </thead>
                             <tbody>
                                 <tr th:if="${#lists.isEmpty(receivables)}">
-                                    <td colspan="11" class="text-center py-4" style="color: var(--mu);">No data for this period</td>
+                                    <td colspan="11" class="text-center py-4" style="color: var(--mu);">
+                                        <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                        <div>No data for this period</div>
+                                    </td>
                                 </tr>
                                 <tr th:each="row : ${receivables}"
                                     th:classappend="${row.overCreditLimit ? 'table-danger' : ''}">

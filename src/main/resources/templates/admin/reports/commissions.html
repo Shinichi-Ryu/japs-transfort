@@ -168,7 +168,10 @@
                             </thead>
                             <tbody>
                                 <tr th:if="${#lists.isEmpty(commissionRows)}">
-                                    <td colspan="5" class="text-center py-4" style="color: var(--mu);">No data for this period</td>
+                                    <td colspan="5" class="text-center py-4" style="color: var(--mu);">
+                                        <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                        <div>No data for this period</div>
+                                    </td>
                                 </tr>
                                 <tr th:each="row : ${commissionRows}">
                                     <td data-col="reseller" data-label="Business Name" style="padding-left: 18px;" class="fw-medium" th:text="${row.businessName}">Reseller</td>

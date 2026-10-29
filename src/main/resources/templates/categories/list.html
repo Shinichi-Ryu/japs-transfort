@@ -104,10 +104,11 @@
                                     </thead>
                                     <tbody>
                                         <tr th:if="${#lists.isEmpty(categories)}">
-                                            <td colspan="3" style="text-align: center; color: var(--mu); padding: 32px 16px;">
-                                                No categories found. Create one using the form.
-                                            </td>
-                                        </tr>
+                                             <td colspan="3" style="text-align: center; color: var(--mu); padding: 32px 16px;">
+                                                 <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                                 <div>No categories found. Create one using the form.</div>
+                                             </td>
+                                         </tr>
                                         <tr th:each="cat : ${categories}">
                                             <td data-col="id" data-label="ID" style="font-family: monospace; font-size: 13px; font-weight: 600; color: var(--mu);" th:text="${cat.categoryId}">1</td>
                                             <td data-col="name" data-label="Name"><b th:text="${cat.name}">General</b></td>

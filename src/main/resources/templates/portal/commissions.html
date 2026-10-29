@@ -86,7 +86,7 @@
                             <tbody>
                                 <tr th:if="${commissions == null or commissions.empty}">
                                     <td colspan="4" class="text-center py-5" style="color: var(--mu);">
-                                        <div class="mb-2"><i class="bi bi-cash-stack" style="font-size: 2rem;"></i></div>
+                                        <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
                                         <div>No commissions earned yet. Commissions are generated when wholesale orders are delivered and fully paid.</div>
                                     </td>
                                 </tr>

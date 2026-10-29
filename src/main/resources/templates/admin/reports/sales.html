@@ -179,10 +179,11 @@
                                     </thead>
                                     <tbody>
                                         <tr th:if="${#lists.isEmpty(resellerSales)}">
-                                            <td colspan="3" class="text-center py-4" style="color: var(--mu);">
-                                                No sales in this period
-                                            </td>
-                                        </tr>
+                                             <td colspan="3" class="text-center py-4" style="color: var(--mu);">
+                                                 <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                                 <div>No sales in this period</div>
+                                             </td>
+                                         </tr>
                                         <tr th:each="r : ${resellerSales}">
                                             <td data-col="reseller" data-label="Business Name" style="padding-left: 18px;" class="fw-medium" th:text="${r.businessName}">Reseller Business</td>
                                             <td data-col="orders" data-label="Orders" class="n text-center font-monospace" th:text="${r.orderCount}">0</td>
@@ -271,7 +272,8 @@
                                     <tbody>
                                         <tr th:if="${#lists.isEmpty(productSales)}">
                                             <td colspan="4" class="text-center py-4" style="color: var(--mu);">
-                                                No sales in this period
+                                                <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                                <div>No sales in this period</div>
                                             </td>
                                         </tr>
                                         <tr th:each="p : ${productSales}">
@@ -319,7 +321,8 @@
                                     <tbody>
                                         <tr th:if="${#lists.isEmpty(dailySales)}">
                                             <td colspan="3" class="text-center py-4" style="color: var(--mu);">
-                                                No sales in this period
+                                                <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                                <div>No sales in this period</div>
                                             </td>
                                         </tr>
                                         <tr th:each="d : ${dailySales}">

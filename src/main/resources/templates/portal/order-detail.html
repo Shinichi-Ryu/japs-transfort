@@ -305,7 +305,10 @@
                             </thead>
                             <tbody>
                                 <tr th:if="${order.items == null or order.items.empty}">
-                                    <td colspan="6" class="text-center py-4" style="color: var(--mu);">No items in this order.</td>
+                                    <td colspan="6" class="text-center py-4" style="color: var(--mu);">
+                                        <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                        <div>No items in this order.</div>
+                                    </td>
                                 </tr>
                                 <tr th:each="item : ${order.items}">
                                     <td class="fw-mono small fw-semibold" style="color: var(--mu);" th:text="${item.sku}">SKU-001</td>
@@ -374,7 +377,10 @@
                             </thead>
                             <tbody>
                                 <tr th:if="${order.payments == null or order.payments.empty}">
-                                    <td colspan="6" class="text-center py-3" style="color: var(--mu);">No payments recorded yet for this order.</td>
+                                    <td colspan="6" class="text-center py-4" style="color: var(--mu);">
+                                        <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                        <div>No payments recorded yet for this order.</div>
+                                    </td>
                                 </tr>
                                 <tr th:each="p : ${order.payments}">
                                     <td class="small" style="color: var(--mu);"

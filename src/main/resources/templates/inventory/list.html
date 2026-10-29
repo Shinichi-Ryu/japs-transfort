@@ -150,7 +150,8 @@
                             <tbody>
                                 <tr th:if="${inventoryPage.empty}">
                                     <td colspan="8" class="text-center py-5" style="color: var(--mu);">
-                                        No inventory records found matching the criteria.
+                                        <div th:replace="~{fragments/jappy :: jappy('thinking', '96px')}"></div>
+                                        <div>No inventory records found matching the criteria.</div>
                                     </td>
                                 </tr>
                                 <tr th:each="row : ${inventoryPage.content}">

@@ -4,178 +4,690 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title th:text="'Invoice ' + ${invoice != null and invoice.orderNo != null ? invoice.orderNo : ''} + ' - ' + ${company != null and company.name != null ? company.name : 'Japs Transfort'}">Invoice - Japs Transfort</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Theme CSS & Design System -->
+    <link rel="stylesheet" th:href="@{/css/theme.css}" href="/css/theme.css">
+    <link rel="stylesheet" th:href="@{/css/lists.css(v='4.3')}" href="/css/lists.css?v=4.3">
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
-</head>
-<body class="bg-white">
+    <!-- Inline appearance script before first paint to prevent theme flash -->
+    <script>
+        (function() {
+            try {
+                var s = null;
+                try { s = JSON.parse(localStorage.getItem('jt') || '{}'); } catch(e) { s = {}; }
+                var theme = (s && s.t) || localStorage.getItem('jt.theme') || 'light';
+                var pal = (s && s.p) || localStorage.getItem('jt.pal') || 'teal';
+                var doc = document.documentElement;
+                doc.setAttribute('data-theme', theme);
+                doc.setAttribute('data-bs-theme', theme);
+                doc.setAttribute('data-pal', pal);
+            } catch (e) {}
+        })();
+    </script>
+    <style>
+        /* Scoped Invoice Styles */
+        body.invoice-page {
+            background-color: var(--bg);
+            color: var(--tx);
+            min-height: 100vh;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
 
-    <!-- Top Action Bar (hidden on print) -->
-    <div class="no-print bg-light border-bottom py-3 mb-4">
-        <div class="container d-flex justify-content-between align-items-center">
-            <a th:href="${backUrl}" class="btn btn-outline-secondary btn-sm">
-                &larr; Back
+        .invoice-page-wrap {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--bg);
+            padding: 24px 16px 48px 16px;
+            box-sizing: border-box;
+        }
+
+        .invoice-toolbar {
+            max-width: 900px;
+            margin: 0 auto 16px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .invoice-card {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--card);
+            color: var(--tx);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            box-shadow: var(--sh, 0 10px 30px rgba(0, 0, 0, 0.05));
+            padding: 44px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .invoice-ineligible-card {
+            max-width: 600px;
+            margin: 32px auto;
+            background-color: var(--card);
+            color: var(--tx);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            box-shadow: var(--sh, 0 10px 30px rgba(0, 0, 0, 0.05));
+            padding: 44px 28px;
+            text-align: center;
+        }
+
+        /* Header row */
+        .invoice-header-row {
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 28px;
+        }
+
+        .invoice-brand-title {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: var(--tx);
+            line-height: 1.2;
+        }
+
+        .invoice-company-sub {
+            font-size: 12.5px;
+            color: var(--mu);
+            line-height: 1.45;
+        }
+
+        .invoice-title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            color: var(--navy, #0F5257);
+        }
+
+        [data-theme="dark"] .invoice-title {
+            color: var(--tt, #6FD8D2);
+        }
+
+        .invoice-meta-item {
+            font-size: 13px;
+            color: var(--tx);
+            line-height: 1.5;
+        }
+
+        .invoice-meta-item .text-muted {
+            color: var(--mu) !important;
+        }
+
+        /* Section Labels */
+        .invoice-section-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--mu);
+            margin-bottom: 8px;
+        }
+
+        .invoice-info-block {
+            font-size: 13.5px;
+            line-height: 1.5;
+            color: var(--tx);
+        }
+
+        .invoice-info-block .fw-bold {
+            color: var(--tx);
+            font-size: 15px;
+        }
+
+        /* Tables */
+        .invoice-table-wrap {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: var(--card);
+        }
+
+        .invoice-table {
+            margin-bottom: 0;
+            width: 100%;
+            border-collapse: collapse;
+            --bs-table-bg: transparent;
+            color: var(--tx);
+        }
+
+        .invoice-table thead th {
+            background-color: var(--soft);
+            color: var(--mu);
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--line);
+            border-top: none;
+            white-space: nowrap;
+        }
+
+        .invoice-table tbody td {
+            padding: 12px 14px;
+            border-top: 1px solid var(--line);
+            border-bottom: none;
+            color: var(--tx);
+            font-size: 13.5px;
+            vertical-align: middle;
+            background: transparent;
+        }
+
+        .invoice-table tbody tr:first-child td {
+            border-top: none;
+        }
+
+        .invoice-sku {
+            color: var(--mu);
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
+        /* Totals Summary Card */
+        .invoice-summary-card {
+            background-color: var(--soft);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 16px 20px;
+        }
+
+        .invoice-summary-card .table {
+            margin-bottom: 0;
+            --bs-table-bg: transparent;
+            color: var(--tx);
+        }
+
+        .invoice-summary-card td {
+            padding: 6px 4px;
+            border: none;
+            vertical-align: middle;
+            font-size: 13.5px;
+            background: transparent;
+        }
+
+        .invoice-summary-card .invoice-total-divider td {
+            border-top: 1px solid var(--line);
+            padding-top: 10px;
+            padding-bottom: 8px;
+            color: var(--tx);
+        }
+
+        .invoice-summary-card .invoice-balance-divider td {
+            border-top: 1px solid var(--line);
+            padding-top: 10px;
+            padding-bottom: 6px;
+            color: var(--tx);
+        }
+
+        .invoice-discount-value {
+            color: var(--gt, #1E6B34) !important;
+        }
+
+        [data-theme="dark"] .invoice-discount-value {
+            color: var(--gt, #7FD79A) !important;
+        }
+
+        .invoice-paid-value {
+            color: var(--gt, #1E6B34) !important;
+        }
+
+        [data-theme="dark"] .invoice-paid-value {
+            color: var(--gt, #7FD79A) !important;
+        }
+
+        .invoice-balance-due-positive {
+            color: var(--rt, #9A2A1E) !important;
+        }
+
+        [data-theme="dark"] .invoice-balance-due-positive {
+            color: var(--rt, #F29A8F) !important;
+        }
+
+        .invoice-balance-due-zero {
+            color: var(--gt, #1E6B34) !important;
+        }
+
+        [data-theme="dark"] .invoice-balance-due-zero {
+            color: var(--gt, #7FD79A) !important;
+        }
+
+        /* Footer */
+        .invoice-footer {
+            border-top: 1px solid var(--line);
+            color: var(--mu);
+            font-size: 12.5px;
+            letter-spacing: 0.02em;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 767.98px) {
+            .invoice-page-wrap {
+                padding: 12px 10px 32px 10px;
+            }
+
+            .invoice-toolbar {
+                margin-bottom: 12px;
+            }
+
+            .invoice-card {
+                padding: 20px 14px;
+                border-radius: 14px;
+            }
+
+            .invoice-header-row {
+                padding-bottom: 18px;
+                margin-bottom: 20px;
+            }
+
+            .invoice-meta {
+                text-align: left !important;
+                margin-top: 16px;
+            }
+
+            .invoice-title {
+                font-size: 24px;
+            }
+
+            .invoice-summary-card {
+                padding: 14px 16px;
+            }
+        }
+
+        /* Print / PDF Stylesheet */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 12mm 15mm 12mm 15mm;
+            }
+
+            *,
+            *::before,
+            *::after {
+                box-shadow: none !important;
+                text-shadow: none !important;
+            }
+
+            html,
+            body,
+            body.invoice-page {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                color: #111827 !important;
+                font-size: 10.5pt !important;
+                line-height: 1.4 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .no-print,
+            .no-print * {
+                display: none !important;
+            }
+
+            .invoice-page-wrap {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .invoice-card {
+                max-width: 100% !important;
+                width: 100% !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: #ffffff !important;
+                color: #111827 !important;
+            }
+
+            .invoice-header-row {
+                border-bottom: 1px solid #E2E8F0 !important;
+                padding-bottom: 16px !important;
+                margin-bottom: 20px !important;
+            }
+
+            .invoice-brand-title {
+                color: #111827 !important;
+            }
+
+            .invoice-title {
+                color: #0F5257 !important;
+            }
+
+            .invoice-meta-item,
+            .invoice-info-block,
+            .invoice-company-sub {
+                color: #111827 !important;
+            }
+
+            .invoice-company-sub div,
+            .invoice-meta-item .text-muted,
+            .invoice-section-label,
+            .text-muted {
+                color: #64748B !important;
+            }
+
+            .invoice-table-wrap {
+                border: 1px solid #E2E8F0 !important;
+                border-radius: 6px !important;
+            }
+
+            .invoice-table {
+                color: #111827 !important;
+            }
+
+            .invoice-table thead th {
+                background-color: #F8FAFC !important;
+                color: #475569 !important;
+                border-bottom: 1px solid #E2E8F0 !important;
+            }
+
+            .invoice-table tbody td {
+                color: #111827 !important;
+                border-top: 1px solid #E2E8F0 !important;
+            }
+
+            .invoice-table th,
+            .invoice-table td,
+            .invoice-table tr,
+            tr {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            .invoice-summary-card {
+                background-color: #F8FAFC !important;
+                border: 1px solid #E2E8F0 !important;
+                border-radius: 6px !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            .invoice-summary-card .invoice-total-divider td,
+            .invoice-summary-card .invoice-balance-divider td {
+                border-top: 1px solid #E2E8F0 !important;
+            }
+
+            .invoice-summary-card td {
+                color: #111827 !important;
+            }
+
+            .invoice-discount-value {
+                color: #1E6B34 !important;
+            }
+
+            .invoice-paid-value {
+                color: #1E6B34 !important;
+            }
+
+            .invoice-balance-due-positive {
+                color: #9A2A1E !important;
+                font-weight: 700 !important;
+            }
+
+            .invoice-balance-due-zero {
+                color: #1E6B34 !important;
+                font-weight: 700 !important;
+            }
+
+            .jt-pill {
+                border: 1px solid currentColor !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .jt-pill.g {
+                background-color: #DDF3E3 !important;
+                color: #1E6B34 !important;
+                border-color: #1E6B34 !important;
+            }
+
+            .jt-pill.r {
+                background-color: #FBE2DE !important;
+                color: #9A2A1E !important;
+                border-color: #9A2A1E !important;
+            }
+
+            .jt-pill.y {
+                background-color: #FFF2D0 !important;
+                color: #7A5200 !important;
+                border-color: #7A5200 !important;
+            }
+
+            .invoice-footer {
+                border-top: 1px solid #E2E8F0 !important;
+                color: #64748B !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+        }
+    </style>
+</head>
+<body class="invoice-page">
+    <div class="invoice-page-wrap">
+        <!-- Top Toolbar (outside the card) -->
+        <div class="invoice-toolbar no-print">
+            <a th:href="${backUrl != null ? backUrl : '/admin/orders'}" class="jt-btn jt-btn-s">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back</span>
             </a>
-            <button type="button" onclick="window.print()" class="btn btn-primary btn-sm" th:if="${invoice != null and invoice.eligible}">
-                Print
+            <button type="button" onclick="window.print()" class="jt-btn jt-btn-s jt-btn-amber" th:if="${invoice != null and invoice.eligible}">
+                <i class="bi bi-printer"></i>
+                <span>Print</span>
             </button>
         </div>
-    </div>
 
-    <!-- Clear message for pending or cancelled orders -->
-    <div th:if="${invoice != null and !invoice.eligible}" class="container my-5">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-6">
-                <div class="card border shadow-sm">
-                    <div class="card-body p-4 text-center">
-                        <h4 class="fw-bold text-dark mb-3">Invoice Unavailable</h4>
-                        <p class="text-secondary mb-3">
-                            Invoices are only generated for orders that are approved, packed, shipped, or delivered.
-                        </p>
-                        <p class="mb-4">
-                            Current order status:
-                            <span class="badge text-uppercase"
-                                  th:classappend="${invoice.status == 'pending' ? 'bg-warning text-dark' : 'bg-danger'}"
-                                  th:text="${invoice.status}">pending</span>
-                        </p>
-                        <a th:href="${backUrl}" class="btn btn-primary btn-sm">
-                            &larr; Back to Order
-                        </a>
+        <!-- Ineligible Order State (pending or cancelled) -->
+        <div th:if="${invoice != null and !invoice.eligible}" class="invoice-ineligible-card">
+            <div class="mb-3">
+                <i class="bi bi-exclamation-circle text-warning fs-1"></i>
+            </div>
+            <h4 class="fw-bold mb-2">Invoice Unavailable</h4>
+            <p class="text-muted small mb-3">
+                Invoices are only generated for orders that are approved, packed, shipped, or delivered.
+            </p>
+            <div class="mb-4">
+                <span class="text-muted small me-2">Current order status:</span>
+                <span class="jt-pill"
+                      th:classappend="${invoice.status == 'pending' ? 'y' : 'r'}"
+                      th:text="${invoice.status}">pending</span>
+            </div>
+            <a th:href="${backUrl != null ? backUrl : '/admin/orders'}" class="jt-btn jt-btn-s jt-btn-amber">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to Order</span>
+            </a>
+        </div>
+
+        <!-- Printable Invoice (only for eligible orders) -->
+        <div th:if="${invoice != null and invoice.eligible}" class="invoice-card">
+            <!-- Header Row -->
+            <div class="invoice-header-row">
+                <div class="row align-items-start">
+                    <div class="col-12 col-sm-7">
+                        <div class="d-flex align-items-center gap-3">
+                            <svg width="40" height="40" viewBox="0 0 64 64" role="img" aria-label="Japs Transfort logo" class="invoice-logo flex-shrink-0">
+                                <rect width="64" height="64" rx="17" fill="var(--amber, #F5A623)"/>
+                                <path d="M32 12l18 10-18 10-18-10z" fill="#fff" fill-opacity=".55"/>
+                                <path fill="none" stroke="var(--sb, #0A3A40)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" d="M32 12l18 10v20L32 52 14 42V22zM14 22l18 10 18-10M32 32v20"/>
+                            </svg>
+                            <div>
+                                <div class="invoice-brand-title fw-bold" th:text="${company != null and company.name != null and !#strings.isEmpty(company.name) ? company.name : 'Japs Transfort'}">Japs Transfort</div>
+                                <div class="invoice-company-sub text-muted small mt-0.5" th:if="${company != null}">
+                                    <div th:if="${company.address != null and !#strings.isEmpty(company.address)}" th:text="${company.address}"></div>
+                                    <div th:if="${company.phone != null and !#strings.isEmpty(company.phone)}" th:text="'Phone: ' + ${company.phone}"></div>
+                                    <div th:if="${company.email != null and !#strings.isEmpty(company.email)}" th:text="'Email: ' + ${company.email}"></div>
+                                    <div th:if="${company.tin != null and !#strings.isEmpty(company.tin)}" th:text="'TIN: ' + ${company.tin}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-5 text-sm-end invoice-meta mt-3 mt-sm-0">
+                        <div class="invoice-title fw-bold text-uppercase">INVOICE</div>
+                        <div class="invoice-meta-item small" th:if="${invoice.orderNo != null}">
+                            <span class="text-muted">Invoice No:</span>
+                            <span class="font-monospace fw-bold ms-1" th:text="${invoice.orderNo}">ORD-0001</span>
+                        </div>
+                        <div class="invoice-meta-item small" th:if="${invoice.orderDate != null}">
+                            <span class="text-muted">Date:</span>
+                            <span class="fw-bold ms-1" th:text="${#temporals.format(invoice.orderDate, 'yyyy-MM-dd HH:mm')}">2026-10-15 10:00</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Printable Invoice (only for eligible orders) -->
-    <div th:if="${invoice != null and invoice.eligible}" class="container print-container pb-5">
-
-        <!-- Company & Document Header -->
-        <div th:replace="~{print/header :: header}"></div>
-
-        <!-- Bill To & Payment Method -->
-        <div class="row g-4 mb-4">
-            <div class="col-6">
-                <h6 class="text-muted text-uppercase small fw-bold mb-2">Bill To</h6>
-                <div class="fw-bold text-dark fs-6" th:text="${invoice.businessName}">Business Name</div>
-                <div class="text-dark small" th:if="${invoice.contactPerson != null and !#strings.isEmpty(invoice.contactPerson)}" th:text="${invoice.contactPerson}">Contact Person</div>
-                <div class="text-secondary small" th:if="${invoice.address != null and !#strings.isEmpty(invoice.address)}" th:text="${invoice.address}">Address</div>
-                <div class="text-secondary small" th:if="${invoice.cityLocation != null and !#strings.isEmpty(invoice.cityLocation)}" th:text="${invoice.cityLocation}">City / Location</div>
-                <div class="text-secondary small" th:if="${invoice.contactNumber != null and !#strings.isEmpty(invoice.contactNumber)}" th:text="${invoice.contactNumber}">Contact Number</div>
-            </div>
-            <div class="col-6 text-end">
-                <h6 class="text-muted text-uppercase small fw-bold mb-2">Payment Details</h6>
-                <div class="small mb-1">
-                    <span class="text-secondary">Payment Method:</span>
-                    <span class="fw-semibold text-dark ms-1" th:text="${invoice.paymentMethod != null ? invoice.paymentMethod : 'On account'}">On account (Credit)</span>
+            <!-- Bill To & Payment Details -->
+            <div class="row g-4 mb-4">
+                <div class="col-12 col-md-6">
+                    <div class="invoice-section-label">Bill To</div>
+                    <div class="invoice-info-block">
+                        <div class="fw-bold mb-1" th:text="${invoice.businessName}">Business Name</div>
+                        <div class="small mb-0.5" th:if="${invoice.contactPerson != null and !#strings.isEmpty(invoice.contactPerson)}" th:text="${invoice.contactPerson}">Contact Person</div>
+                        <div class="small text-muted mb-0.5" th:if="${invoice.address != null and !#strings.isEmpty(invoice.address)}" th:text="${invoice.address}">Address</div>
+                        <div class="small text-muted mb-0.5" th:if="${invoice.cityLocation != null and !#strings.isEmpty(invoice.cityLocation)}" th:text="${invoice.cityLocation}">City / Location</div>
+                        <div class="small text-muted" th:if="${invoice.contactNumber != null and !#strings.isEmpty(invoice.contactNumber)}" th:text="${invoice.contactNumber}">Contact Number</div>
+                    </div>
                 </div>
-                <div class="small">
-                    <span class="text-secondary">Payment Status:</span>
-                    <span class="badge text-uppercase ms-1"
-                          th:classappend="${invoice.paymentStatusBadge == 'PAID' ? 'bg-success' : (invoice.paymentStatusBadge == 'PARTIAL' ? 'bg-info text-dark' : 'bg-secondary')}"
-                          th:text="${invoice.paymentStatusBadge != null ? invoice.paymentStatusBadge : 'UNPAID'}">UNPAID</span>
+                <div class="col-12 col-md-6 text-md-end">
+                    <div class="invoice-section-label">Payment Details</div>
+                    <div class="invoice-info-block">
+                        <div class="small mb-2">
+                            <span class="text-muted">Payment Method:</span>
+                            <span class="fw-semibold ms-1" th:text="${invoice.paymentMethod != null ? invoice.paymentMethod : 'On account'}">On account (Credit)</span>
+                        </div>
+                        <div class="small d-flex align-items-center justify-content-md-end gap-2">
+                            <span class="text-muted">Payment Status:</span>
+                            <span class="jt-pill"
+                                  th:classappend="${invoice.paymentStatusBadge == 'PAID' ? 'g' : (invoice.paymentStatusBadge == 'PARTIAL' ? 'y' : 'r')}"
+                                  th:text="${invoice.paymentStatusBadge != null ? invoice.paymentStatusBadge : 'UNPAID'}">UNPAID</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Items Table -->
-        <div class="table-responsive mb-4">
-            <table class="table table-bordered align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col" style="width: 15%;">SKU</th>
-                        <th scope="col" style="width: 35%;">Description</th>
-                        <th scope="col" style="width: 10%;" class="text-center">Unit</th>
-                        <th scope="col" style="width: 10%;" class="text-center">Quantity</th>
-                        <th scope="col" style="width: 15%;" class="text-end">Unit Price</th>
-                        <th scope="col" style="width: 15%;" class="text-end">Line Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:if="${invoice.items == null or invoice.items.empty}">
-                        <td colspan="6" class="text-center text-muted py-3">No items in this order.</td>
-                    </tr>
-                    <tr th:each="item : ${invoice.items}">
-                        <td class="font-monospace small text-secondary" th:text="${item.sku}">SKU-001</td>
-                        <td class="fw-medium text-dark" th:text="${item.description}">Product Description</td>
-                        <td class="text-center small text-muted" th:text="${item.unit != null ? item.unit : 'pc'}">pc</td>
-                        <td class="text-center font-monospace" th:text="${item.quantity}">1</td>
-                        <td class="text-end font-monospace" th:text="'₱' + ${item.unitPrice != null ? #numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
-                        <td class="text-end font-monospace fw-semibold text-dark" th:text="'₱' + ${item.lineTotal != null ? #numbers.formatDecimal(item.lineTotal, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Totals & Financial Breakdown -->
-        <div class="row justify-content-end mb-4">
-            <div class="col-12 col-md-6 col-lg-5">
-                <table class="table table-sm table-borderless mb-0">
-                    <tbody>
+            <!-- Items Table -->
+            <div class="table-responsive invoice-table-wrap mb-4">
+                <table class="table invoice-table align-middle mb-0">
+                    <thead>
                         <tr>
-                            <td class="text-secondary fw-semibold">List price total</td>
-                            <td class="text-end font-monospace fw-semibold"
-                                th:text="'₱' + ${invoice.listPriceTotal != null ? #numbers.formatDecimal(invoice.listPriceTotal, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
-                        </tr>
-                        <tr>
-                            <td class="text-secondary fw-semibold" th:text="${invoice.discountLabel != null ? invoice.discountLabel : 'Tier discount (0%)'}">Tier discount (0%)</td>
-                            <td class="text-end font-monospace text-success fw-semibold"
-                                th:text="'-₱' + ${invoice.discountAmount != null ? #numbers.formatDecimal(invoice.discountAmount, 1, 'COMMA', 2, 'POINT') : '0.00'}">-₱0.00</td>
-                        </tr>
-                        <tr class="border-top">
-                            <td class="fw-bold text-dark fs-6">Total</td>
-                            <td class="text-end font-monospace fw-bold text-dark fs-6"
-                                th:text="'₱' + ${invoice.total != null ? #numbers.formatDecimal(invoice.total, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
-                        </tr>
-                        <tr>
-                            <td class="text-secondary fw-semibold">Amount paid</td>
-                            <td class="text-end font-monospace text-success fw-semibold"
-                                th:text="'₱' + ${invoice.amountPaid != null ? #numbers.formatDecimal(invoice.amountPaid, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
-                        </tr>
-                        <tr class="border-top">
-                            <td class="fw-bold text-dark fs-6">Balance due</td>
-                            <td class="text-end font-monospace fw-bold text-danger fs-6"
-                                th:text="'₱' + ${invoice.balanceDue != null ? #numbers.formatDecimal(invoice.balanceDue, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Payments Received Table -->
-        <div class="mb-4">
-            <h6 class="text-muted text-uppercase small fw-bold mb-2">Payments Received</h6>
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col" style="width: 25%;">Date</th>
-                            <th scope="col" style="width: 25%;">Method</th>
-                            <th scope="col" style="width: 25%;">Reference</th>
-                            <th scope="col" style="width: 25%;" class="text-end">Amount</th>
+                            <th scope="col" style="width: 15%;">SKU</th>
+                            <th scope="col" style="width: 35%;">Description</th>
+                            <th scope="col" style="width: 10%;" class="text-center">Unit</th>
+                            <th scope="col" style="width: 10%;" class="text-center">Quantity</th>
+                            <th scope="col" style="width: 15%;" class="text-end">Unit Price</th>
+                            <th scope="col" style="width: 15%;" class="text-end">Line Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:if="${invoice.payments == null or invoice.payments.empty}">
-                            <td colspan="4" class="text-center text-muted small py-2">No payments received yet.</td>
+                        <tr th:if="${invoice.items == null or invoice.items.empty}">
+                            <td colspan="6" class="text-center text-muted py-4">No items in this order.</td>
                         </tr>
-                        <tr th:each="p : ${invoice.payments}">
-                            <td class="small" th:text="${p.paidAt != null ? #temporals.format(p.paidAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-10-15 10:00</td>
-                            <td class="small" th:text="${p.method != null ? p.method : 'Cash'}">Cash</td>
-                            <td class="small font-monospace" th:text="${p.reference != null and !#strings.isEmpty(p.reference) ? p.reference : '-'}">-</td>
-                            <td class="small text-end font-monospace fw-semibold" th:text="'₱' + ${p.amount != null ? #numbers.formatDecimal(p.amount, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
+                        <tr th:each="item : ${invoice.items}">
+                            <td class="font-monospace invoice-sku text-nowrap" th:text="${item.sku}">SKU-001</td>
+                            <td class="fw-semibold" th:text="${item.description}">Product Description</td>
+                            <td class="text-center small text-muted" th:text="${item.unit != null ? item.unit : 'pc'}">pc</td>
+                            <td class="text-center font-monospace" th:text="${item.quantity}">1</td>
+                            <td class="text-end font-monospace text-nowrap" th:text="'₱' + ${item.unitPrice != null ? #numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
+                            <td class="text-end font-monospace fw-bold text-nowrap" th:text="'₱' + ${item.lineTotal != null ? #numbers.formatDecimal(item.lineTotal, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
 
-        <!-- Invoice Footer (if not blank) -->
-        <div class="invoice-footer mt-5 pt-3 border-top text-center text-muted small"
-             th:if="${company != null and company.footer != null and !#strings.isEmpty(company.footer)}"
-             th:text="${company.footer}">
-        </div>
+            <!-- Totals & Financial Breakdown -->
+            <div class="row justify-content-end mb-4">
+                <div class="col-12 col-md-7 col-lg-5">
+                    <div class="invoice-summary-card">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tbody>
+                                <tr>
+                                    <td class="text-muted fw-semibold">List price total</td>
+                                    <td class="text-end font-monospace fw-semibold text-nowrap"
+                                        th:text="'₱' + ${invoice.listPriceTotal != null ? #numbers.formatDecimal(invoice.listPriceTotal, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fw-semibold" th:text="${invoice.discountLabel != null ? invoice.discountLabel : 'Tier discount (0%)'}">Tier discount (0%)</td>
+                                    <td class="text-end font-monospace fw-semibold text-nowrap invoice-discount-value"
+                                        th:text="'-₱' + ${invoice.discountAmount != null ? #numbers.formatDecimal(invoice.discountAmount, 1, 'COMMA', 2, 'POINT') : '0.00'}">-₱0.00</td>
+                                </tr>
+                                <tr class="invoice-total-divider">
+                                    <td class="fw-bold fs-6">Total</td>
+                                    <td class="text-end font-monospace fw-bold fs-6 text-nowrap"
+                                        th:text="'₱' + ${invoice.total != null ? #numbers.formatDecimal(invoice.total, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fw-semibold">Amount paid</td>
+                                    <td class="text-end font-monospace fw-semibold text-nowrap invoice-paid-value"
+                                        th:text="'₱' + ${invoice.amountPaid != null ? #numbers.formatDecimal(invoice.amountPaid, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
+                                </tr>
+                                <tr class="invoice-balance-divider">
+                                    <td class="fw-bold fs-6">Balance due</td>
+                                    <td class="text-end font-monospace fw-bold fs-6 text-nowrap"
+                                        th:classappend="${invoice.balanceDue != null and invoice.balanceDue.signum() > 0 ? 'invoice-balance-due-positive' : 'invoice-balance-due-zero'}"
+                                        th:text="'₱' + ${invoice.balanceDue != null ? #numbers.formatDecimal(invoice.balanceDue, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Payments Received Table -->
+            <div class="mb-4">
+                <div class="invoice-section-label">Payments Received</div>
+                <div class="table-responsive invoice-table-wrap">
+                    <table class="table invoice-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="width: 25%;">Date</th>
+                                <th scope="col" style="width: 25%;">Method</th>
+                                <th scope="col" style="width: 25%;">Reference</th>
+                                <th scope="col" style="width: 25%;" class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${invoice.payments == null or invoice.payments.empty}">
+                                <td colspan="4" class="text-center text-muted py-3">
+                                    <i class="bi bi-clock-history me-1 opacity-75"></i> No payments received yet.
+                                </td>
+                            </tr>
+                            <tr th:each="p : ${invoice.payments}">
+                                <td class="small" th:text="${p.paidAt != null ? #temporals.format(p.paidAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-10-15 10:00</td>
+                                <td class="small" th:text="${p.method != null ? p.method : 'Cash'}">Cash</td>
+                                <td class="small font-monospace" th:text="${p.reference != null and !#strings.isEmpty(p.reference) ? p.reference : '-'}">-</td>
+                                <td class="small text-end font-monospace fw-bold text-nowrap" th:text="'₱' + ${p.amount != null ? #numbers.formatDecimal(p.amount, 1, 'COMMA', 2, 'POINT') : '0.00'}">₱0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Invoice Footer -->
+            <div class="invoice-footer mt-5 pt-3 text-center small">
+                <div th:if="${company != null and company.footer != null and !#strings.isEmpty(company.footer)}" th:text="${company.footer}" class="mb-1"></div>
+                <div>Thank you for your business.</div>
+            </div>
+        </div>
     </div>
-
 </body>
 </html>

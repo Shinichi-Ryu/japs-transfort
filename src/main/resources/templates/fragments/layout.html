@@ -19,6 +19,7 @@
     <link rel="stylesheet" th:href="@{/css/lists.css(v='4.3')}" href="/css/lists.css?v=4.3">
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
     <link rel="stylesheet" th:href="@{/css/confirm-modal.css}" href="/css/confirm-modal.css">
+    <link rel="stylesheet" th:href="@{/css/help-assistant.css}" href="/css/help-assistant.css">
     <!-- Inline appearance script before first paint to prevent flash -->
     <script>
         (function() {
@@ -251,9 +252,11 @@
         <!-- Shared Jappy Mascot Gradient Definitions -->
         <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="jb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#eaa31f"/></linearGradient><linearGradient id="jl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8a826"/><stop offset="1" stop-color="#d28f12"/></linearGradient><linearGradient id="jc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a8a62"/><stop offset="1" stop-color="#14503a"/></linearGradient></defs></svg>
         <div th:replace="~{fragments/confirm-modal :: confirmModal}"></div>
+        <div th:replace="~{fragments/help-assistant :: helpAssistant}"></div>
         <script th:src="@{/js/jappy.js}" src="/js/jappy.js"></script>
         <script th:src="@{/js/confirm-modal.js}" src="/js/confirm-modal.js"></script>
         <script th:src="@{/js/table-view.js(v='4.3')}" src="/js/table-view.js?v=4.3"></script>
+        <script th:src="@{/js/help-assistant.js}" src="/js/help-assistant.js"></script>
         <script>
             (function() {
                 var IC = {

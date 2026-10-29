@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+    <div th:fragment="helpAssistant" id="jt-help-assistant" class="jt-help-container">
+        <!-- Shared Mascot Gradients (guaranteed available) -->
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+            <defs>
+                <linearGradient id="jb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#eaa31f"/></linearGradient>
+                <linearGradient id="jl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8a826"/><stop offset="1" stop-color="#d28f12"/></linearGradient>
+                <linearGradient id="jc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a8a62"/><stop offset="1" stop-color="#14503a"/></linearGradient>
+            </defs>
+        </svg>
+
+        <!-- Floating Greeting Bubble -->
+        <div id="jt-help-greeting"
+             class="jt-help-greeting"
+             role="status"
+             aria-live="polite"
+             style="display: none;">
+            <div class="jt-help-greeting-content" id="jt-help-greeting-trigger" role="button" tabindex="0" aria-label="Open Jappy help assistant">
+                <span class="jt-help-greeting-text">Hi! Need help? 👋</span>
+            </div>
+            <button type="button"
+                    class="jt-help-greeting-close"
+                    id="jt-help-greeting-close"
+                    aria-label="Dismiss greeting"
+                    title="Dismiss greeting">
+                <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <div class="jt-help-greeting-tail" aria-hidden="true"></div>
+        </div>
+
+        <!-- Floating Toggle Button -->
+        <button type="button"
+                id="jt-help-btn"
+                class="jt-help-btn"
+                aria-label="Open Jappy help assistant"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+                aria-controls="jt-help-panel"
+                title="Ask Jappy for help">
+            <span class="jt-help-btn-ring" aria-hidden="true"></span>
+            <span class="jt-help-btn-mascot" id="jt-help-btn-mascot" aria-hidden="true">
+                <!-- Mascot rendered via JS / thymeleaf fallback -->
+            </span>
+        </button>
+
+        <!-- Help Panel Dialog Card -->
+        <div id="jt-help-panel"
+             class="jt-help-panel"
+             role="dialog"
+             aria-modal="false"
+             aria-labelledby="jt-help-dialog-title"
+             style="display: none;">
+
+            <!-- Header in brand green -->
+            <div class="jt-help-header">
+                <div class="jt-help-header-info">
+                    <div class="jt-help-header-avatar" id="jt-help-header-avatar" aria-hidden="true">
+                        <!-- Hello Jappy (about 40px) -->
+                    </div>
+                    <div>
+                        <h2 id="jt-help-dialog-title" class="jt-help-title">Jappy, your assistant</h2>
+                        <span class="jt-help-subtitle">Instant answers &amp; guides</span>
+                    </div>
+                </div>
+                <div class="jt-help-header-actions">
+                    <button type="button"
+                            class="jt-help-header-btn"
+                            id="jt-help-clear-btn"
+                            title="Clear chat"
+                            aria-label="Clear chat history">
+                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                            <path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 002 2h8a2 2 0 002-2l1-12M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="d-none d-sm-inline ms-1" style="font-size: 11px;">Clear</span>
+                    </button>
+                    <button type="button"
+                            class="jt-help-header-btn jt-help-close-btn"
+                            id="jt-help-close-btn"
+                            title="Close assistant (Esc)"
+                            aria-label="Close assistant">
+                        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages Area (Scrollable) -->
+            <div class="jt-help-messages" id="jt-help-messages" role="log" aria-live="polite">
+                <!-- Dynamic chat messages -->
+            </div>
+
+            <!-- Quick Chips Area -->
+            <div class="jt-help-chips-wrap" id="jt-help-chips-wrap">
+                <div class="jt-help-chips-label">Popular questions:</div>
+                <div class="jt-help-chips" id="jt-help-chips">
+                    <!-- Populated dynamically based on role -->
+                </div>
+            </div>
+
+            <!-- Question Input Form -->
+            <form class="jt-help-form" id="jt-help-form" onsubmit="return false;">
+                <div class="jt-help-input-wrap">
+                    <input type="text"
+                           id="jt-help-input"
+                           class="jt-help-input"
+                           placeholder="Ask Jappy a question..."
+                           aria-label="Ask Jappy a question"
+                           autocomplete="off"
+                           maxlength="200">
+                    <button type="submit"
+                            id="jt-help-send-btn"
+                            class="jt-help-send-btn"
+                            aria-label="Send question"
+                            title="Send question">
+                        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

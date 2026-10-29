@@ -133,7 +133,15 @@ public class TemplateValidationTest {
                 IWebExchange webExchange = application.buildExchange(request, response);
                 WebContext webContext = new WebContext(webExchange, request.getLocale(), model);
 
-                engine.process(template, webContext);
+                String rendered = engine.process(template, webContext);
+                if ("login".equals(template)) {
+                    org.junit.jupiter.api.Assertions.assertFalse(rendered.contains("jt-help-assistant"),
+                            "Login page must NOT include floating help assistant");
+                }
+                if ("dashboard".equals(template)) {
+                    org.junit.jupiter.api.Assertions.assertTrue(rendered.contains("jt-help-assistant"),
+                            "Dashboard page MUST include floating help assistant");
+                }
                 System.out.println(">>> Verified valid template: " + template);
 
                 // For print templates, also verify with filled company details, payments present, and missing reference

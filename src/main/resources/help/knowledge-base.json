@@ -1,0 +1,166 @@
+[
+  {
+    "id": "admin-add-product",
+    "roles": ["ADMIN", "STAFF"],
+    "title": "How do I add a product?",
+    "keywords": ["add product", "new product", "create product", "magdagdag ng produkto", "gumawa ng produkto", "item", "sku", "bagong produkto", "upload product", "paninda", "dagdag paninda"],
+    "answer": "1. Go to **Products** in the sidebar (under Catalog).\n2. Click the **+ Add Product** button in the top right.\n3. Fill in the SKU, product name, brand, category, unit price, and opening stock.\n4. Upload product photos and choose a primary thumbnail.\n5. Click **Save Product**.",
+    "link": "/admin/products/new",
+    "linkLabel": "Add Product",
+    "quickChip": true
+  },
+  {
+    "id": "admin-approve-reseller",
+    "roles": ["ADMIN", "STAFF"],
+    "title": "How do I approve a reseller?",
+    "keywords": ["approve reseller", "reseller application", "pending reseller", "i-approve ang reseller", "tanggapin", "reject reseller", "reseller status", "resellers list", "mag-apruba"],
+    "answer": "1. Click **Resellers** in the sidebar (under Sales).\n2. Look for applications marked with the **Pending** badge.\n3. Click the green **Approve** button on the reseller's row to activate their account and grant catalog access, or **Reject** if details are incomplete.",
+    "link": "/admin/resellers",
+    "linkLabel": "View Resellers",
+    "quickChip": true
+  },
+  {
+    "id": "admin-record-payment",
+    "roles": ["ADMIN", "STAFF"],
+    "title": "How do I record a payment?",
+    "keywords": ["record payment", "bayad", "magbayad", "enter payment", "cash payment", "gcash", "bank transfer", "payment reference", "order payment", "kolekta", "magtala ng bayad"],
+    "answer": "1. Open **Orders** and click the order number to open order details.\n2. Scroll down to the **Record a Payment** card.\n3. Select payment method (Cash, GCash, Bank transfer, or Check).\n4. Enter the amount paid, payment date, and reference number.\n5. Click **Record Payment**.",
+    "link": "/admin/orders",
+    "linkLabel": "View Orders",
+    "quickChip": true
+  },
+  {
+    "id": "admin-print-invoice",
+    "roles": ["ADMIN", "STAFF"],
+    "title": "How do I print an invoice?",
+    "keywords": ["print invoice", "invoice", "resibo", "print receipt", "billing", "i-print ang invoice", "faktura", "download invoice", "resibo ng order"],
+    "answer": "1. Go to **Orders** and click an approved, packed, shipped, or delivered order.\n2. In the top action bar, click **Print invoice** (printer icon).\n3. A printable invoice opens in a new tab with order items, totals, payment status, and verification QR code.",
+    "link": "/admin/orders",
+    "linkLabel": "View Orders",
+    "quickChip": true
+  },
+  {
+    "id": "admin-change-tier-discount",
+    "roles": ["ADMIN"],
+    "title": "How do I change a tier discount?",
+    "keywords": ["change tier discount", "tier discount", "reseller tier", "diskwento", "change discount", "bawasan presyo", "tier levels", "bronze", "silver", "gold", "platinum", "edit tier", "palitan diskwento"],
+    "answer": "1. Under Catalog in the sidebar, click **Reseller tiers**.\n2. Locate the tier (e.g. Bronze, Silver, Gold, Platinum) and click **Edit**.\n3. Modify the discount percentage and minimum monthly spend requirement.\n4. Click **Save Tier** to apply the updated discount across all assigned resellers.",
+    "link": "/admin/tiers",
+    "linkLabel": "Reseller Tiers",
+    "quickChip": true
+  },
+  {
+    "id": "admin-adjust-inventory",
+    "roles": ["ADMIN", "STAFF", "WAREHOUSE"],
+    "title": "How do I adjust inventory or stock?",
+    "keywords": ["adjust inventory", "stock", "magdagdag ng stock", "bawas stock", "warehouse", "stock in", "stock out", "damage", "movements", "imbentaryo", "bilang ng stock"],
+    "answer": "1. Go to **Inventory** in the sidebar.\n2. Find the product and click **Adjust Stock**.\n3. Select the movement type (Restock, Return, Adjustment, or Loss) and enter the quantity change.\n4. Click **Confirm Adjustment**. You can view full audit history under **Stock Movements**.",
+    "link": "/admin/inventory",
+    "linkLabel": "Inventory Management",
+    "quickChip": false
+  },
+  {
+    "id": "admin-view-reports",
+    "roles": ["ADMIN"],
+    "title": "How do I view sales and stock reports?",
+    "keywords": ["sales reports", "reports", "kita", "benta", "receivables", "stock report", "commission report", "ulat", "financial", "benta ngayong buwan"],
+    "answer": "1. Click **Reports** in the sidebar (under Insights).\n2. Select Sales Overview, Outstanding Receivables, Stock Summary, or Commission Reports.\n3. Filter by date range or payment status, and use **Export CSV** to download.",
+    "link": "/admin/reports",
+    "linkLabel": "Reports",
+    "quickChip": false
+  },
+  {
+    "id": "admin-manage-categories",
+    "roles": ["ADMIN", "STAFF"],
+    "title": "How do I manage product categories?",
+    "keywords": ["categories", "kategorya", "add category", "bagong kategorya", "edit category", "manage categories"],
+    "answer": "1. Go to **Categories** under Catalog in the sidebar.\n2. Click **+ Add Category** to create a new product group.\n3. Enter the category name, description, and status.\n4. Click **Save Category**.",
+    "link": "/admin/categories",
+    "linkLabel": "Categories",
+    "quickChip": false
+  },
+  {
+    "id": "reseller-place-order",
+    "roles": ["RESELLER"],
+    "title": "How do I place an order?",
+    "keywords": ["place order", "mag-order", "order", "buy", "bumili", "checkout", "add to cart", "paano umorder", "cart", "shopping", "bili ng paninda"],
+    "answer": "1. Click **Catalog** in the sidebar to view available wholesale items.\n2. Enter the quantity you want and click **Add to Cart**.\n3. Open your **Cart** from the sidebar or cart icon in the topbar.\n4. Review your items and select your payment terms (COD or Credit terms).\n5. Click **Place Order** to submit your purchase.",
+    "link": "/portal/catalog",
+    "linkLabel": "Browse Catalog",
+    "quickChip": true
+  },
+  {
+    "id": "reseller-view-commissions",
+    "roles": ["RESELLER"],
+    "title": "Where do I see my commissions?",
+    "keywords": ["commissions", "komisyon", "kita", "earnings", "commission rate", "payout", "balance", "pera", "magkano kita"],
+    "answer": "1. Click **Commissions** in the sidebar (under My account).\n2. Check your current commission balance, tier rate, and recent order commissions.\n3. Review your completed payout history and payout status.",
+    "link": "/portal/commissions",
+    "linkLabel": "View Commissions",
+    "quickChip": true
+  },
+  {
+    "id": "reseller-track-order",
+    "roles": ["RESELLER"],
+    "title": "How do I track my order?",
+    "keywords": ["track order", "order status", "nasaan ang order", "kailan darating", "tracking number", "shipment", "pending", "shipped", "delivered", "status ng order"],
+    "answer": "1. Click **My orders** in the sidebar.\n2. Check the status badge for your order (Pending, Approved, Packed, Shipped, or Delivered).\n3. Click **View** on any order to see detailed item breakdown, shipment progress, and courier tracking number.",
+    "link": "/portal/orders",
+    "linkLabel": "My Orders",
+    "quickChip": true
+  },
+  {
+    "id": "reseller-view-statement",
+    "roles": ["RESELLER"],
+    "title": "Where can I see my statement of account?",
+    "keywords": ["statement", "statement of account", "soa", "utang", "balance", "bayarin", "unpaid invoices", "credit balance", "natitirang bayarin"],
+    "answer": "1. Click **Statement** in the sidebar.\n2. View your total billed purchases, recorded payments, remaining outstanding balance, and available credit limit.",
+    "link": "/portal/statement",
+    "linkLabel": "View Statement",
+    "quickChip": false
+  },
+  {
+    "id": "reseller-tier-pricing",
+    "roles": ["RESELLER"],
+    "title": "How does my reseller tier discount work?",
+    "keywords": ["tier discount", "presyo", "diskwento", "reseller discount", "wholesale price", "srp", "tier level"],
+    "answer": "Your wholesale discount depends on your assigned tier (Bronze, Silver, Gold, Platinum). In the **Catalog**, product cards automatically display your discounted tier price alongside the original SRP, showing your wholesale savings.",
+    "link": "/portal/catalog",
+    "linkLabel": "View Catalog",
+    "quickChip": false
+  },
+  {
+    "id": "common-account-settings",
+    "roles": ["ALL"],
+    "title": "How do I update my profile or password?",
+    "keywords": ["change password", "profile", "password", "palitan ang password", "settings", "theme", "dark mode", "light mode", "account", "palitan pangalan"],
+    "answer": "1. Click **Settings** at the bottom of the sidebar or your initials in the top bar.\n2. Under Profile, update your name, email, or contact number.\n3. Under Security, enter your current password and your new password twice.\n4. Click **Save Changes**.",
+    "link": "/account",
+    "linkLabel": "Settings",
+    "quickChip": false
+  },
+  {
+    "id": "smalltalk-hello",
+    "roles": ["ALL"],
+    "title": "Greetings",
+    "keywords": ["hi", "hello", "hey", "kamusta", "kumusta", "good morning", "good afternoon", "good evening", "magandang araw", "magandang umaga", "magandang gabi", "yo", "sup", "jappy"],
+    "answer": "Hi! 👋 I'm Jappy, your assistant for Japs Transfort. How can I help you today? You can ask a question or pick one of the quick topics below.",
+    "quickChip": false
+  },
+  {
+    "id": "smalltalk-thanks",
+    "roles": ["ALL"],
+    "title": "Thank you",
+    "keywords": ["thanks", "thank you", "salamat", "maraming salamat", "ty", "salamat po", "appreciate it", "great", "ok", "okay", "ayos", "sige salamat"],
+    "answer": "You're very welcome! 😊 Always happy to assist. Let me know if you need anything else!",
+    "quickChip": false
+  },
+  {
+    "id": "smalltalk-help",
+    "roles": ["ALL"],
+    "title": "What can you do?",
+    "keywords": ["help", "tulong", "what can you do", "features", "capabilities", "ano pwede gawin", "assist", "guide"],
+    "answer": "I'm Jappy! I can guide you through using Japs Transfort: placing and tracking orders, managing products, recording payments, checking commissions, adjusting stock, and more. Try asking me a question!",
+    "quickChip": false
+  }
+]

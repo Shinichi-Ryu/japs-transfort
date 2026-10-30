@@ -161,8 +161,8 @@ public class OrderAdminController {
             redirectAttributes.addFlashAttribute("typedMessage", body != null ? body : "");
             return "redirect:/admin/orders/" + id + "/chat";
         }
-        if (body.trim().length() > 1000) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Message cannot exceed 1000 characters.");
+        if (body.trim().length() > 3000) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Message cannot exceed 3000 characters.");
             redirectAttributes.addFlashAttribute("typedMessage", body);
             return "redirect:/admin/orders/" + id + "/chat";
         }

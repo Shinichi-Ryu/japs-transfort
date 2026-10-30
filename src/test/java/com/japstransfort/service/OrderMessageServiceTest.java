@@ -51,15 +51,15 @@ class OrderMessageServiceTest {
 
     @Test
     void testOverLengthBodyRejected() {
-        String longBody = "a".repeat(1001);
+        String longBody = "a".repeat(3001);
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
                 orderMessageService.sendAsAdmin(1, 1, longBody));
-        assertTrue(ex.getMessage().contains("1000 characters"));
+        assertTrue(ex.getMessage().contains("3000 characters"));
     }
 
     @Test
     void testMaxLengthBodyAccepted() {
-        String body1000 = "a".repeat(1000);
+        String body3000 = "a".repeat(3000);
         Order order = new Order();
         User admin = new User();
 
@@ -67,9 +67,9 @@ class OrderMessageServiceTest {
         when(userRepository.findById(99)).thenReturn(Optional.of(admin));
         when(orderMessageRepository.save(any(OrderMessage.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        OrderMessage saved = orderMessageService.sendAsAdmin(1, 99, body1000);
+        OrderMessage saved = orderMessageService.sendAsAdmin(1, 99, body3000);
         assertNotNull(saved);
-        assertEquals(1000, saved.getBody().length());
+        assertEquals(3000, saved.getBody().length());
         assertEquals("ADMIN", saved.getSenderRole());
         assertTrue(saved.isReadByAdmin());
         assertFalse(saved.isReadByReseller());

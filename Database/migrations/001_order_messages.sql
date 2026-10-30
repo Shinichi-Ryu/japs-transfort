@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS order_messages (
   order_id         INT NOT NULL REFERENCES orders(order_id),
   sender_user_id   INT NOT NULL REFERENCES users(user_id),
   sender_role      VARCHAR(20) NOT NULL,
-  body             VARCHAR(1000) NOT NULL,
+  body             VARCHAR(3000) NOT NULL,
   created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
   read_by_admin    BOOLEAN NOT NULL DEFAULT FALSE,
   read_by_reseller BOOLEAN NOT NULL DEFAULT FALSE

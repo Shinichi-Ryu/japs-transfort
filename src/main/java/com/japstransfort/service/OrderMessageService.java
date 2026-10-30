@@ -168,8 +168,8 @@ public class OrderMessageService {
         if (body == null || body.trim().isEmpty()) {
             throw new IllegalArgumentException("Message cannot be blank.");
         }
-        if (body.trim().length() > 1000) {
-            throw new IllegalArgumentException("Message cannot exceed 1000 characters.");
+        if (body.trim().length() > 3000) {
+            throw new IllegalArgumentException("Message cannot exceed 3000 characters.");
         }
     }
 }

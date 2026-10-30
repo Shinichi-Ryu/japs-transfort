@@ -1,6 +1,7 @@
 package com.japstransfort.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 /**
@@ -28,7 +29,8 @@ public class OrderMessage {
     @Column(name = "sender_role", length = 20, nullable = false)
     private String senderRole;
 
-    @Column(name = "body", length = 1000, nullable = false)
+    @Size(max = 3000, message = "Message cannot exceed 3000 characters.")
+    @Column(name = "body", length = 3000, nullable = false)
     private String body;
 
     @Column(name = "created_at", nullable = false)

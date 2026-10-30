@@ -21,6 +21,11 @@
     --r: 16px;
     --sh: 0 1px 3px rgba(11, 34, 57, 0.08);
 
+    /* Motion Tokens */
+    --t-fast: 120ms;
+    --t-base: 180ms;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+
     --c-o: #2F6FB0;
     --c-s: #0E8F8A;
     --c-m: #E08A00;
@@ -276,6 +281,20 @@
 html {
     scroll-padding-top: calc(58px + env(safe-area-inset-top, 0px) + 12px);
     overflow-x: clip;
+    -webkit-tap-highlight-color: rgba(245, 166, 35, 0.15);
+}
+
+button,
+a,
+input,
+select,
+textarea,
+.btn,
+.jt-btn,
+.pill,
+.form-control,
+.form-select {
+    touch-action: manipulation;
 }
 
 body {
@@ -297,11 +316,111 @@ body {
 a {
     color: var(--lk);
     text-decoration: none;
+    transition: color var(--t-fast) var(--ease);
 }
 
+/* Accessible focus ring: brand colour, never amber; radius follows element */
 :focus-visible {
-    outline: 3px solid var(--amber) !important;
+    outline: 2px solid var(--lk) !important;
     outline-offset: 2px !important;
+}
+
+/* Form inputs: soft shadow ring is the focus cue – suppress outline to avoid stacking */
+.form-control:focus-visible,
+.form-select:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: none !important;
+}
+
+/* Command-palette input: no outline or ring; cp-bar underline is the focus cue */
+.cp input:focus-visible,
+.cp input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+}
+
+/* Modals & Drawer contain overscroll */
+.modal,
+.modal-dialog,
+.sb,
+.jt-confirm-backdrop {
+    overscroll-behavior: contain;
+}
+
+/* Disabled states across all interactive elements */
+:disabled,
+[disabled],
+.btn:disabled,
+.jt-btn:disabled,
+.btn.disabled,
+.jt-btn.disabled,
+[aria-disabled="true"] {
+    opacity: 0.55 !important;
+    cursor: not-allowed !important;
+}
+
+:disabled:hover,
+[disabled]:hover,
+.btn:disabled:hover,
+.jt-btn:disabled:hover,
+.btn.disabled:hover,
+.jt-btn.disabled:hover,
+[aria-disabled="true"]:hover {
+    transform: none !important;
+    filter: none !important;
+    background-color: inherit;
+    border-color: inherit;
+}
+
+/* Page fade-in: main content area only */
+@keyframes jtPageFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mw > main,
+.app > main,
+.jt-login-container {
+    animation: jtPageFadeIn var(--t-base) var(--ease) both;
+}
+
+/* Cards that are links */
+a.card,
+.card.is-link,
+a.stat-card,
+a.kpi,
+.dashboard-kpi-grid a.card {
+    transition: transform var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+}
+
+a.card:hover,
+.card.is-link:hover,
+a.stat-card:hover,
+a.kpi:hover,
+.dashboard-kpi-grid a.card:hover {
+    transform: translateY(-1px);
+    border-color: var(--n2);
+}
+
+/* Pills that are links */
+a.pill,
+.pill a {
+    transition: background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+a.pill:hover,
+.pill a:hover {
+    border-color: var(--n2);
+    color: var(--tx);
 }
 
 /* ===================================================================
@@ -355,12 +474,13 @@ a {
     font-family: inherit;
     cursor: pointer;
     text-decoration: none;
-    transition: transform 120ms ease, background-color 120ms ease;
+    transition: transform var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
 
 .btn:hover {
     transform: translateY(-1px);
-    filter: brightness(.97);
+    background-color: var(--soft);
+    color: var(--tx);
 }
 
 .btn:active {
@@ -388,10 +508,17 @@ a {
 .btn.p:hover,
 .jt-btn-p:hover,
 .jt-btn-amber:hover {
-    filter: brightness(1.06);
-    background-color: var(--amber) !important;
-    border-color: var(--amber) !important;
+    background-color: color-mix(in srgb, var(--amber) 90%, #000) !important;
+    border-color: color-mix(in srgb, var(--amber) 90%, #000) !important;
     color: #2F2100 !important;
+    transform: translateY(-1px);
+}
+
+.btn-primary:active,
+.btn.p:active,
+.jt-btn-p:active,
+.jt-btn-amber:active {
+    transform: scale(.98) !important;
 }
 
 [data-theme="dark"] .btn-primary,
@@ -407,10 +534,10 @@ a {
 [data-theme="dark"] .btn.p:hover,
 [data-theme="dark"] .jt-btn-p:hover,
 [data-theme="dark"] .jt-btn-amber:hover {
-    filter: brightness(1.06);
-    background-color: var(--amber) !important;
-    border-color: var(--amber) !important;
+    background-color: color-mix(in srgb, var(--amber) 90%, #fff) !important;
+    border-color: color-mix(in srgb, var(--amber) 90%, #fff) !important;
     color: #2F2100 !important;
+    transform: translateY(-1px);
 }
 
 .btn-outline-primary {
@@ -488,6 +615,16 @@ table td {
     vertical-align: middle;
 }
 
+.table tbody tr,
+table tbody tr {
+    transition: background-color var(--t-fast) var(--ease);
+}
+
+.table tbody tr a,
+table tbody tr a {
+    transition: color var(--t-fast) var(--ease);
+}
+
 .table-hover tbody tr:hover,
 table tbody tr:hover {
     background-color: color-mix(in srgb, var(--soft) 50%, transparent);
@@ -511,7 +648,15 @@ textarea {
     padding: 0 12px;
     font-family: inherit;
     font-size: 14px;
-    transition: border-color 150ms ease-in-out;
+    transition: border-color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+}
+
+.form-control:hover,
+.form-select:hover,
+input:not([type="button"]):not([type="submit"]):not([type="reset"]):hover,
+select:hover,
+textarea:hover {
+    border-color: var(--n2);
 }
 
 .form-control:focus,
@@ -521,7 +666,7 @@ select:focus,
 textarea:focus {
     border-color: var(--lk);
     outline: 0;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--lk) 25%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--lk) 18%, transparent);
     background-color: var(--card);
     color: var(--tx);
 }
@@ -539,6 +684,26 @@ textarea:focus {
     border-color: var(--line);
 }
 
+/* Modals: quick fade and slide */
+.modal.fade {
+    transition: opacity 160ms var(--ease);
+}
+
+.modal.fade .modal-dialog {
+    transition: transform 160ms var(--ease);
+    transform: translateY(8px);
+}
+
+.modal.show .modal-dialog {
+    transform: translateY(0);
+}
+
+.modal-backdrop.fade {
+    transition: opacity 160ms var(--ease);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
 .modal-content {
     background-color: var(--card);
     color: var(--tx);
@@ -546,6 +711,7 @@ textarea:focus {
     border-radius: 14px;
 }
 
+/* Dropdowns, Tom Select, and Command Palette: opacity + small translateY, 140ms */
 .dropdown-menu {
     background-color: var(--card);
     color: var(--tx);
@@ -553,8 +719,32 @@ textarea:focus {
     border-radius: 12px;
 }
 
+.dropdown-menu.show {
+    animation: jtMenuSlide 140ms var(--ease) forwards;
+}
+
+.ts-dropdown {
+    animation: jtMenuSlide 140ms var(--ease) forwards;
+}
+
+.cp > div {
+    animation: jtMenuSlide 140ms var(--ease) forwards;
+}
+
+@keyframes jtMenuSlide {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .dropdown-item {
     color: var(--tx);
+    transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
 
 .dropdown-item:hover,
@@ -844,6 +1034,70 @@ textarea:focus {
 .kpi.hi .ic {
     background: rgba(255, 255, 255, 0.14) !important;
     color: #fff !important;
+}
+
+/* ── KPI card hover: whole card clickable, lift on hover ─────────────────── */
+.kpi:has(a) {
+    cursor: pointer;
+    transition: transform var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+
+.kpi:has(a):hover,
+.kpi:has(a):focus-within {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--lk) 50%, var(--line));
+}
+
+.kpi.hi:has(a):hover,
+.kpi.hi:has(a):focus-within {
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.kpi:has(a):active {
+    transform: scale(.99);
+}
+
+/* Arrow nudge on hover */
+.kpi:has(a):hover .bi-arrow-right,
+.kpi:has(a):focus-within .bi-arrow-right {
+    display: inline-block;
+    transform: translateX(3px);
+    transition: transform var(--t-fast) var(--ease);
+}
+
+/* Full-card click overlay via the last <a> inside .kpi */
+.kpi > a:last-of-type {
+    position: relative;
+}
+.kpi > a:last-of-type::after {
+    content: '';
+    position: absolute;
+    inset: -19px -21px;
+    z-index: 0;
+    border-radius: var(--r);
+}
+/* Focus ring stays visible on the link itself (z-index 1) */
+.kpi > a:last-of-type:focus-visible {
+    position: relative;
+    z-index: 1;
+}
+
+/* Motion effects OFF: border+color change only, no lift or arrow nudge */
+[data-motion="still"] .kpi:has(a),
+html.still .kpi:has(a) {
+    transition: border-color var(--t-fast) var(--ease) !important;
+}
+[data-motion="still"] .kpi:has(a):hover,
+[data-motion="still"] .kpi:has(a):focus-within,
+html.still .kpi:has(a):hover,
+html.still .kpi:has(a):focus-within {
+    transform: none !important;
+}
+[data-motion="still"] .kpi:has(a):hover .bi-arrow-right,
+[data-motion="still"] .kpi:has(a):focus-within .bi-arrow-right,
+html.still .kpi:has(a):hover .bi-arrow-right,
+html.still .kpi:has(a):focus-within .bi-arrow-right {
+    transform: none !important;
 }
 
 /* ===================================================================
@@ -1182,7 +1436,7 @@ textarea:focus {
     place-items: center;
     padding: 0;
     flex: none;
-    transition: background-color 150ms, color 150ms, border-color 150ms;
+    transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
 }
 
 .sbt:hover {
@@ -1193,7 +1447,7 @@ textarea:focus {
 .sbt svg {
     width: 16px;
     height: 16px;
-    transition: transform 150ms ease;
+    transition: transform var(--t-fast) var(--ease);
 }
 
 .sbt .sbt-chevron {
@@ -1229,7 +1483,7 @@ textarea:focus {
 .sb .lb2,
 .sb .sg span {
     opacity: 1;
-    transition: opacity 150ms ease;
+    transition: opacity var(--t-fast) var(--ease);
     white-space: nowrap;
     overflow: hidden;
 }
@@ -1248,7 +1502,7 @@ textarea:focus {
     min-height: 44px;
     height: 44px;
     box-sizing: border-box;
-    transition: background-color 150ms, color 150ms;
+    transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
     overflow: hidden;
     flex: none;
 }
@@ -1604,7 +1858,7 @@ textarea:focus {
     cursor: pointer;
     padding: 0;
     flex: none;
-    transition: background-color 150ms, color 150ms;
+    transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
 
 .tb-search-btn:hover,
@@ -1616,38 +1870,6 @@ textarea:focus {
 .tb-search-btn svg {
     width: 18px;
     height: 18px;
-}
-
-.tb-motion-btn {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    min-height: 40px;
-    border-radius: 12px;
-    border: 1px solid var(--line);
-    background-color: var(--card);
-    color: var(--mu);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    padding: 0;
-    flex: none;
-    transition: background-color 150ms, color 150ms, border-color 150ms;
-}
-
-.tb-motion-btn:hover {
-    background-color: var(--soft);
-    color: var(--tx);
-}
-
-.tb-motion-btn[aria-pressed="false"] {
-    opacity: 0.55;
-}
-
-.tb-motion-btn svg {
-    width: 20px;
-    height: 20px;
 }
 
 .tb-title {
@@ -1671,7 +1893,7 @@ textarea:focus {
     font-size: 13px;
     text-decoration: none;
     flex: none;
-    transition: transform 150ms ease;
+    transition: transform var(--t-fast) var(--ease);
 }
 
 .avatar:hover {
@@ -1740,7 +1962,7 @@ main {
     background: rgba(5, 15, 25, 0.5);
     z-index: 1040;
     cursor: pointer;
-    transition: opacity 150ms ease;
+    transition: opacity var(--t-fast) var(--ease);
 }
 
 @media (max-width: 991.98px) {
@@ -1773,7 +1995,7 @@ main {
         z-index: 1050 !important;
         width: min(86vw, 320px) !important;
         transform: translateX(-105%);
-        transition: transform 200ms ease !important;
+        transition: transform var(--t-base) var(--ease) !important;
         overflow-x: hidden;
     }
 
@@ -1981,16 +2203,6 @@ main {
         min-height: 40px !important;
     }
 
-    /* Right: motion button (flex-shrink: 0) */
-    .tb-motion-btn {
-        display: inline-flex !important;
-        flex-shrink: 0 !important;
-        width: 40px !important;
-        height: 40px !important;
-        min-width: 40px !important;
-        min-height: 40px !important;
-    }
-
     /* Right: profile avatar ALWAYS visible at far right (flex-shrink: 0) */
     .avatar {
         display: grid !important;
@@ -2106,16 +2318,75 @@ main {
    REDUCED MOTION & PAUSE STATES
    =================================================================== */
 @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+        transform: none !important;
+    }
+
     .sb,
     .sb .lb2,
     .sb .sg span,
     .sbt svg,
-    .mapg,
-    .pulse,
-    .mp-route {
+    .mw > main,
+    .app > main,
+    .jt-login-container,
+    .modal.fade,
+    .modal.fade .modal-dialog,
+    .dropdown-menu,
+    .ts-dropdown,
+    .cp > div {
         animation: none !important;
         transition: none !important;
+        transform: none !important;
     }
+    /* BG paused by prefers-reduced-motion unless user explicitly enabled it */
+    html:not([data-bgmotion-explicit="true"]) .mapg,
+    html:not([data-bgmotion-explicit="true"]) .pulse,
+    html:not([data-bgmotion-explicit="true"]) .mp-route {
+        animation-play-state: paused !important;
+    }
+}
+
+/* ── Motion-effects OFF: freeze UI animations (NOT the background) ───────── */
+html.still *:not(.mapg):not(.pulse):not(.mp-route),
+html.still *::before,
+html.still *::after,
+.app.still *:not(.mapg):not(.pulse):not(.mp-route),
+.app.still *::before,
+.app.still *::after,
+[data-motion="still"] *:not(.mapg):not(.pulse):not(.mp-route),
+[data-motion="still"] *::before,
+[data-motion="still"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+}
+
+[data-motion="still"] .mw > main,
+[data-motion="still"] .app > main,
+[data-motion="still"] .jt-login-container,
+[data-motion="still"] .modal.fade,
+[data-motion="still"] .modal.fade .modal-dialog,
+[data-motion="still"] .dropdown-menu,
+[data-motion="still"] .ts-dropdown,
+[data-motion="still"] .cp > div,
+html.still .mw > main,
+html.still .app > main,
+html.still .jt-login-container,
+html.still .modal.fade,
+html.still .modal.fade .modal-dialog,
+html.still .dropdown-menu,
+html.still .ts-dropdown,
+html.still .cp > div {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
 }
 
 html.still .sb,
@@ -2125,25 +2396,21 @@ html.still .sbt svg,
 .app.still .sb,
 .app.still .sb .lb2,
 .app.still .sb .sg span,
-.app.still .sbt svg,
-html.still .mapg,
-html.still .pulse,
-html.still .mp-route,
-.app.still .mapg,
-.app.still .pulse,
-.app.still .mp-route,
-[data-motion="still"] .mapg,
-[data-motion="still"] .pulse,
-[data-motion="still"] .mp-route,
+.app.still .sbt svg {
+    animation-play-state: paused !important;
+}
+
+/* ── Background animation pause rules ───────────────────────────────────── */
+/* OFF toggle, resizing, tab hidden */
+[data-bgmotion="off"] .mapg,
+[data-bgmotion="off"] .pulse,
+[data-bgmotion="off"] .mp-route,
 html.resizing .mapg,
 html.resizing .pulse,
 html.resizing .mp-route,
-html.jt-paused .mapg,
-html.jt-paused .pulse,
-html.jt-paused .mp-route,
-.jt-paused .mapg,
-.jt-paused .pulse,
-.jt-paused .mp-route {
+html.tab-hidden .mapg,
+html.tab-hidden .pulse,
+html.tab-hidden .mp-route {
     animation-play-state: paused !important;
 }
 
@@ -2172,6 +2439,11 @@ html.jt-paused .mp-route,
     align-items: center;
     border-bottom: 1px solid var(--line);
     background-color: var(--card);
+    transition: border-color 140ms var(--ease);
+}
+
+.cp-bar:focus-within {
+    border-bottom-color: var(--lk);
 }
 
 .cp input {
@@ -2203,7 +2475,7 @@ html.jt-paused .mp-route,
     margin-right: 6px;
     flex-shrink: 0;
     border-radius: 8px;
-    transition: background-color 150ms, color 150ms;
+    transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
 
 .cp-close-btn:hover {
@@ -2225,7 +2497,7 @@ html.jt-paused .mp-route,
     color: var(--tx);
     font-weight: 500;
     font-size: 14px;
-    transition: background-color 100ms, color 100ms;
+    transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
 
 .cp a:hover,
@@ -2391,6 +2663,8 @@ html.jt-paused .mp-route,
     *,
     *::before,
     *::after {
+        animation: none !important;
+        transition: none !important;
         box-shadow: none !important;
         text-shadow: none !important;
         filter: none !important;

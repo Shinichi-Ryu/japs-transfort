@@ -31,12 +31,19 @@
                 var bg = (s && s.b) || localStorage.getItem('jt.bg') || 'map';
                 var motion = (s && s.m) || localStorage.getItem('jt.motion') || 'animated';
                 var sidebar = (s && s.s) || localStorage.getItem('jt.sidebar') || 'full';
+                var explicitBm = (s && typeof s.bm !== 'undefined') || (localStorage.getItem('jt.bgmotion') !== null);
+                var rawBm = (s && s.bm) || localStorage.getItem('jt.bgmotion');
+                var bgmotion = (explicitBm && rawBm === 'off') ? 'off' : 'on';
                 var doc = document.documentElement;
                 doc.setAttribute('data-theme', theme);
                 doc.setAttribute('data-bs-theme', theme);
                 doc.setAttribute('data-pal', pal);
                 doc.setAttribute('data-bg', bg);
                 doc.setAttribute('data-motion', motion);
+                doc.setAttribute('data-bgmotion', bgmotion);
+                if (explicitBm && rawBm === 'on') {
+                    doc.setAttribute('data-bgmotion-explicit', 'true');
+                }
                 doc.setAttribute('data-sidebar', sidebar);
                 if (sidebar === 'mini') doc.classList.add('mini');
                 if (motion === 'still') doc.classList.add('still');
@@ -187,9 +194,6 @@
         <button type="button" class="tb-search-btn" onclick="window.jtOpenCommandPalette()" title="Jump to a page (Ctrl+K)" aria-label="Search pages">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" fill="none"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
-        <button type="button" class="tb-motion-btn" id="jtMotionToggle" onclick="window.jtToggleMotion()" title="Toggle motion animation" aria-label="Toggle motion animation">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M10 8l6 4-6 4V8z" fill="currentColor" stroke="none"/></svg>
-        </button>
         <a class="avatar" th:href="@{/account}" title="My Account" aria-label="My Account"
            th:text="${currentUser != null and currentUser.fullName != null and #strings.length(currentUser.fullName) >= 2 ? #strings.substring(currentUser.fullName, 0, 2).toUpperCase() : (roleName == 'reseller' ? 'RP' : 'AD')}">
             AD
@@ -287,6 +291,7 @@
                         if (s.p) localStorage.setItem('jt.pal', s.p);
                         if (s.b) localStorage.setItem('jt.bg', s.b);
                         if (s.m) localStorage.setItem('jt.motion', s.m);
+                        if (s.bm) localStorage.setItem('jt.bgmotion', s.bm);
                         if (s.s) localStorage.setItem('jt.sidebar', s.s);
                     } catch(e) {}
                 }
@@ -304,6 +309,19 @@
                         var s = getSettings();
                         s.p = pal;
                         saveSettings(s);
+                    },
+                    setBgMotion: function(bgmotion, isExplicit) {
+                        var mode = (bgmotion === 'off') ? 'off' : 'on';
+                        var doc = document.documentElement;
+                        doc.setAttribute('data-bgmotion', mode);
+                        var s = getSettings();
+                        s.bm = mode;
+                        saveSettings(s);
+                        if (mode === 'on' && isExplicit !== false) {
+                            doc.setAttribute('data-bgmotion-explicit', 'true');
+                        } else {
+                            doc.removeAttribute('data-bgmotion-explicit');
+                        }
                     },
                     setBg: function(bg) {
                         document.documentElement.setAttribute('data-bg', bg);
@@ -349,13 +367,6 @@
                             if (app) app.classList.remove('mini');
                         }
                     }
-                };
-
-                window.jtToggleMotion = function() {
-                    var s = getSettings();
-                    var cur = s.m || localStorage.getItem('jt.motion') || 'animated';
-                    var next = (cur === 'animated') ? 'still' : 'animated';
-                    window.jt.setMotion(next);
                 };
 
                 window.addEventListener('storage', function(e) {
@@ -675,17 +686,11 @@
                 });
 
                 // Pause on tab hidden or blur, resume on focus
-                function handlePauseResume() {
-                    var isPaused = document.hidden || (document.hasFocus && !document.hasFocus());
-                    document.documentElement.classList.toggle('jt-paused', isPaused);
+                function handleTabVisibility() {
+                    document.documentElement.classList.toggle('tab-hidden', document.hidden);
+
                 }
-                document.addEventListener('visibilitychange', handlePauseResume);
-                window.addEventListener('blur', function() {
-                    document.documentElement.classList.add('jt-paused');
-                });
-                window.addEventListener('focus', function() {
-                    document.documentElement.classList.remove('jt-paused');
-                });
+                document.addEventListener('visibilitychange', handleTabVisibility);
 
                 // ONE matchMedia listener to close drawer and re-apply saved docked state (no resize listener)
                 var mql = window.matchMedia('(min-width: 992px)');

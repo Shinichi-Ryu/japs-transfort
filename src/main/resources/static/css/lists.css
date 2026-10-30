@@ -91,7 +91,7 @@
     color: var(--tx);
     font-family: inherit;
     font-size: 13.5px;
-    transition: border-color 150ms ease-in-out;
+    transition: border-color var(--t-fast) var(--ease);
     box-sizing: border-box;
     width: 100%;
 }
@@ -396,6 +396,14 @@ table.jt-table tbody td,
     background-color: transparent;
 }
 
+table.jt-table tbody tr,
+.jt-table tbody tr {
+    transition: background-color var(--t-fast) var(--ease);
+}
+table.jt-table tbody tr a,
+.jt-table tbody tr a {
+    transition: color var(--t-fast) var(--ease);
+}
 table.jt-table tbody tr:hover,
 .jt-table tbody tr:hover {
     background-color: color-mix(in srgb, var(--soft) 60%, transparent);
@@ -514,7 +522,7 @@ td .jt-thumb {
     font-family: inherit;
     cursor: pointer;
     text-decoration: none;
-    transition: transform 120ms ease, background-color 120ms ease;
+    transition: transform var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
     line-height: 1;
 }
 
@@ -588,7 +596,7 @@ td .jt-thumb {
     border-color: transparent;
     color: var(--mu);
     transform: none !important;
-    transition: background-color 100ms ease, color 100ms ease;
+    transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
 
 .jt-btn-ghost:hover {
@@ -733,7 +741,7 @@ td .jt-thumb {
     font-weight: 600;
     font-size: 12.5px;
     text-decoration: none;
-    transition: background-color 120ms, color 120ms, border-color 120ms;
+    transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
 }
 
 .jt-pager-links a:hover,
@@ -801,7 +809,7 @@ td .jt-thumb {
     cursor: pointer;
     padding: 0 4px;
     opacity: 0.6;
-    transition: opacity 150ms;
+    transition: opacity var(--t-fast) var(--ease);
 }
 
 .jt-alert-close:hover {
@@ -1161,7 +1169,7 @@ td .jt-thumb {
     color: var(--tx);
     font-family: inherit;
     font-size: 13.5px;
-    transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out;
+    transition: border-color var(--t-fast) var(--ease);
     box-sizing: border-box;
     width: 100%;
 }
@@ -1264,7 +1272,7 @@ textarea.form-control {
     cursor: pointer;
     white-space: nowrap;
     background: transparent;
-    transition: color 140ms ease, border-color 140ms ease;
+    transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
 }
 
 .jt-tab:hover {

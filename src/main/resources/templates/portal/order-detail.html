@@ -425,6 +425,16 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Chat Link -->
+                <div class="card jt-card mb-4">
+                    <div style="padding: 20px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <a th:href="@{'/portal/orders/' + ${order.orderId} + '/chat'}" class="jt-btn jt-btn-p jt-btn-s">
+                            <i class="bi bi-chat-dots me-2"></i> Open chat
+                        </a>
+                        <span class="small" style="color: var(--mu);">Messages between you and admin for this order.</span>
+                    </div>
+                </div>
             </main>
         </div>
 
@@ -550,6 +560,16 @@
             cancelForm.appendChild(hidden);
             cancelForm.submit();
         });
+
+        (function() {
+            var ta = document.getElementById('portalMsgBody');
+            var counter = document.getElementById('portalMsgCharCount');
+            if (ta && counter) {
+                var update = function() { counter.textContent = ta.value.length; };
+                ta.addEventListener('input', update);
+                update();
+            }
+        })();
     })();
     </script>
 </body>

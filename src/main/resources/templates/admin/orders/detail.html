@@ -625,6 +625,19 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Chat Link -->
+                <div class="jt-card mb-4">
+                    <div style="padding: 20px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <a th:href="@{'/admin/orders/' + ${order.orderId} + '/chat'}" class="jt-btn jt-btn-p jt-btn-s">
+                            <i class="bi bi-chat-dots me-2"></i> Open chat
+                            <span th:if="${unreadCount != null and unreadCount > 0}"
+                                  class="order-unread-pill ms-1"
+                                  th:text="${unreadCount}">0</span>
+                        </a>
+                        <span class="small" style="color: var(--mu);">Messages between you and the reseller for this order.</span>
+                    </div>
+                </div>
             </main>
         </div>
 
@@ -676,6 +689,16 @@
         });
         return false;
     }
+
+    (function() {
+        var ta = document.getElementById('adminMsgBody');
+        var counter = document.getElementById('adminMsgCharCount');
+        if (ta && counter) {
+            var update = function() { counter.textContent = ta.value.length; };
+            ta.addEventListener('input', update);
+            update();
+        }
+    })();
     </script>
 </body>
 </html>

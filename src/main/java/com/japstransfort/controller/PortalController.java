@@ -12,6 +12,7 @@ import com.japstransfort.repository.CategoryRepository;
 import com.japstransfort.repository.ProductRepository;
 import com.japstransfort.repository.ResellerRepository;
 import com.japstransfort.service.CommissionService;
+import com.japstransfort.service.OrderMessageService;
 import com.japstransfort.service.OrderService;
 import com.japstransfort.service.ProductService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -49,19 +50,22 @@ public class PortalController {
     private final ProductService productService;
     private final OrderService orderService;
     private final CommissionService commissionService;
+    private final OrderMessageService orderMessageService;
 
     public PortalController(ResellerRepository resellerRepository,
                             CategoryRepository categoryRepository,
                             ProductRepository productRepository,
                             ProductService productService,
                             OrderService orderService,
-                            CommissionService commissionService) {
+                            CommissionService commissionService,
+                            OrderMessageService orderMessageService) {
         this.resellerRepository = resellerRepository;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productService = productService;
         this.orderService = orderService;
         this.commissionService = commissionService;
+        this.orderMessageService = orderMessageService;
     }
 
     // ─── Cart helper ──────────────────────────────────────────────────────────
@@ -416,6 +420,11 @@ public class PortalController {
         model.addAttribute("orders", orders);
         model.addAttribute("reseller", reseller);
 
+        Map<Integer, Long> unreadByOrder = reseller != null
+                ? orderMessageService.getUnreadCountsMapForReseller(reseller.getResellerId())
+                : Map.of();
+        model.addAttribute("unreadByOrder", unreadByOrder);
+
         return "portal/orders";
     }
 
@@ -445,7 +454,83 @@ public class PortalController {
         if (userDetails != null) model.addAttribute("currentUser", userDetails.getUser());
         model.addAttribute("order", opt.get());
         model.addAttribute("reseller", reseller);
+
         return "portal/order-detail";
+    }
+
+    /**
+     * Displays the dedicated chat page for an order (reseller side).
+     */
+    @GetMapping("/orders/{id}/chat")
+    public String orderChat(
+            @PathVariable("id") Integer orderId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletResponse response,
+            Model model) {
+        Reseller reseller = loadReseller(userDetails);
+        if (reseller == null) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return "portal/order-not-found";
+        }
+        java.util.Optional<OrderDetailDto> opt =
+                orderService.getOrderDetailForReseller(orderId, reseller.getResellerId());
+        if (opt.isEmpty()) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return "portal/order-not-found";
+        }
+        if (userDetails != null) model.addAttribute("currentUser", userDetails.getUser());
+        model.addAttribute("order", opt.get());
+        model.addAttribute("reseller", reseller);
+        orderMessageService.markReadFor(orderId, "RESELLER");
+        model.addAttribute("orderMessages", orderMessageService.listForOrder(orderId));
+        return "portal/order-chat";
+    }
+
+    /**
+     * Posts a message to an order as the owning Reseller.
+     */
+    @PostMapping("/orders/{id}/messages")
+    public String sendOrderMessage(
+            @PathVariable("id") Integer orderId,
+            @RequestParam(value = "body", required = false) String body,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes) {
+
+        Reseller reseller = loadReseller(userDetails);
+        if (reseller == null) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return "portal/order-not-found";
+        }
+
+        // Verify the order belongs to the logged-in reseller
+        java.util.Optional<OrderDetailDto> opt =
+                orderService.getOrderDetailForReseller(orderId, reseller.getResellerId());
+        if (opt.isEmpty()) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            return "portal/order-not-found";
+        }
+
+        if (body == null || body.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Message cannot be blank.");
+            redirectAttributes.addFlashAttribute("typedMessage", body != null ? body : "");
+            return "redirect:/portal/orders/" + orderId + "/chat";
+        }
+        if (body.trim().length() > 1000) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Message cannot exceed 1000 characters.");
+            redirectAttributes.addFlashAttribute("typedMessage", body);
+            return "redirect:/portal/orders/" + orderId + "/chat";
+        }
+
+        try {
+            orderMessageService.sendAsReseller(orderId, reseller.getResellerId(), userDetails.getUserId(), body);
+            redirectAttributes.addFlashAttribute("successMessage", "Message sent successfully.");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            redirectAttributes.addFlashAttribute("typedMessage", body);
+        }
+
+        return "redirect:/portal/orders/" + orderId + "/chat";
     }
 
     // ─── Order Invoice ────────────────────────────────────────────────────────

@@ -20,6 +20,7 @@
     <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
     <link rel="stylesheet" th:href="@{/css/confirm-modal.css}" href="/css/confirm-modal.css">
     <link rel="stylesheet" th:href="@{/css/help-assistant.css}" href="/css/help-assistant.css">
+    <link rel="stylesheet" th:href="@{/css/messages.css}" href="/css/messages.css">
     <!-- Inline appearance script before first paint to prevent flash -->
     <script>
         (function() {
@@ -87,6 +88,7 @@
                 <a th:href="@{/admin/orders}" th:classappend="${activeItem == 'orders' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'orders' ? 'page' : null}" title="Orders" aria-label="Orders">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
                     <span class="lb2">Orders</span>
+                    <span class="sidebar-unread-badge" th:if="${unreadMessageCount != null and unreadMessageCount > 0}" th:text="${unreadMessageCount > 99 ? '99+' : unreadMessageCount}">0</span>
                 </a>
                 <a th:href="@{/admin/resellers}" th:classappend="${activeItem == 'resellers' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'resellers' ? 'page' : null}" title="Resellers" aria-label="Resellers">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M17 4.5a3.5 3.5 0 010 7M21.5 20c0-2.5-1.5-4.5-4-5.5"/></svg>
@@ -147,6 +149,7 @@
                 <a th:href="@{/portal/orders}" th:classappend="${activeItem == 'orders' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'orders' ? 'page' : null}" title="My orders" aria-label="My orders">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
                     <span class="lb2">My orders</span>
+                    <span class="sidebar-unread-badge" th:if="${unreadMessageCount != null and unreadMessageCount > 0}" th:text="${unreadMessageCount > 99 ? '99+' : unreadMessageCount}">0</span>
                 </a>
                 <a th:href="@{/portal/commissions}" th:classappend="${activeItem == 'commissions' ? 'on' : ''}" th:attr="aria-current=${activeItem == 'commissions' ? 'page' : null}" title="Commissions" aria-label="Commissions">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2 0 00-5 0c0 2.5 5 1.5 5 4a2.5 2 0 01-5 0M12 6.5v11"/></svg>

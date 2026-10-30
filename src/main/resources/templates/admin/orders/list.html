@@ -23,6 +23,7 @@
             <header th:replace="~{fragments/layout :: topbar('Orders', 'admin')}"></header>
 
             <main>
+                <link rel="stylesheet" th:href="@{/css/messages.css}" href="/css/messages.css">
                 <!-- Page Header -->
                 <div class="jt-ph">
                     <div>
@@ -141,6 +142,13 @@
                                            th:text="${ord.orderNo}">
                                             ORD-20261013-0001
                                         </a>
+                                        <a th:if="${(unreadByOrder?.get(ord.orderId) ?: 0) > 0}"
+                                           th:href="@{'/admin/orders/' + ${ord.orderId} + '/chat'}"
+                                           class="order-unread-pill"
+                                           th:title="${unreadByOrder[ord.orderId]} + ' unread messages'">
+                                            <span th:text="${unreadByOrder[ord.orderId]} + ' new'">1 new</span>
+                                            <span class="visually-hidden">unread messages</span>
+                                        </a>
                                         <div class="d-lg-none text-muted small jt-compact-sub" th:text="${ord.createdAt != null ? #temporals.format(ord.createdAt, 'yyyy-MM-dd HH:mm') : ''}">2026-10-13 10:00</div>
                                     </td>
                                     <td data-col="reseller" data-label="Reseller">
@@ -178,11 +186,18 @@
                                         </span>
                                     </td>
                                     <td data-col="actions" data-label="Actions" class="n">
-                                        <a th:href="@{'/admin/orders/' + ${ord.orderId}}"
-                                           class="jt-btn jt-btn-s"
-                                           title="View Order Details">
-                                           <i class="bi bi-eye me-1"></i> View
-                                        </a>
+                                        <div class="d-flex gap-2 justify-content-end flex-wrap">
+                                            <a th:href="@{'/admin/orders/' + ${ord.orderId}}"
+                                               class="jt-btn jt-btn-s"
+                                               title="View Order Details">
+                                                <i class="bi bi-eye me-1"></i> View
+                                            </a>
+                                            <a th:href="@{'/admin/orders/' + ${ord.orderId} + '/chat'}"
+                                               class="jt-btn jt-btn-s jt-btn-ghost"
+                                               title="Open chat for this order">
+                                                <i class="bi bi-chat-dots me-1"></i> Chat
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>

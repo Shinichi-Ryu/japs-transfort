@@ -197,12 +197,25 @@ CREATE TABLE audit_logs (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- ===== Order messages =====
+CREATE TABLE order_messages (
+  message_id       SERIAL PRIMARY KEY,
+  order_id         INT NOT NULL REFERENCES orders(order_id),
+  sender_user_id   INT NOT NULL REFERENCES users(user_id),
+  sender_role      VARCHAR(20) NOT NULL,
+  body             VARCHAR(1000) NOT NULL,
+  created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+  read_by_admin    BOOLEAN NOT NULL DEFAULT FALSE,
+  read_by_reseller BOOLEAN NOT NULL DEFAULT FALSE
+);
+
 -- ===== Indexes =====
 CREATE INDEX idx_orders_reseller ON orders(reseller_id);
 CREATE INDEX idx_orders_status   ON orders(status);
 CREATE INDEX idx_items_order     ON order_items(order_id);
 CREATE INDEX idx_stock_product   ON stock_movements(product_id);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_commissions_order ON commissions(order_id);
+CREATE INDEX idx_order_messages_order_created ON order_messages(order_id, created_at);
 
 -- ===== Seed data =====
 INSERT INTO reseller_tiers (tier_name, discount_pct, commission_pct, min_monthly_purchase) VALUES

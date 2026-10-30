@@ -143,6 +143,16 @@
                 <div class="v" th:text="${totalCategories}">0</div>
                 <a th:href="@{/admin/categories}">Manage <i class="bi bi-arrow-right"></i></a>
             </div>
+
+            <!-- Unread Messages (Admin Only) -->
+            <div class="card kpi h-100" sec:authorize="hasRole('ADMIN')">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="k">Unread messages</div>
+                    <span class="ic c-m"><i class="bi bi-chat-dots"></i></span>
+                </div>
+                <div class="v" th:text="${unreadMessageCount != null ? unreadMessageCount : 0}">0</div>
+                <a th:href="@{/admin/orders}">View messages <i class="bi bi-arrow-right"></i></a>
+            </div>
         </div>
 
         <!-- Quick Info & Defense Architecture Card -->

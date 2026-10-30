@@ -9,6 +9,7 @@ import com.japstransfort.entity.Shipment;
 import com.japstransfort.entity.User;
 import com.japstransfort.service.CommissionService;
 import com.japstransfort.service.OrderAdminService;
+import com.japstransfort.service.OrderMessageService;
 import com.japstransfort.service.OrderService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
@@ -36,13 +37,16 @@ public class OrderAdminController {
     private final OrderAdminService orderAdminService;
     private final OrderService orderService;
     private final CommissionService commissionService;
+    private final OrderMessageService orderMessageService;
 
     public OrderAdminController(OrderAdminService orderAdminService,
                                 OrderService orderService,
-                                CommissionService commissionService) {
+                                CommissionService commissionService,
+                                OrderMessageService orderMessageService) {
         this.orderAdminService = orderAdminService;
         this.orderService = orderService;
         this.commissionService = commissionService;
+        this.orderMessageService = orderMessageService;
     }
 
     /**
@@ -73,6 +77,7 @@ public class OrderAdminController {
         model.addAttribute("selectedPaymentMethod", paymentMethod != null ? paymentMethod : "");
         model.addAttribute("allStatuses", OrderStatus.values());
         model.addAttribute("allPaymentMethods", PaymentMethod.values());
+        model.addAttribute("unreadByOrder", orderMessageService.getUnreadCountsMapForAdmin());
 
         return "admin/orders/list";
     }
@@ -114,6 +119,63 @@ public class OrderAdminController {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/admin/orders";
         }
+    }
+
+    /**
+     * Displays the dedicated chat page for an order (admin side).
+     */
+    @GetMapping("/{id}/chat")
+    public String orderChat(
+            @PathVariable("id") Integer id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Order order = orderAdminService.getOrderDetail(id);
+            if (userDetails != null) {
+                model.addAttribute("currentUser", userDetails.getUser());
+                model.addAttribute("userRole", userDetails.getRole().name());
+            }
+            model.addAttribute("order", order);
+            orderMessageService.markReadFor(id, "ADMIN");
+            model.addAttribute("orderMessages", orderMessageService.listForOrder(id));
+            return "admin/orders/chat";
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/admin/orders";
+        }
+    }
+
+    /**
+     * Posts a message to an order as Admin.
+     */
+    @PostMapping("/{id}/messages")
+    public String sendOrderMessage(
+            @PathVariable("id") Integer id,
+            @RequestParam(value = "body", required = false) String body,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+
+        if (body == null || body.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Message cannot be blank.");
+            redirectAttributes.addFlashAttribute("typedMessage", body != null ? body : "");
+            return "redirect:/admin/orders/" + id + "/chat";
+        }
+        if (body.trim().length() > 1000) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Message cannot exceed 1000 characters.");
+            redirectAttributes.addFlashAttribute("typedMessage", body);
+            return "redirect:/admin/orders/" + id + "/chat";
+        }
+
+        try {
+            orderMessageService.sendAsAdmin(id, userDetails.getUserId(), body);
+            redirectAttributes.addFlashAttribute("successMessage", "Message sent successfully.");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            redirectAttributes.addFlashAttribute("typedMessage", body);
+        }
+
+        return "redirect:/admin/orders/" + id + "/chat";
     }
 
     /**

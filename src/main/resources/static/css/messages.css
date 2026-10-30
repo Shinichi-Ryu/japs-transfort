@@ -1,0 +1,292 @@
+/* ===================================================================
+   Per-Order Messages Component Styling (messages.css)
+   Solid cards, theme tokens, accessible, light/dark/palettes/mobile.
+   =================================================================== */
+
+.order-messages-card {
+    background-color: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    box-shadow: var(--sh);
+    color: var(--tx);
+    margin-bottom: 24px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.order-messages-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 24px;
+    max-height: 480px;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.order-msg-empty {
+    text-align: center;
+    color: var(--mu);
+    padding: 28px 16px;
+    font-size: 14px;
+}
+
+.order-msg-row {
+    display: flex;
+    width: 100%;
+}
+
+.order-msg-row.own {
+    justify-content: flex-end;
+}
+
+.order-msg-row.other {
+    justify-content: flex-start;
+}
+
+.order-msg-bubble {
+    max-width: 80%;
+    border-radius: 14px;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.order-msg-row.own .order-msg-bubble {
+    background-color: var(--tb);
+    border: 1px solid color-mix(in srgb, var(--tt) 28%, transparent);
+    color: var(--tx);
+    border-bottom-right-radius: 4px;
+}
+
+.order-msg-row.other .order-msg-bubble {
+    background-color: var(--xb);
+    border: 1px solid var(--line);
+    color: var(--tx);
+    border-bottom-left-radius: 4px;
+}
+
+.order-msg-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.order-msg-sender {
+    font-weight: 600;
+}
+
+.order-msg-row.own .order-msg-sender {
+    color: var(--tt);
+}
+
+.order-msg-row.other .order-msg-sender {
+    color: var(--mu);
+}
+
+.order-msg-time {
+    color: var(--mu);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.order-msg-body {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.order-messages-composer {
+    padding: 16px 24px 20px 24px;
+    border-top: 1px solid var(--line);
+    box-sizing: border-box;
+}
+
+.order-msg-textarea {
+    width: 100%;
+    min-height: 64px;
+    font-size: 16px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.order-messages-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.order-msg-counter {
+    font-size: 12px;
+    color: var(--mu);
+}
+
+@media (max-width: 576px) {
+    .order-messages-thread {
+        padding: 16px;
+        gap: 10px;
+    }
+    .order-messages-composer {
+        padding: 14px 16px 16px 16px;
+    }
+    .order-msg-bubble {
+        max-width: 90%;
+    }
+}
+
+/* ===================================================================
+   Unread Message Indicators
+   =================================================================== */
+
+.order-unread-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    margin-left: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    border-radius: 999px;
+    background-color: var(--tb);
+    color: var(--tt);
+    border: 1px solid color-mix(in srgb, var(--tt) 30%, transparent);
+    text-decoration: none;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.order-unread-pill:hover,
+.order-unread-pill:focus {
+    background-color: var(--tt);
+    color: var(--card);
+    text-decoration: none;
+}
+
+/* ===================================================================
+   Sidebar Unread Messages Badge (solid colors, theme variables, no blur, no animation)
+   =================================================================== */
+
+.sidebar-unread-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: 999px;
+    background-color: var(--c-r, #D64533);
+    color: #ffffff;
+    box-sizing: border-box;
+    white-space: nowrap;
+    text-align: center;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+/* Active navigation item state */
+.sb a.on .sidebar-unread-badge,
+.sb a[aria-current="page"] .sidebar-unread-badge {
+    background-color: var(--sb, #0A3A40);
+    color: #ffffff;
+}
+
+/* Collapsed Mini Rail Sidebar */
+html.mini .sb-nav a,
+.app.mini .sb-nav a,
+[data-sidebar="mini"] .sb-nav a {
+    position: relative;
+}
+
+html.mini .sb-nav a .sidebar-unread-badge,
+.app.mini .sb-nav a .sidebar-unread-badge,
+[data-sidebar="mini"] .sb-nav a .sidebar-unread-badge {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    margin-left: 0;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 16px;
+    border-radius: 999px;
+    z-index: 2;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 991.98px) {
+    .sidebar-unread-badge {
+        font-size: 11px;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+    }
+}
+
+
+/* ===================================================================
+   Chat Page Layout (order-chat-card, order-chat-thread, composer)
+   Solid cards, no blur/backdrop-filter, no animation.
+   =================================================================== */
+
+.order-chat-header-card {
+    background-color: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    box-shadow: var(--sh);
+    color: var(--tx);
+}
+
+.order-chat-card {
+    background-color: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    box-shadow: var(--sh);
+    color: var(--tx);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.order-chat-thread {
+    flex: 1 1 auto;
+    max-height: 520px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+.order-chat-composer {
+    flex: 0 0 auto;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--card);
+    border-top: 1px solid var(--line);
+    z-index: 2;
+}
+
+/* Light / dark mode already handled by var(--card), var(--line), var(--tx) tokens */
+
+/* 4-palette support — all tokens are set globally, no overrides needed */
+
+/* Mobile: keep composer visible, thread scrolls inside container */
+@media (max-width: 576px) {
+    .order-chat-thread {
+        max-height: 55vh;
+    }
+    .order-chat-composer {
+        padding: 12px 16px 14px 16px;
+    }
+}

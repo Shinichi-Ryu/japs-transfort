@@ -23,7 +23,7 @@
     "id": "admin-record-payment",
     "roles": ["ADMIN", "STAFF"],
     "title": "How do I record a payment?",
-    "keywords": ["record payment", "bayad", "magbayad", "enter payment", "cash payment", "gcash", "bank transfer", "payment reference", "order payment", "kolekta", "magtala ng bayad"],
+    "keywords": ["record payment", "bayad", "magbayad", "enter payment", "cash payment", "gcash", "bank transfer", "payment reference", "order payment", "kolekta", "magtala ng bayad", "magrehistro ng bayad", "i-record ang payment", "payment entry", "bayad ng order"],
     "answer": "1. Open **Orders** and click the order number to open order details.\n2. Scroll down to the **Record a Payment** card.\n3. Select payment method (Cash, GCash, Bank transfer, or Check).\n4. Enter the amount paid, payment date, and reference number.\n5. Click **Record Payment**.",
     "link": "/admin/orders",
     "linkLabel": "View Orders",
@@ -161,6 +161,36 @@
     "title": "What can you do?",
     "keywords": ["help", "tulong", "what can you do", "features", "capabilities", "ano pwede gawin", "assist", "guide"],
     "answer": "I'm Jappy! I can guide you through using Japs Transfort: placing and tracking orders, managing products, recording payments, checking commissions, adjusting stock, and more. Try asking me a question!",
+    "quickChip": false
+  },
+  {
+    "id": "admin-view-unpaid-balances",
+    "roles": ["ADMIN", "STAFF"],
+    "title": "How do I see unpaid orders and balances?",
+    "keywords": ["unpaid balances", "receivables", "unpaid orders", "view receivables", "outstanding balance", "hindi pa nabayaran", "balanse", "utang ng reseller", "accounts receivable", "bayarin", "natitirang utang", "overdue", "unpaid", "collectibles"],
+    "answer": "1. On the **Dashboard**, look for the **Unpaid balances** card showing the total outstanding amount.\n2. Click **View receivables** to see a full list of resellers with outstanding balances.\n3. For a detailed report with aging buckets, go to **Reports** in the sidebar and click **Receivables Report**.",
+    "link": "/admin/resellers",
+    "linkLabel": "View Receivables",
+    "quickChip": false
+  },
+  {
+    "id": "admin-view-pending-commissions",
+    "roles": ["ADMIN"],
+    "title": "How do I see pending commissions?",
+    "keywords": ["pending commissions", "commission review", "komisyon na pending", "unpaid commissions", "review commissions", "commission payout", "pending komisyon", "i-review ang komisyon", "commission status", "i-approve komisyon", "pending commission", "komisyon"],
+    "answer": "1. On the **Dashboard**, check the **Pending commissions** card for the total pending amount.\n2. Click **Review** to go to the Commissions list filtered to pending status.\n3. Alternatively, click **Commissions** in the sidebar and filter by **Pending** status.",
+    "link": "/admin/commissions?status=pending",
+    "linkLabel": "Review Pending Commissions",
+    "quickChip": false
+  },
+  {
+    "id": "admin-view-low-stock",
+    "roles": ["ADMIN", "STAFF", "WAREHOUSE"],
+    "title": "How do I see low stock items?",
+    "keywords": ["low stock", "low stock items", "restock", "restock now", "mababang stock", "kulang na stock", "inventory alert", "stock warning", "out of stock", "stock level", "kulang", "naubos", "palamihin stock", "dagdag stock", "halos wala na stock"],
+    "answer": "1. On the **Dashboard**, check the **Low stock items** card to see how many products need restocking.\n2. Click **Restock now** to go directly to the Inventory page.\n3. In the **Inventory** list, products with low stock are marked with a **Low stock** warning badge.\n4. Use **Receive Stock** or **Adjust Stock** to update quantities.",
+    "link": "/admin/inventory",
+    "linkLabel": "Inventory Management",
     "quickChip": false
   }
 ]

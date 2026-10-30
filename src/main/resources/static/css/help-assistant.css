@@ -549,6 +549,22 @@
     cursor: not-allowed;
 }
 
+.jt-help-footnote {
+    font-size: 11px;
+    color: var(--mu, #888);
+    text-align: center;
+    margin-top: 6px;
+    line-height: 1.3;
+    user-select: none;
+}
+
+.jt-help-links-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
 /* ===================================================================
    Mobile Responsiveness (Phones below 576px)
    =================================================================== */

@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <body>
-    <div th:fragment="helpAssistant" id="jt-help-assistant" class="jt-help-container">
+    <div th:fragment="helpAssistant"
+         id="jt-help-assistant"
+         class="jt-help-container"
+         th:data-csrf-token="${_csrf != null ? _csrf.token : ''}"
+         th:data-csrf-header="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}">
         <!-- Shared Mascot Gradients (guaranteed available) -->
         <svg width="0" height="0" style="position:absolute" aria-hidden="true">
             <defs>
@@ -111,7 +115,7 @@
                            placeholder="Ask Jappy a question..."
                            aria-label="Ask Jappy a question"
                            autocomplete="off"
-                           maxlength="200">
+                           maxlength="500">
                     <button type="submit"
                             id="jt-help-send-btn"
                             class="jt-help-send-btn"
@@ -122,6 +126,7 @@
                         </svg>
                     </button>
                 </div>
+                <div class="jt-help-footnote">Jappy is an AI assistant and can make mistakes.</div>
             </form>
         </div>
     </div>

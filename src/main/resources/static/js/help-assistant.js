@@ -1,7 +1,7 @@
 /**
  * Jappy Floating Help Assistant
  * Reusable client-side logic for the admin and reseller portals.
- * Strictly uses role-aware backend help search (GET /help/search?q=...) without touching business database records.
+ * Strictly uses role-aware backend help search and Gemini AI without touching business database records.
  */
 (function (global) {
     'use strict';
@@ -80,6 +80,31 @@
         return safe;
     }
 
+    function getCsrfInfo() {
+        var token = null;
+        var header = 'X-CSRF-TOKEN';
+
+        if (elContainer) {
+            token = elContainer.getAttribute('data-csrf-token');
+            var h = elContainer.getAttribute('data-csrf-header');
+            if (h) header = h;
+        }
+
+        if (!token) {
+            var metaToken = document.querySelector('meta[name="_csrf"]');
+            var metaHeader = document.querySelector('meta[name="_csrf_header"]');
+            if (metaToken) token = metaToken.getAttribute('content');
+            if (metaHeader) header = metaHeader.getAttribute('content') || header;
+        }
+
+        if (!token) {
+            var inputToken = document.querySelector('input[name="_csrf"]');
+            if (inputToken) token = inputToken.value;
+        }
+
+        return { token: token, header: header };
+    }
+
     // Chat History Management (Session Storage, up to 20 messages)
     function loadHistory() {
         var raw = SafeStorage.get(STORAGE_KEY_HISTORY);
@@ -129,7 +154,7 @@
         scrollToBottom();
     }
 
-    // Render Assistant Message
+    // Render Assistant Message for keyword search html
     function renderAssistantMessage(mood, contentHtml) {
         var row = document.createElement('div');
         row.className = 'jt-help-msg jt-help-msg-assistant';
@@ -139,6 +164,85 @@
             '</div>';
 
         row.innerHTML = avatarHtml + '<div class="jt-help-bubble">' + contentHtml + '</div>';
+        elMessages.appendChild(row);
+        scrollToBottom();
+    }
+
+    // Render Safe Answer Message (Strictly avoids innerHTML for untrusted model text)
+    function renderSafeAnswerMessage(mood, data) {
+        var row = document.createElement('div');
+        row.className = 'jt-help-msg jt-help-msg-assistant';
+
+        var avatarDiv = document.createElement('div');
+        avatarDiv.className = 'jt-help-avatar';
+        avatarDiv.setAttribute('aria-hidden', 'true');
+        avatarDiv.innerHTML = getMascotSvg(mood || 'happy', '32px');
+        row.appendChild(avatarDiv);
+
+        var bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'jt-help-bubble';
+
+        var textContainer = document.createElement('div');
+        textContainer.className = 'jt-help-answer-text';
+
+        // Split text by newlines and safely parse **bold** into text nodes & <strong> elements
+        var rawText = (data && data.answer) ? data.answer : '';
+        var lines = rawText.split('\n');
+
+        lines.forEach(function (line, idx) {
+            if (idx > 0) {
+                textContainer.appendChild(document.createElement('br'));
+            }
+            var parts = line.split(/(\*\*.*?\*\*)/g);
+            parts.forEach(function (part) {
+                if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+                    var strong = document.createElement('strong');
+                    strong.textContent = part.slice(2, -2);
+                    textContainer.appendChild(strong);
+                } else if (part) {
+                    textContainer.appendChild(document.createTextNode(part));
+                }
+            });
+        });
+
+        bubbleDiv.appendChild(textContainer);
+
+        // Render links from server as normal anchors
+        if (data && data.links && data.links.length > 0) {
+            var linksWrap = document.createElement('div');
+            linksWrap.className = 'jt-help-links-wrap';
+
+            data.links.forEach(function (lnk) {
+                if (!lnk || !lnk.url) return;
+                var a = document.createElement('a');
+                a.className = 'jt-help-link-btn';
+                a.href = lnk.url;
+                a.textContent = lnk.label || 'Open Page';
+
+                var icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                icon.setAttribute('viewBox', '0 0 24 24');
+                icon.setAttribute('width', '12');
+                icon.setAttribute('height', '12');
+                icon.setAttribute('fill', 'none');
+                icon.setAttribute('stroke', 'currentColor');
+                icon.setAttribute('stroke-width', '2.5');
+                icon.setAttribute('stroke-linecap', 'round');
+                icon.setAttribute('stroke-linejoin', 'round');
+                icon.setAttribute('aria-hidden', 'true');
+                icon.style.marginLeft = '4px';
+
+                var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M7 17l9.2-9.2M17 17V8H8');
+                icon.appendChild(path);
+
+                a.appendChild(icon);
+                linksWrap.appendChild(a);
+            });
+
+            bubbleDiv.appendChild(linksWrap);
+        }
+
+        row.appendChild(bubbleDiv);
         elMessages.appendChild(row);
         scrollToBottom();
     }
@@ -186,13 +290,13 @@
             btn.setAttribute('data-query', chip.query || chip.title);
             btn.addEventListener('click', function () {
                 var q = this.getAttribute('data-query');
-                submitQuestion(q);
+                submitChipQuestion(q);
             });
             elChips.appendChild(btn);
         });
     }
 
-    // Build Assistant Answer HTML from API response results
+    // Build Assistant Answer HTML from GET /help/search results
     function buildAnswerHtml(data) {
         var html = '';
 
@@ -223,8 +327,8 @@
         return html;
     }
 
-    // Submit Question to /help/search
-    function submitQuestion(questionText) {
+    // Submit Instant Quick Chip Question (GET /help/search)
+    function submitChipQuestion(questionText) {
         if (!questionText || isSubmitting) return;
         var query = questionText.trim();
         if (!query) return;
@@ -233,26 +337,18 @@
         if (elInput) elInput.value = '';
         if (elSendBtn) elSendBtn.disabled = true;
 
-        // Render user question
         renderUserMessage(query);
         appendToHistory({ sender: 'user', text: query });
-
-        // Show thinking avatar and typing dots
         showTypingIndicator();
 
-        // Delay ~450ms for realistic thinking animation
         setTimeout(function () {
             var url = '/help/search?q=' + encodeURIComponent(query);
             fetch(url, {
                 method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
+                headers: { 'Accept': 'application/json' }
             })
             .then(function (res) {
-                if (!res.ok) {
-                    throw new Error('Search failed with status: ' + res.status);
-                }
+                if (!res.ok) throw new Error('Search failed with status: ' + res.status);
                 return res.json();
             })
             .then(function (data) {
@@ -262,15 +358,12 @@
 
                 var mood = data.avatarMood || (data.found ? 'happy' : 'surprised');
                 var answerHtml = buildAnswerHtml(data);
-
                 renderAssistantMessage(mood, answerHtml);
 
-                // Update quick chips if provided
                 if (data.quickChips) {
                     renderChips(data.quickChips);
                 }
 
-                // Save assistant message to history
                 appendToHistory({
                     sender: 'assistant',
                     mood: mood,
@@ -282,21 +375,136 @@
                     try { elInput.focus(); } catch (e) {}
                 }
             })
-            .catch(function (err) {
+            .catch(function () {
                 hideTypingIndicator();
                 isSubmitting = false;
                 if (elSendBtn) elSendBtn.disabled = false;
 
                 var errorHtml = '<div class="jt-help-answer-text">Sorry, I had trouble reaching the help knowledge base. Please try again!</div>';
                 renderAssistantMessage('worried', errorHtml);
-
                 appendToHistory({
                     sender: 'assistant',
                     mood: 'worried',
                     html: errorHtml
                 });
             });
-        }, 450);
+        }, 300);
+    }
+
+    // Submit Typed Question (POST /help/ask with AI & safe fallback)
+    function submitTypedQuestion(questionText) {
+        if (!questionText || isSubmitting) return;
+        var query = questionText.trim();
+        if (!query) return;
+
+        isSubmitting = true;
+        if (elInput) elInput.value = '';
+        if (elSendBtn) elSendBtn.disabled = true;
+
+        renderUserMessage(query);
+
+        // Prepare up to 6 last messages from existing history before appending current
+        var existingHistory = loadHistory();
+        var historyPayload = [];
+        var startIdx = Math.max(0, existingHistory.length - 6);
+        for (var i = startIdx; i < existingHistory.length; i++) {
+            var item = existingHistory[i];
+            var role = (item.sender === 'user') ? 'user' : 'assistant';
+            var txt = item.plainText || item.text || '';
+            if (txt) {
+                historyPayload.push({
+                    role: role,
+                    text: txt.substring(0, 500)
+                });
+            }
+        }
+
+        appendToHistory({ sender: 'user', text: query });
+        showTypingIndicator();
+
+        // 20-second client timeout with retry message
+        var timedOut = false;
+        var abortController = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        var timeoutTimer = setTimeout(function () {
+            timedOut = true;
+            if (abortController) {
+                try { abortController.abort(); } catch (e) {}
+            }
+            hideTypingIndicator();
+            isSubmitting = false;
+            if (elSendBtn) elSendBtn.disabled = false;
+
+            var retryMsg = 'Sorry, that took a bit too long. Please try asking again!';
+            renderSafeAnswerMessage('surprised', { answer: retryMsg, links: [] });
+            appendToHistory({
+                sender: 'assistant',
+                mood: 'surprised',
+                plainText: retryMsg
+            });
+        }, 20000);
+
+        var csrf = getCsrfInfo();
+        var headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+        if (csrf.token) {
+            headers[csrf.header] = csrf.token;
+        }
+
+        fetch('/help/ask', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+                message: query.substring(0, 500),
+                history: historyPayload
+            }),
+            signal: abortController ? abortController.signal : undefined
+        })
+        .then(function (res) {
+            clearTimeout(timeoutTimer);
+            if (timedOut) return null;
+            if (!res.ok) {
+                throw new Error('Ask failed with status: ' + res.status);
+            }
+            return res.json();
+        })
+        .then(function (data) {
+            if (!data || timedOut) return;
+            hideTypingIndicator();
+            isSubmitting = false;
+            if (elSendBtn) elSendBtn.disabled = false;
+
+            var mood = data.mood || 'happy';
+            renderSafeAnswerMessage(mood, data);
+
+            appendToHistory({
+                sender: 'assistant',
+                mood: mood,
+                plainText: data.answer,
+                links: data.links || [],
+                source: data.source || 'ai'
+            });
+
+            if (elInput) {
+                try { elInput.focus(); } catch (e) {}
+            }
+        })
+        .catch(function () {
+            clearTimeout(timeoutTimer);
+            if (timedOut) return;
+            hideTypingIndicator();
+            isSubmitting = false;
+            if (elSendBtn) elSendBtn.disabled = false;
+
+            var fallbackMsg = 'Sorry, I had trouble answering that right now. Please try again in a moment!';
+            renderSafeAnswerMessage('surprised', { answer: fallbackMsg, links: [] });
+            appendToHistory({
+                sender: 'assistant',
+                mood: 'surprised',
+                plainText: fallbackMsg
+            });
+        });
     }
 
     // Initial Load of Quick Chips & Greeting
@@ -307,11 +515,16 @@
             history.forEach(function (item) {
                 if (item.sender === 'user') {
                     renderUserMessage(item.text);
+                } else if (item.plainText || item.answer) {
+                    renderSafeAnswerMessage(item.mood || 'happy', {
+                        answer: item.plainText || item.answer,
+                        links: item.links || []
+                    });
                 } else {
                     renderAssistantMessage(item.mood || 'happy', item.html || formatAnswerText(item.text));
-                    if (item.chips) {
-                        renderChips(item.chips);
-                    }
+                }
+                if (item.chips) {
+                    renderChips(item.chips);
                 }
             });
             scrollToBottom();
@@ -347,7 +560,6 @@
             });
         })
         .catch(function () {
-            // Offline/fallback welcome
             var fallbackHtml = '<div class="jt-help-answer-text">Hi! Need assistance? Ask me a question below.</div>';
             renderAssistantMessage('hello', fallbackHtml);
         });
@@ -361,7 +573,6 @@
         panelOpen = willOpen;
 
         if (panelOpen) {
-            // Dismiss greeting if open
             dismissGreeting();
 
             try {
@@ -372,19 +583,16 @@
             elPanel.setAttribute('aria-modal', 'true');
             elBtn.setAttribute('aria-expanded', 'true');
 
-            // Populate initial mascot heads if empty
             if (elHeaderAvatar && !elHeaderAvatar.hasChildNodes()) {
                 elHeaderAvatar.innerHTML = getMascotSvg('hello', '40px');
             }
 
-            // If messages are empty, load initial help
             if (elMessages && elMessages.children.length === 0) {
                 loadInitialHelp();
             } else {
                 scrollToBottom();
             }
 
-            // Focus input or close button
             setTimeout(function () {
                 try {
                     if (elInput) elInput.focus();
@@ -508,11 +716,11 @@
             });
         }
 
-        // Form submit
+        // Form submit calls submitTypedQuestion (POST /help/ask)
         if (elForm && elInput) {
             elForm.addEventListener('submit', function (e) {
                 e.preventDefault();
-                submitQuestion(elInput.value);
+                submitTypedQuestion(elInput.value);
             });
         }
 
@@ -541,7 +749,7 @@
         toggle: function () { togglePanel(); },
         ask: function (q) {
             togglePanel(true);
-            submitQuestion(q);
+            submitTypedQuestion(q);
         }
     };
 

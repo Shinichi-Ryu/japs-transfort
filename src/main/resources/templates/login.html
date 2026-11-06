@@ -128,7 +128,15 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
+                <!-- Info Banner -->
+                <div th:if="${infoMessage}" class="alert alert-info alert-dismissible fade show small jt-login-alert" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <span th:text="${infoMessage}">Information notice</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
                 <form th:action="@{/login}" method="post" class="jt-login-form">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <div class="jt-login-field-group">
                         <label for="username" class="jt-login-label">Email</label>
                         <input type="email" class="jt-login-input" id="username" name="username" placeholder="name@japstransfort.com" required autofocus>
@@ -149,6 +157,7 @@
                             <input type="checkbox" name="remember-me" class="jt-login-checkbox">
                             <span>Remember me</span>
                         </label>
+                        <a th:href="@{/forgot-password}" class="jt-login-link" id="forgot-password-link">Forgot password?</a>
                     </div>
 
                     <button type="submit" class="jt-login-btn-primary">

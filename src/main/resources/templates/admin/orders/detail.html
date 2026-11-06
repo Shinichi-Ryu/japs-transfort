@@ -41,7 +41,7 @@
                                                (order.status != null and order.status.name() == 'shipped' ? 't' :
                                                (order.status != null and order.status.name() == 'delivered' ? 'g' :
                                                (order.status != null and order.status.name() == 'cancelled' ? 'r' : 'x')))))}"
-                              th:text="${order.status}">
+                              th:text="${@statusFormatter.format(order.status)}">
                             pending
                         </span>
                     </div>
@@ -128,12 +128,12 @@
                                           th:classappend="${order.paymentStatus != null and order.paymentStatus.name() == 'unpaid' ? 'r' :
                                                            (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'y' :
                                                            (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'g' : 'x'))}"
-                                          th:text="${order.paymentStatus}">unpaid</span>
+                                          th:text="${@statusFormatter.format(order.paymentStatus)}">unpaid</span>
                                 </div>
                                 <div class="jt-info-row">
                                     <span class="jt-info-label">Payment Method</span>
                                     <span class="jt-pill b"
-                                          th:text="${order.paymentMethod != null ? (order.paymentMethod.name() == 'COD' ? 'Cash on delivery' : (order.paymentMethod.name() == 'ONLINE' ? 'Online' : 'On account')) : 'On account'}">
+                                          th:text="${@statusFormatter.format(order.paymentMethod)}">
                                         On account
                                     </span>
                                 </div>
@@ -224,7 +224,7 @@
                         <h6><i class="bi bi-cash-stack me-2" style="color: var(--c-g);"></i> Reseller Commission</h6>
                         <span class="jt-pill"
                               th:classappend="${(commission != null ? commission.status : order.commission.status) == 'paid' ? 'g' : 'y'}"
-                              th:text="${commission != null ? commission.status : order.commission.status}">pending</span>
+                              th:text="${@statusFormatter.format(commission != null ? commission.status : order.commission.status)}">pending</span>
                     </div>
                     <div style="padding: 20px 24px;">
                         <div class="row g-3">
@@ -238,7 +238,7 @@
                                 <div>
                                     <span class="jt-pill"
                                           th:classappend="${(commission != null ? commission.status : order.commission.status) == 'paid' ? 'g' : 'y'}"
-                                          th:text="${commission != null ? commission.status : order.commission.status}">pending</span>
+                                          th:text="${@statusFormatter.format(commission != null ? commission.status : order.commission.status)}">pending</span>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4" th:if="${(commission != null ? commission.createdAt : order.commission.createdAt) != null}">
@@ -329,7 +329,7 @@
                               th:classappend="${order.paymentStatus != null and order.paymentStatus.name() == 'unpaid' ? 'r' :
                                                (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'y' :
                                                (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'g' : 'x'))}"
-                              th:text="${order.paymentStatus}">
+                              th:text="${@statusFormatter.format(order.paymentStatus)}">
                             unpaid
                         </span>
                     </div>
@@ -618,7 +618,7 @@
                             <div class="jt-alert mb-0" style="background-color: var(--soft); color: var(--mu); border: 1px solid var(--line);">
                                 <div>
                                     <i class="bi bi-shield-check me-2"></i>
-                                    This order is currently in <strong class="text-uppercase" th:text="${order.status}">STATUS</strong> status.
+                                    This order is currently in <strong class="text-uppercase" th:text="${@statusFormatter.format(order.status)}">STATUS</strong> status.
                                     No administrative actions are available from this screen.
                                 </div>
                             </div>

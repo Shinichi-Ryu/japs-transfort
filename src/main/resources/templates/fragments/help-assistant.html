@@ -36,19 +36,41 @@
             <div class="jt-help-greeting-tail" aria-hidden="true"></div>
         </div>
 
-        <!-- Floating Toggle Button -->
+        <!-- Floating Trigger Wrap with Mascot & Hide/Collapse Control -->
+        <div id="jt-help-trigger-wrap" class="jt-help-trigger-wrap">
+            <button type="button"
+                    id="jt-help-collapse-btn"
+                    class="jt-help-collapse-btn"
+                    aria-label="Collapse assistant"
+                    title="Hide assistant">
+                <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button type="button"
+                    id="jt-help-btn"
+                    class="jt-help-btn"
+                    aria-label="Open assistant"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                    aria-controls="jt-help-panel"
+                    title="Ask Jappy for help">
+                <span class="jt-help-btn-ring" aria-hidden="true"></span>
+                <span class="jt-help-btn-mascot" id="jt-help-btn-mascot" aria-hidden="true">
+                    <!-- Mascot rendered via JS / thymeleaf fallback -->
+                </span>
+            </button>
+        </div>
+
+        <!-- Floating Unhide Tab (shown when mascot is hidden) -->
         <button type="button"
-                id="jt-help-btn"
-                class="jt-help-btn"
-                aria-label="Open Jappy help assistant"
-                aria-haspopup="dialog"
-                aria-expanded="false"
-                aria-controls="jt-help-panel"
-                title="Ask Jappy for help">
-            <span class="jt-help-btn-ring" aria-hidden="true"></span>
-            <span class="jt-help-btn-mascot" id="jt-help-btn-mascot" aria-hidden="true">
-                <!-- Mascot rendered via JS / thymeleaf fallback -->
-            </span>
+                id="jt-help-unhide-btn"
+                class="jt-help-unhide-btn"
+                aria-label="Unhide assistant"
+                title="Show Jappy assistant"
+                style="display: none;">
+            <span class="jt-help-unhide-icon" aria-hidden="true">💬</span>
+            <span class="jt-help-unhide-text">Ask Jappy</span>
         </button>
 
         <!-- Help Panel Dialog Card -->
@@ -71,6 +93,13 @@
                     </div>
                 </div>
                 <div class="jt-help-header-actions">
+                    <button type="button"
+                            class="jt-help-header-btn"
+                            id="jt-help-toggle-mascot-btn"
+                            title="Toggle floating mascot on/off screen"
+                            aria-label="Toggle floating mascot">
+                        <span id="jt-help-toggle-mascot-label" style="font-size: 11px;">Mascot</span>
+                    </button>
                     <button type="button"
                             class="jt-help-header-btn"
                             id="jt-help-clear-btn"

@@ -965,6 +965,7 @@ td .jt-thumb {
     .jt-table-scroll {
         overflow-x: visible !important;
         padding: 10px;
+        padding-bottom: calc(20px + var(--jt-mascot-clearance, 100px)) !important;
     }
 
     /* Transform table into stacked card list */

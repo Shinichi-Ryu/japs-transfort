@@ -124,6 +124,13 @@ public class AuthController {
         return "login";
     }
 
+    @GetMapping("/forgot-password")
+    public String forgotPassword(Model model) {
+        // TODO: Integrate self-service password reset email token flow when mail service is configured.
+        model.addAttribute("infoMessage", "Self-service password reset is coming soon. Please contact your system administrator to reset your account password.");
+        return "login";
+    }
+
     @GetMapping("/register")
     public String registerPage(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

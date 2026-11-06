@@ -46,7 +46,7 @@
                                                    (order.status != null and (order.status.name() == 'packed' or order.status.name() == 'shipped') ? 'b' :
                                                    (order.status != null and order.status.name() == 'delivered' ? 'g' :
                                                    (order.status != null and order.status.name() == 'cancelled' ? 'r' : 'gr'))))}"
-                                  th:text="${order.status}">
+                                  th:text="${@statusFormatter.format(order.status)}">
                                 pending
                             </span>
                         </div>
@@ -196,7 +196,7 @@
                                                                    (order.status != null and (order.status.name() == 'packed' or order.status.name() == 'shipped') ? 'b' :
                                                                    (order.status != null and order.status.name() == 'delivered' ? 'g' :
                                                                    (order.status != null and order.status.name() == 'cancelled' ? 'r' : 'gr'))))}"
-                                                  th:text="${order.status}">pending</span>
+                                                  th:text="${@statusFormatter.format(order.status)}">pending</span>
                                         </div>
                                     </div>
                                     <div class="col-6">
@@ -207,14 +207,14 @@
                                                                    (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'b' :
                                                                    (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'g' :
                                                                    (order.paymentStatus != null and order.paymentStatus.name() == 'refunded' ? 'gr' : 'gr')))}"
-                                                  th:text="${order.paymentStatus}">unpaid</span>
+                                                  th:text="${@statusFormatter.format(order.paymentStatus)}">unpaid</span>
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <label class="small d-block" style="color: var(--mu);">Payment Method</label>
                                         <div>
                                             <span class="pill b"
-                                                  th:text="${order.paymentMethod != null ? (order.paymentMethod.name() == 'COD' ? 'Cash on delivery' : (order.paymentMethod.name() == 'ONLINE' ? 'Online' : 'On account')) : 'On account'}">
+                                                  th:text="${@statusFormatter.format(order.paymentMethod)}">
                                                 On account
                                             </span>
                                         </div>
@@ -361,7 +361,7 @@
                                                (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'b' :
                                                (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'g' :
                                                (order.paymentStatus != null and order.paymentStatus.name() == 'refunded' ? 'gr' : 'gr')))}"
-                              th:text="${order.paymentStatus}">unpaid</span>
+                              th:text="${@statusFormatter.format(order.paymentStatus)}">unpaid</span>
                     </div>
                     <div class="jt-table-scroll">
                         <table class="jt-table">
@@ -411,7 +411,7 @@
                     <div class="card-body p-4">
                         <p class="small mb-3" style="color: var(--mu);">
                             You may cancel this order while it is still
-                            <strong th:text="${order.status}">pending</strong>.
+                            <strong th:text="${@statusFormatter.format(order.status)}">pending</strong>.
                             This action cannot be undone.
                         </p>
                         <button type="button"

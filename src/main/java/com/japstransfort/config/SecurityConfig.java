@@ -1,6 +1,8 @@
 package com.japstransfort.config;
 
 import com.japstransfort.service.CustomUserDetailsService;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AccountExpiredException;
@@ -14,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.WebAttributes;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -92,18 +95,44 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AccessDeniedHandler customAccessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            boolean isApi = "XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"))
+                    || (request.getContentType() != null && request.getContentType().contains("application/json"))
+                    || (request.getHeader("Accept") != null && request.getHeader("Accept").contains("application/json"))
+                    || request.getRequestURI().startsWith("/api/");
+
+            if (isApi) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"status\":403,\"error\":\"Forbidden\",\"message\":\"Access Denied\"}");
+                return;
+            }
+
+            request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, HttpServletResponse.SC_FORBIDDEN);
+            request.setAttribute(RequestDispatcher.ERROR_MESSAGE, "Your session expired. Please sign in again.");
+            request.setAttribute("errorMessage", "Your session expired. Please sign in again.");
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            request.getRequestDispatcher("/error").forward(request, response);
+        };
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    DaoAuthenticationProvider authenticationProvider) throws Exception {
         http
             .authenticationProvider(authenticationProvider)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/login", "/register", "/forgot-password", "/error", "/error/**", "/css/**", "/js/**", "/img/**", "/images/**", "/favicon.ico").permitAll()
                 .requestMatchers("/products/*/image", "/products/{id}/image", "/products/**").authenticated()
                 .requestMatchers("/portal", "/portal/**").hasRole("RESELLER")
                 .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                 .requestMatchers("/dashboard", "/dashboard/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/account", "/account/**").authenticated()
                 .anyRequest().authenticated()
+            )
+            .exceptionHandling(ex -> ex
+                .accessDeniedHandler(customAccessDeniedHandler())
             )
             .formLogin(form -> form
                 .loginPage("/login")

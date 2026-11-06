@@ -113,7 +113,7 @@
                                                                (order.status.name() == 'shipped' ? 'b' :
                                                                (order.status.name() == 'delivered' ? 'g' :
                                                                (order.status.name() == 'cancelled' ? 'r' : 'gr')))))}"
-                                              th:text="${order.status}">
+                                              th:text="${@statusFormatter.format(order.status)}">
                                             pending
                                         </span>
                                         <!-- Shipment info for shipped/delivered -->
@@ -143,13 +143,13 @@
                                                                (order.paymentStatus != null and order.paymentStatus.name() == 'partial' ? 'b' :
                                                                (order.paymentStatus != null and order.paymentStatus.name() == 'paid' ? 'g' :
                                                                (order.paymentStatus != null and order.paymentStatus.name() == 'refunded' ? 'gr' : 'gr')))}"
-                                              th:text="${order.paymentStatus}">
+                                              th:text="${@statusFormatter.format(order.paymentStatus)}">
                                             unpaid
                                         </span>
                                     </td>
                                     <td style="text-align: center;">
                                         <span class="pill b"
-                                              th:text="${order.paymentMethod != null ? (order.paymentMethod.name() == 'COD' ? 'Cash on delivery' : (order.paymentMethod.name() == 'ONLINE' ? 'Online' : 'On account')) : 'On account'}">
+                                              th:text="${@statusFormatter.format(order.paymentMethod)}">
                                             On account
                                         </span>
                                     </td>

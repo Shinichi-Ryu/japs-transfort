@@ -103,7 +103,7 @@
                                     <td style="text-align: center;">
                                         <span class="pill"
                                               th:classappend="${comm.status != null and comm.status.equalsIgnoreCase('paid') ? 'g' : 'y'}"
-                                              th:text="${comm.status}">
+                                              th:text="${@statusFormatter.format(comm.status)}">
                                             pending
                                         </span>
                                     </td>

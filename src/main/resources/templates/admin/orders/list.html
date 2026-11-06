@@ -68,7 +68,7 @@
                                 <option value="" th:selected="${selectedStatus == null or selectedStatus == '' or selectedStatus == 'all'}">All statuses</option>
                                 <option th:each="st : ${allStatuses}"
                                         th:value="${st.name()}"
-                                        th:text="${st.name()}"
+                                        th:text="${@statusFormatter.format(st)}"
                                         th:selected="${selectedStatus != null and selectedStatus.equalsIgnoreCase(st.name())}">Status</option>
                             </select>
                         </div>
@@ -164,7 +164,7 @@
                                                                (ord.status != null and ord.status.name() == 'packed' ? 'v' :
                                                                (ord.status != null and ord.status.name() == 'shipped' ? 't' :
                                                                (ord.status != null and ord.status.name() == 'delivered' ? 'g' : 'x'))))}"
-                                              th:text="${ord.status}">
+                                              th:text="${@statusFormatter.format(ord.status)}">
                                             pending
                                         </span>
                                     </td>
@@ -173,7 +173,7 @@
                                               th:classappend="${ord.paymentStatus != null and ord.paymentStatus.name() == 'unpaid' ? 'r' :
                                                                (ord.paymentStatus != null and ord.paymentStatus.name() == 'partial' ? 'y' :
                                                                (ord.paymentStatus != null and ord.paymentStatus.name() == 'paid' ? 'g' : 'x'))}"
-                                              th:text="${ord.paymentStatus}">
+                                              th:text="${@statusFormatter.format(ord.paymentStatus)}">
                                             unpaid
                                         </span>
                                     </td>
@@ -181,7 +181,7 @@
                                         <span class="jt-pill"
                                               th:classappend="${ord.paymentMethod != null and ord.paymentMethod.name() == 'COD' ? 'b' :
                                                                (ord.paymentMethod != null and ord.paymentMethod.name() == 'ONLINE' ? 't' : 'v')}"
-                                              th:text="${ord.paymentMethod != null ? (ord.paymentMethod.name() == 'COD' ? 'Cash on delivery' : (ord.paymentMethod.name() == 'ONLINE' ? 'Online' : 'On account')) : 'On account'}">
+                                              th:text="${@statusFormatter.format(ord.paymentMethod)}">
                                             On account
                                         </span>
                                     </td>

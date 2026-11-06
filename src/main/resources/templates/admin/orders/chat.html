@@ -468,7 +468,7 @@
                                     <span class="chat-meta-lbl" th:text="'Status'">Status</span>
                                     <span class="jt-pill"
                                           th:classappend="${order.status == null ? 'x' : ('pending'.equals(order.status.name()) ? 'y' : ('approved'.equals(order.status.name()) ? 'b' : ('packed'.equals(order.status.name()) ? 'v' : ('shipped'.equals(order.status.name()) ? 't' : ('delivered'.equals(order.status.name()) ? 'g' : ('cancelled'.equals(order.status.name()) ? 'r' : 'x'))))))}"
-                                          th:text="${order.status}">pending</span>
+                                          th:text="${@statusFormatter.format(order.status)}">pending</span>
                                 </span>
                                 <span class="chat-meta-unit">
                                     <span class="chat-meta-lbl" th:text="'Total'">Total</span>

@@ -60,6 +60,7 @@ public class TemplateValidationTest {
         MockServletContext servletContext = new MockServletContext();
         StaticWebApplicationContext wac = new StaticWebApplicationContext();
         wac.setServletContext(servletContext);
+        wac.registerSingleton("statusFormatter", com.japstransfort.util.StatusFormatter.class);
         wac.refresh();
         servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 
@@ -100,6 +101,8 @@ public class TemplateValidationTest {
                 request.setAttribute("org.springframework.web.servlet.support.RequestContext", requestContext);
                 model.put("springRequestContext", requestContext);
                 model.put("thymeleafRequestContext", new org.thymeleaf.spring6.context.webmvc.SpringWebMvcThymeleafRequestContext(requestContext, request));
+            model.put(org.thymeleaf.spring6.expression.ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME,
+                    new org.thymeleaf.spring6.expression.ThymeleafEvaluationContext(wac, null));
 
                 com.japstransfort.dto.CompanyDetailsDto company = new com.japstransfort.dto.CompanyDetailsDto("Japs Transfort", "", "", "", "", "");
                 model.put("company", company);
@@ -190,6 +193,7 @@ public class TemplateValidationTest {
         MockServletContext servletContext = new MockServletContext();
         StaticWebApplicationContext wac = new StaticWebApplicationContext();
         wac.setServletContext(servletContext);
+        wac.registerSingleton("statusFormatter", com.japstransfort.util.StatusFormatter.class);
         wac.refresh();
         servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 
@@ -247,6 +251,8 @@ public class TemplateValidationTest {
             request.setAttribute("org.springframework.web.servlet.support.RequestContext", requestContext);
             model.put("springRequestContext", requestContext);
             model.put("thymeleafRequestContext", new org.thymeleaf.spring6.context.webmvc.SpringWebMvcThymeleafRequestContext(requestContext, request));
+            model.put(org.thymeleaf.spring6.expression.ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME,
+                    new org.thymeleaf.spring6.expression.ThymeleafEvaluationContext(wac, null));
 
             model.forEach(request::setAttribute);
 

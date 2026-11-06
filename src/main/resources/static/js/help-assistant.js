@@ -29,16 +29,39 @@
 
     var STORAGE_KEY_HISTORY = 'jt_jappy_chat_history';
     var STORAGE_KEY_GREETING = 'jt_jappy_greeting_dismissed';
+    var STORAGE_KEY_COLLAPSED = 'jt_jappy_collapsed';
+    var STORAGE_KEY_HIDDEN = 'jt_jappy_hidden';
     var MAX_HISTORY = 20;
 
+    // Persistent storage (localStorage) for collapsed state across sessions
+    var PersistStorage = {
+        get: function (key) {
+            try {
+                return localStorage.getItem(key);
+            } catch (e) {
+                return null;
+            }
+        },
+        set: function (key, val) {
+            try {
+                localStorage.setItem(key, val);
+            } catch (e) {}
+        }
+    };
+
     var panelOpen = false;
+    var jappyCollapsed = false;
+    var jappyHidden = false;
     var lastActiveElement = null;
     var greetingTimer = null;
     var isSubmitting = false;
 
     // DOM Elements
     var elContainer = null;
+    var elTriggerWrap = null;
     var elBtn = null;
+    var elCollapseBtn = null;
+    var elUnhideBtn = null;
     var elBtnMascot = null;
     var elGreeting = null;
     var elGreetingClose = null;
@@ -565,6 +588,85 @@
         });
     }
 
+    // Set mascot hidden / unhidden state
+    function setHidden(hidden) {
+        jappyHidden = hidden;
+        PersistStorage.set(STORAGE_KEY_HIDDEN, hidden ? '1' : '0');
+
+        if (elContainer) {
+            if (hidden) {
+                elContainer.classList.add('jt-help-container--hidden');
+            } else {
+                elContainer.classList.remove('jt-help-container--hidden');
+            }
+        }
+
+        if (elTriggerWrap) {
+            elTriggerWrap.style.display = hidden ? 'none' : 'flex';
+        }
+
+        if (elUnhideBtn) {
+            elUnhideBtn.style.display = hidden ? 'flex' : 'none';
+        }
+
+        if (elToggleMascotLabel) {
+            elToggleMascotLabel.textContent = hidden ? 'Show mascot' : 'Hide mascot';
+        }
+
+        // When hiding, dismiss greeting
+        if (hidden) {
+            dismissGreeting();
+        }
+    }
+
+    // Set mascot collapsed / expanded state
+    function setCollapsed(collapsed) {
+        jappyCollapsed = collapsed;
+        PersistStorage.set(STORAGE_KEY_COLLAPSED, collapsed ? '1' : '0');
+
+        if (elContainer) {
+            if (collapsed) {
+                elContainer.classList.add('jt-help-container--collapsed');
+            } else {
+                elContainer.classList.remove('jt-help-container--collapsed');
+            }
+        }
+
+        if (elBtn) {
+            if (collapsed) {
+                elBtn.classList.add('jt-help-btn--collapsed');
+                elBtn.setAttribute('aria-label', 'Open assistant');
+                elBtn.title = 'Open Jappy';
+            } else {
+                elBtn.classList.remove('jt-help-btn--collapsed');
+                elBtn.setAttribute('aria-label', 'Open Jappy help assistant');
+                elBtn.title = 'Ask Jappy for help';
+            }
+        }
+
+        if (elTriggerWrap) {
+            if (collapsed) {
+                elTriggerWrap.classList.add('jt-help-trigger-wrap--collapsed');
+            } else {
+                elTriggerWrap.classList.remove('jt-help-trigger-wrap--collapsed');
+            }
+        }
+
+        if (elCollapseBtn) {
+            elCollapseBtn.style.display = collapsed ? 'none' : 'flex';
+        }
+
+        if (elBtnMascot) {
+            var size = collapsed ? '36px' : '48px';
+            elBtnMascot.innerHTML = getMascotSvg('hello', size);
+        }
+
+        // If collapsing while panel is open, close the panel
+        if (collapsed && panelOpen) {
+            togglePanel(false);
+        }
+    }
+
     // Toggle Panel Open/Close
     function togglePanel(open) {
         var willOpen = typeof open === 'boolean' ? open : !panelOpen;
@@ -574,6 +676,11 @@
 
         if (panelOpen) {
             dismissGreeting();
+
+            // If currently collapsed, expand before opening panel
+            if (jappyCollapsed) {
+                setCollapsed(false);
+            }
 
             try {
                 lastActiveElement = document.activeElement;
@@ -650,8 +757,10 @@
         elContainer = document.getElementById('jt-help-assistant');
         if (!elContainer) return;
 
+        elTriggerWrap = document.getElementById('jt-help-trigger-wrap');
         elBtn = document.getElementById('jt-help-btn');
         elBtnMascot = document.getElementById('jt-help-btn-mascot');
+        elUnhideBtn = document.getElementById('jt-help-unhide-btn');
         elGreeting = document.getElementById('jt-help-greeting');
         elGreetingClose = document.getElementById('jt-help-greeting-close');
         elGreetingTrigger = document.getElementById('jt-help-greeting-trigger');
@@ -674,10 +783,16 @@
             elHeaderAvatar.innerHTML = getMascotSvg('hello', '40px');
         }
 
-        // Toggle button click
+        // Toggle button click:
+        // - collapsed -> expand (single click expands; second click opens panel)
+        // - expanded  -> open/close panel
         if (elBtn) {
             elBtn.addEventListener('click', function () {
-                togglePanel();
+                if (jappyCollapsed) {
+                    setCollapsed(false);
+                } else {
+                    togglePanel();
+                }
             });
         }
 
@@ -734,6 +849,67 @@
 
         // Trigger greeting timer after 4s
         setupGreetingBubble();
+
+        // ---- Collapsed state init ----
+        // 1. If localStorage has a saved preference, use it.
+        // 2. If no preference and viewport width < 768px, default to collapsed.
+        var savedCollapsed = PersistStorage.get(STORAGE_KEY_COLLAPSED);
+        var isNarrow = (window.innerWidth < 768);
+        if (savedCollapsed === '1' || (savedCollapsed === null && isNarrow)) {
+            setCollapsed(true);
+        } else {
+            setCollapsed(false);
+        }
+
+        // Wire hide/collapse and unhide buttons
+        elCollapseBtn = document.getElementById('jt-help-collapse-btn');
+        if (elCollapseBtn) {
+            elCollapseBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                // Hide the mascot completely so it never blocks content
+                setHidden(true);
+            });
+            elCollapseBtn.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setHidden(true);
+                }
+            });
+        }
+
+        if (elUnhideBtn) {
+            elUnhideBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                setHidden(false);
+            });
+            elUnhideBtn.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setHidden(false);
+                }
+            });
+        }
+
+        elToggleMascotBtn = document.getElementById('jt-help-toggle-mascot-btn');
+        elToggleMascotLabel = document.getElementById('jt-help-toggle-mascot-label');
+        if (elToggleMascotBtn) {
+            elToggleMascotBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                setHidden(!jappyHidden);
+            });
+        }
+
+        // Initialize hidden state:
+        // On narrow/crowded screens (< 768px), default to completely hidden unless explicitly enabled
+        var savedHidden = PersistStorage.get(STORAGE_KEY_HIDDEN);
+        var isCrowdedScreen = (window.innerWidth < 768);
+        if (savedHidden === '1' || (savedHidden === null && isCrowdedScreen)) {
+            setHidden(true);
+        } else {
+            setHidden(false);
+        }
     }
 
     if (document.readyState === 'loading') {
@@ -744,10 +920,16 @@
 
     // Public API
     global.jtHelpAssistant = {
-        open: function () { togglePanel(true); },
+        open: function () { setHidden(false); togglePanel(true); },
         close: function () { togglePanel(false); },
         toggle: function () { togglePanel(); },
+        hide: function () { setHidden(true); },
+        unhide: function () { setHidden(false); },
+        show: function () { setHidden(false); },
+        collapse: function () { setCollapsed(true); },
+        expand: function () { setCollapsed(false); },
         ask: function (q) {
+            setHidden(false);
             togglePanel(true);
             submitTypedQuestion(q);
         }
